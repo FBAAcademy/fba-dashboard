@@ -92,6 +92,27 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 .tl{color:var(--muted);}.tv{font-family:'DM Mono',monospace;}
 .page{display:none;}.page.active{display:block;}
 .last-update{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+.ai-btn{background:var(--pdim);border:1px solid rgba(155,127,232,0.3);color:var(--purple);cursor:pointer;padding:4px 12px;border-radius:6px;font-size:11px;font-family:inherit;display:flex;align-items:center;gap:5px;}
+.ai-btn:hover{opacity:0.8;}
+.ai-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.modal-sub{font-size:11px;color:var(--muted);margin-bottom:20px;}
+.modal-sections{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.modal-sec-btn{background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:10px;border-radius:8px;font-size:11px;font-family:inherit;text-align:left;transition:all 0.15s;}
+.modal-sec-btn:hover{border-color:var(--purple);color:var(--text);}
+.modal-sec-btn.selected{background:var(--pdim);border-color:var(--purple);color:var(--purple);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+.modal-cancel{background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:8px 16px;border-radius:8px;font-size:12px;font-family:inherit;}
+.modal-run{background:var(--purple);border:none;color:#fff;cursor:pointer;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;}
+.modal-run:disabled{opacity:0.5;cursor:not-allowed;}
+.ai-result-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px;font-size:12px;line-height:1.7;white-space:pre-wrap;max-height:400px;overflow-y:auto;}
+.ai-result-box h1,.ai-result-box h2,.ai-result-box h3{color:var(--green);margin:12px 0 6px;}
+.ai-result-box strong{color:var(--amber);}
+.pdf-btn{background:var(--gdim);border:1px solid rgba(46,202,138,0.3);color:var(--green);cursor:pointer;padding:6px 14px;border-radius:6px;font-size:11px;font-family:inherit;margin-top:10px;}
+.cost-note{font-size:10px;color:var(--muted);margin-top:8px;}
 </style>
 </head>
 <body>
@@ -141,6 +162,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <button class="refresh-btn" onclick="refreshData()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
       Yangilash
+    </button>
+    <button class="ai-btn" onclick="showAiModal()" id="aiBtn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+      AI Tahlil
     </button>
     <div class="user-info">
       <span class="user-name" id="userName"></span>
@@ -359,6 +384,45 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 </div>
 
 </div><!-- /cont -->
+
+<!-- AI TAHLIL MODAL -->
+<div id="aiModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+      AI Chuqur Tahlil
+    </div>
+    <div class="modal-sub">Claude AI ma'lumotlarni tahlil qiladi va chuqur xulosalar beradi. ~$0.02-0.05 xarajat.</div>
+    
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Qaysi bo'limni tahlil qilish kerak?</div>
+    <div class="modal-sections">
+      <button class="modal-sec-btn selected" onclick="selectSection('overview',this)">📊 Umumiy tahlil</button>
+      <button class="modal-sec-btn" onclick="selectSection('teachers',this)">👨‍🏫 O'qituvchilar</button>
+      <button class="modal-sec-btn" onclick="selectSection('subjects',this)">📚 Fanlar</button>
+      <button class="modal-sec-btn" onclick="selectSection('dropout',this)">🚪 Dropout</button>
+      <button class="modal-sec-btn" onclick="selectSection('sales',this)">💼 Sales</button>
+      <button class="modal-sec-btn" onclick="selectSection('marketing',this)">📣 Marketing</button>
+    </div>
+    
+    <div id="aiResultDiv" style="display:none;">
+      <div class="ai-result-box" id="aiResultText"></div>
+      <button class="pdf-btn" onclick="downloadPdf()">📥 PDF yuklab olish</button>
+    </div>
+    
+    <div id="aiLoadingDiv" style="display:none;text-align:center;padding:20px;">
+      <div style="width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
+      <div style="font-size:12px;color:var(--muted);">Claude tahlil qilmoqda... (~10-20 soniya)</div>
+    </div>
+    
+    <div class="cost-note" id="costNote">⚡ Har bir tahlil taxminan $0.02-0.05 xarajat qiladi</div>
+    
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="modal-cancel" onclick="closeAiModal()">Bekor qilish</button>
+      <button class="modal-run" id="runAiBtn" onclick="runAiAnalysis()">🤖 Tahlil boshlash</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /mainContent -->
 
 <script>
@@ -1406,6 +1470,121 @@ function populateFanFilters() {
     fans.forEach(f=>{const opt=document.createElement('option');opt.value=f;opt.textContent=f;sel.appendChild(opt);});
   });
 }
+
+
+// ── AI TAHLIL ──
+const FUNC_URL = "https://fba-api-bkbgbcewcmgdfcea.centralus-01.azurewebsites.net/api/analyze";
+let selectedSection = 'overview';
+let lastAnalysis = '';
+
+function showAiModal() {
+  document.getElementById('aiModal').style.display = 'flex';
+  document.getElementById('aiResultDiv').style.display = 'none';
+  document.getElementById('aiLoadingDiv').style.display = 'none';
+  document.getElementById('runAiBtn').disabled = false;
+  document.getElementById('costNote').style.display = 'block';
+}
+
+function closeAiModal() {
+  document.getElementById('aiModal').style.display = 'none';
+}
+
+function selectSection(section, btn) {
+  selectedSection = section;
+  document.querySelectorAll('.modal-sec-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('aiResultDiv').style.display = 'none';
+}
+
+async function runAiAnalysis() {
+  if (!snap) { alert("Avval ma'lumot yuklansin!"); return; }
+  
+  const btn = document.getElementById('runAiBtn');
+  btn.disabled = true;
+  document.getElementById('aiLoadingDiv').style.display = 'block';
+  document.getElementById('aiResultDiv').style.display = 'none';
+  document.getElementById('costNote').style.display = 'none';
+  
+  try {
+    const snapWithSm = { ...snap, sales: smData.sales, marketing: smData.marketing };
+    
+    const response = await fetch(FUNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ snapData: snapWithSm, section: selectedSection })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) throw new Error(data.error || 'Xato');
+    
+    lastAnalysis = data.analysis;
+    
+    // Render markdown-like text
+    const formatted = data.analysis
+      .replace(/### (.*)/g, '<h3>$1</h3>')
+      .replace(/## (.*)/g, '<h2>$1</h2>')
+      .replace(/# (.*)/g, '<h1>$1</h1>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+    
+    document.getElementById('aiResultText').innerHTML = formatted;
+    document.getElementById('aiResultDiv').style.display = 'block';
+    document.getElementById('aiLoadingDiv').style.display = 'none';
+    btn.disabled = false;
+    
+  } catch(e) {
+    document.getElementById('aiLoadingDiv').style.display = 'none';
+    document.getElementById('costNote').style.display = 'block';
+    btn.disabled = false;
+    alert('Xato: ' + e.message);
+  }
+}
+
+function downloadPdf() {
+  if (!lastAnalysis) return;
+  
+  const sectionNames = {
+    overview: 'Umumiy tahlil',
+    teachers: "O'qituvchilar tahlili",
+    subjects: 'Fanlar tahlili',
+    dropout: 'Dropout tahlili',
+    sales: 'Sales tahlili',
+    marketing: 'Marketing tahlili'
+  };
+  
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html><head><meta charset="UTF-8">
+    <title>FBA Academy - ${sectionNames[selectedSection]}</title>
+    <style>
+      body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 20px;color:#222;line-height:1.6;}
+      h1{color:#1a5c3a;border-bottom:2px solid #1a5c3a;padding-bottom:10px;}
+      h2{color:#1a5c3a;margin-top:24px;}
+      h3{color:#2d7a52;}
+      .header{background:#0a2e1a;color:white;padding:20px;border-radius:8px;margin-bottom:24px;}
+      .header h1{color:white;border:none;}
+      .header p{color:#aaa;margin:4px 0;}
+      strong{color:#d4620a;}
+      pre{white-space:pre-wrap;}
+    </style></head>
+    <body>
+      <div class="header">
+        <h1>FBA Academy Analytics</h1>
+        <p>${sectionNames[selectedSection]}</p>
+        <p>Sana: ${new Date().toLocaleDateString('uz')}</p>
+      </div>
+      <div>${lastAnalysis.replace(/### (.*)/g,'<h3>$1</h3>').replace(/## (.*)/g,'<h2>$1</h2>').replace(/# (.*)/g,'<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>
+    </body></html>
+  `);
+  win.document.close();
+  win.print();
+}
+
+// Close modal on overlay click
+document.getElementById('aiModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeAiModal();
+});
 
 // ── INIT: Check if already logged in ──
 async function init() {
