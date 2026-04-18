@@ -639,15 +639,12 @@ const ANALYTICS = {
     const sheetName = wb.SheetNames.find(s => s.toLowerCase().includes('student') || s === 'All students') || wb.SheetNames[0];
     const ws = wb.Sheets[sheetName];
     
-    // Row 0 = header, Row 1 = bo'sh, Row 2 = mapping, Row 3+ = data
-    const allRows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false });
-    console.log("Total rows:", allRows.length, "First row:", allRows[0]?.slice(0,5));
+    // 2 qator skip qilib o'qish
+    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, range: 2, raw: false });
     
-    // Header Row 0 da
-    const headers = allRows[0];
-    // Ma'lumotlar Row 3 dan (index 3)
-    const rows = allRows.slice(3);
-    console.log("Data rows:", rows.length, "First data:", rows[0]?.slice(0,5));
+    // Ustun nomlari (3-qator = index 0)
+    const headers = raw[0];
+    const rows = raw.slice(1);
     
     // Ustun indekslarini topish
     const col = {};
@@ -1019,7 +1016,7 @@ const ANALYTICS = {
         xarajat: parseFloat(r[cXarajat]) || 0,
         leads: parseFloat(r[cLeads]) || 0,
         valyuta: (r[cValyuta] || 'UZS').toString().trim(),
-        oy: (() => { try { if(!r[cSana]) return null; const d=new Date(r[cSana]); return isNaN(d.getTime())?null:d.toISOString().substring(0,7); } catch(e){return null;} })(),
+        oy: r[cSana] ? new Date(r[cSana]).toISOString().substring(0,7) : null,
       })).filter(r => r.sana && !isNaN(r.sana.getTime()));
 
       // Oylik
@@ -1815,43 +1812,97 @@ function downloadPdf() {
   if (!lastAnalysis) return;
   
   const sectionNames = {
-    overview: 'Umumiy tahlil',
-    teachers: "O'qituvchilar tahlili",
-    subjects: 'Fanlar tahlili',
-    dropout: 'Dropout tahlili',
-    sales: 'Sales tahlili',
-    marketing: 'Marketing tahlili',
-    all: "Toʻliq Hisobot — Barcha Boʻlimlar"
+    overview: 'Umumiy Tahlil / Overall Analysis',
+    teachers: "O'qituvchilar Tahlili / Teachers Analysis",
+    subjects: 'Fanlar Tahlili / Subjects Analysis',
+    dropout: 'Dropout Tahlili / Dropout Analysis',
+    sales: 'Sales Tahlili / Sales Analysis',
+    marketing: 'Marketing Tahlili / Marketing Analysis',
+    all: "To'liq Professional Hisobot / Full Professional Report"
   };
   
+  const secName = sectionNames[lastSection] || sectionNames[selectedSection] || 'Tahlil';
+  
+  // Format markdown to HTML with tables
+  const formatted = lastAnalysis
+    .replace(/\|(.+)\|/g, (match) => {
+      const cells = match.split('|').filter(c=>c.trim());
+      if(cells.every(c=>c.trim().match(/^[-:| ]+$/))) return '';
+      const isHeader = formatted_tracking++;
+      return '<tr>' + cells.map((c,i)=> isHeader===0 ? `<th>${c.trim()}</th>` : `<td>${c.trim()}</td>`).join('') + '</tr>';
+    });
+  
+  // Simpler approach
+  let body = lastAnalysis;
+  // Convert markdown tables
+  body = body.replace(/(\|[^
+]+\|
+)+/g, (tableBlock) => {
+    const rows = tableBlock.trim().split('
+').filter(r => !r.match(/^\|[-:| ]+\|$/));
+    const htmlRows = rows.map((row, i) => {
+      const cells = row.split('|').filter(c=>c.trim());
+      const tag = i===0 ? 'th' : 'td';
+      return '<tr>' + cells.map(c=>`<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+    });
+    return '<table>' + htmlRows.join('') + '</table>';
+  });
+  body = body
+    .replace(/### (.*)/g,'<h3>$1</h3>')
+    .replace(/## (.*)/g,'<h2>$1</h2>')
+    .replace(/# (.*)/g,'<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/
+
+/g,'</p><p>')
+    .replace(/
+/g,'<br>');
+  
   const win = window.open('', '_blank');
-  win.document.write(`
-    <html><head><meta charset="UTF-8">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBhMGEwZiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iNzAwIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMmVjYThhIj5GQTwvdGV4dD4KPC9zdmc+">
-    <title>FBA Academy - ${sectionNames[selectedSection]}</title>
-    <style>
-      body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 20px;color:#222;line-height:1.6;}
-      h1{color:#1a5c3a;border-bottom:2px solid #1a5c3a;padding-bottom:10px;}
-      h2{color:#1a5c3a;margin-top:24px;}
-      h3{color:#2d7a52;}
-      .header{background:#0a2e1a;color:white;padding:20px;border-radius:8px;margin-bottom:24px;}
-      .header h1{color:white;border:none;}
-      .header p{color:#aaa;margin:4px 0;}
-      strong{color:#d4620a;}
-      pre{white-space:pre-wrap;}
-    </style></head>
-    <body>
-      <div class="header">
-        <h1>FBA Academy Analytics</h1>
-        <p>${sectionNames[selectedSection]}</p>
-        <p>Sana: ${new Date().toLocaleDateString('uz')}</p>
-      </div>
-      <div>${lastAnalysis.replace(/### (.*)/g,'<h3>$1</h3>').replace(/## (.*)/g,'<h2>$1</h2>').replace(/# (.*)/g,'<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>
-    </body></html>
-  `);
+  win.document.write(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>FBA Academy - ${secName}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:20px 30px;color:#1a1a2e;line-height:1.7;font-size:13px;}
+.header{background:linear-gradient(135deg,#0a2e1a,#1a5c3a);color:white;padding:24px 28px;border-radius:12px;margin-bottom:28px;}
+.header-top{display:flex;justify-content:space-between;}
+.logo{font-size:22px;font-weight:700;color:#2eca8a;}
+.header h1{color:white;font-size:18px;margin:8px 0 4px;}
+.header p{color:rgba(255,255,255,0.7);font-size:12px;margin:2px 0;}
+.badge{display:inline-block;background:rgba(46,202,138,0.2);color:#2eca8a;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:8px;}
+h1{color:#1a5c3a;font-size:17px;border-bottom:2px solid #1a5c3a;padding-bottom:8px;margin:24px 0 14px;}
+h2{color:#1a5c3a;font-size:15px;margin:20px 0 10px;}
+h3{color:#2d7a52;font-size:13px;margin:16px 0 8px;font-weight:600;}
+p{margin:6px 0;}
+strong{color:#c44d00;font-weight:600;}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}
+th,td{border:1px solid #dde;padding:7px 10px;text-align:left;}
+th{background:#e8f0e8;font-weight:600;color:#1a5c3a;}
+tr:nth-child(even) td{background:#f8faf8;}
+.footer{margin-top:32px;padding-top:14px;border-top:1px solid #dde;font-size:11px;color:#888;display:flex;justify-content:space-between;}
+@media print{.header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style></head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="logo">FBA Academy</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);">${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+  </div>
+  <h1>Professional Analytics Report</h1>
+  <p>${secName}</p>
+  <span class="badge">AI-Powered · Claude Analysis</span>
+</div>
+<p>${body}</p>
+<div class="footer">
+  <span>FBA Academy Analytics Dashboard</span>
+  <span>Generated: ${new Date().toLocaleString()}</span>
+</div>
+</body></html>`);
   win.document.close();
-  win.print();
+  setTimeout(() => win.print(), 500);
 }
+
 
 // Close modal on overlay click
 document.getElementById('aiModal')?.addEventListener('click', function(e) {
