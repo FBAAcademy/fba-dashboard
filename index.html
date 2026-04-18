@@ -639,12 +639,10 @@ const ANALYTICS = {
     const sheetName = wb.SheetNames.find(s => s.toLowerCase().includes('student') || s === 'All students') || wb.SheetNames[0];
     const ws = wb.Sheets[sheetName];
     
-    // 2 qator skip qilib o'qish
-    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, range: 2, raw: false });
-    
-    // Ustun nomlari (3-qator = index 0)
-    const headers = raw[0];
-    const rows = raw.slice(1);
+    // Row 0 = header, Row 1 = bo'sh, Row 2 = mapping, Row 3+ = data
+    const allRows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false });
+    const headers = allRows[0]; // Header Row 0 da
+    const rows = allRows.slice(3); // Ma'lumotlar Row 3 dan
     
     // Ustun indekslarini topish
     const col = {};
@@ -1016,7 +1014,7 @@ const ANALYTICS = {
         xarajat: parseFloat(r[cXarajat]) || 0,
         leads: parseFloat(r[cLeads]) || 0,
         valyuta: (r[cValyuta] || 'UZS').toString().trim(),
-        oy: r[cSana] ? new Date(r[cSana]).toISOString().substring(0,7) : null,
+        oy: (() => { try { if(!r[cSana]) return null; const d=new Date(r[cSana]); return isNaN(d.getTime())?null:d.toISOString().substring(0,7); } catch(e){return null;} })(),
       })).filter(r => r.sana && !isNaN(r.sana.getTime()));
 
       // Oylik
