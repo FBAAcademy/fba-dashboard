@@ -644,28 +644,15 @@ const ANALYTICS = {
     const headers = allRows[0]; // Header Row 0 da
     const rows = allRows.slice(3); // Ma'lumotlar Row 3 dan
     
-    // Ustun indekslarini topish
-    const col = {};
-    const colNames = {
-      'ID': ['ID', 'Id'],
-      'Oqituvchi': ["Oqituvchi", "Oqituvchi", 'Teacher'],
-      'Boshlangan': ["Kurs boshlangan sana", "Boshlangan"],
-      'Product': ['Product', 'Fan'],
-      'Product_type': ['Product_type', 'Product type'],
-      'Sotuv_mng': ['Sotuv Menegeri', 'Sotuv_mng'],
-      'Tolov_op': ["Tolov operatori", "Tolov_op"],
-      'Status': ['Status'],
-      'Final_status': ['Final_status', 'Final status'],
-      'Sabab': ['Sabab'],
+    // Aniq ustun indekslari (Customer base 1.xlsx ga mos)
+    // Col 0:№, 1:Guruh, 2:ID, 3:Ismi, 4:Tel, 5:LeadInfo
+    // Col 6:O'qituvchi, 7:Boshlangan, 8:Tugaydigan, 9:Product, 10:Product type
+    // Col 11:Sotuv Menegeri, 12:To'lov operatori, 13:Chegirma, 14:Chegirma turi
+    // Col 15:Qoshilgan, 16:Chiqgan, 17:Status, 18:Sabab, 19:Toxtatgan, 20:Ball, 21:Final status
+    const col = {
+      ID: 2, Oqituvchi: 6, Boshlangan: 7, Product: 9, Product_type: 10,
+      Sotuv_mng: 11, Tolov_op: 12, Status: 17, Sabab: 18, Final_status: 21
     };
-    
-    headers.forEach((h, i) => {
-      Object.entries(colNames).forEach(([key, names]) => {
-        if (names.some(n => h && h.toString().trim().includes(n))) {
-          col[key] = i;
-        }
-      });
-    });
 
     // Ma'lumotlarni tozalash
     const data = [];
