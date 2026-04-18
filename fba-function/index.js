@@ -128,7 +128,32 @@ Har bo'lim uchun quyidagi strukturada yoz:
 **Asosiy muammo:** ...
 **Moliyaviy ta'sir:** ... so'm
 **Tavsiya:** Aniq harakat, mas'ul shaxs, muddat
----`;
+---
+
+## 🏆 MEN BIZNES EGASI BO'LGANIMDA — BIRINCHI TOP 5 HARAKAT
+
+Yuqoridagi tahlildan kelib chiqib, agar men FBA Academy biznes egasi bo'lganimda birinchi 30 kunda qilgan 5 ta harakatim (raqamlar bilan asosla):
+
+**#1 — [Eng tez ROI beradigan harakat]**
+Nima: | Nima uchun birinchi: | Moliyaviy natija: ___ so'm | Mas'ul: | Muddat:
+
+**#2 — [Eng katta yo'qotishni to'xtatish]**
+Nima: | Nima uchun: | Moliyaviy natija: | Mas'ul: | Muddat:
+
+**#3 — [Tizimiy jarayon o'zgartirish]**
+Nima: | Nima uchun: | Moliyaviy natija: | Mas'ul: | Muddat:
+
+**#4 — [Jamoa va sifat]**
+Nima: | Nima uchun: | Moliyaviy natija: | Mas'ul: | Muddat:
+
+**#5 — [O'lchash va monitoring]**
+Nima: | Nima uchun: | Moliyaviy natija: | Mas'ul: | Muddat:
+
+## 📊 6 OYLIK O'LCHANADIGAN MAQSADLAR
+- Retention: hozir ___% → 6 oyda ___% (qo'shimcha: ___ mln so'm)
+- Pass rate: ___% → ___%
+- Dropout: ___% → ___% (tejash: ___ mln so'm)
+- Jami qo'shimcha daromad potensiali: ___ mln so'm/yil`;
 
   const prompts = {
     overview: `${base}
