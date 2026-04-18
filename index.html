@@ -1719,7 +1719,7 @@ function selectSection(section, btn) {
   document.getElementById('aiResultDiv').style.display = 'none';
   // Update run button text
   const runBtn = document.getElementById('runAiBtn');
-  if (runBtn) runBtn.textContent = section === 'all' ? '🤖 To'liq hisobot yaratish' : '🤖 Tahlil boshlash';
+  if (runBtn) runBtn.textContent = section === "all" ? "Toʻliq hisobot" : "Tahlil boshlash";
 }
 
 function formatAnalysis(text) {
@@ -1816,7 +1816,7 @@ function downloadPdf() {
     dropout: 'Dropout tahlili',
     sales: 'Sales tahlili',
     marketing: 'Marketing tahlili',
-    all: 'To'liq Hisobot — Barcha Bo'limlar'
+    all: "Toʻliq Hisobot — Barcha Boʻlimlar"
   };
   
   const win = window.open('', '_blank');
