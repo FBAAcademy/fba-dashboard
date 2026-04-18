@@ -451,6 +451,11 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <button class="modal-sec-btn" onclick="selectSection('sales',this)">💼 Sales</button>
       <button class="modal-sec-btn" onclick="selectSection('marketing',this)">📣 Marketing</button>
     </div>
+    <div style="margin-bottom:16px;">
+      <button class="modal-sec-btn" id="allSectionsBtn" onclick="selectSection('all',this)" style="width:100%;text-align:center;background:var(--pdim);border-color:rgba(155,127,232,0.3);color:var(--purple);">
+        🤖 Barcha bo'limlarni tahlil qilish (To'liq hisobot)
+      </button>
+    </div>
     
     <div id="aiResultDiv" style="display:none;">
       <div class="ai-result-box" id="aiResultText"></div>
@@ -459,10 +464,11 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     
     <div id="aiLoadingDiv" style="display:none;text-align:center;padding:20px;">
       <div style="width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
-      <div style="font-size:12px;color:var(--muted);">Claude tahlil qilmoqda... (~10-20 soniya)</div>
+      <div style="font-size:12px;color:var(--muted);" id="loadingSubText">Claude tahlil qilmoqda... (~10-20 soniya)</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="loadingProgress"></div>
     </div>
     
-    <div class="cost-note" id="costNote">⚡ Har bir tahlil taxminan $0.02-0.05 xarajat qiladi</div>
+    <div class="cost-note" id="costNote">⚡ Har bir tahlil ~$0.03-0.08 · To'liq hisobot ~$0.20-0.40</div>
     
     <div class="modal-actions" style="margin-top:16px;">
       <button class="modal-cancel" onclick="closeAiModal()">Bekor qilish</button>
@@ -1692,6 +1698,7 @@ function populateFanFilters() {
 const FUNC_URL = "https://fba-api-bkbgbcewcmgdfcea.centralus-01.azurewebsites.net/api/analyze";
 let selectedSection = 'overview';
 let lastAnalysis = '';
+let lastSection = 'overview';
 
 function showAiModal() {
   document.getElementById('aiModal').style.display = 'flex';
@@ -1710,6 +1717,29 @@ function selectSection(section, btn) {
   document.querySelectorAll('.modal-sec-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   document.getElementById('aiResultDiv').style.display = 'none';
+  // Update run button text
+  const runBtn = document.getElementById('runAiBtn');
+  if (runBtn) runBtn.textContent = section === 'all' ? '🤖 To'liq hisobot yaratish' : '🤖 Tahlil boshlash';
+}
+
+function formatAnalysis(text) {
+  return text
+    .replace(/### (.*)/g, '<h3>$1</h3>')
+    .replace(/## (.*)/g, '<h2>$1</h2>')
+    .replace(/# (.*)/g, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+async function fetchSection(snapWithSm, section) {
+  const response = await fetch(FUNC_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ snapData: snapWithSm, section })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Xato');
+  return data.analysis;
 }
 
 async function runAiAnalysis() {
@@ -1721,30 +1751,49 @@ async function runAiAnalysis() {
   document.getElementById('aiResultDiv').style.display = 'none';
   document.getElementById('costNote').style.display = 'none';
   
+  const snapWithSm = { ...snap, sales: smData.sales, marketing: smData.marketing };
+  
   try {
-    const snapWithSm = { ...snap, sales: smData.sales, marketing: smData.marketing };
+    if (selectedSection === 'all') {
+      // Barcha bo'limlarni ketma-ket tahlil qilish
+      const sections = [
+        { key: 'overview', label: '📊 Umumiy tahlil' },
+        { key: 'teachers', label: '👨‍🏫 O'qituvchilar' },
+        { key: 'subjects', label: '📚 Fanlar' },
+        { key: 'dropout', label: '🚪 Dropout' },
+        { key: 'sales', label: '💼 Sales' },
+        { key: 'marketing', label: '📣 Marketing' }
+      ];
+      
+      let fullReport = '';
+      
+      for (let i = 0; i < sections.length; i++) {
+        const sec = sections[i];
+        const prog = document.getElementById('loadingProgress');
+        const sub = document.getElementById('loadingSubText');
+        if (prog) prog.textContent = `${i+1}/${sections.length} — ${sec.label}`;
+        if (sub) sub.textContent = 'Claude tahlil qilmoqda...';
+        
+        const analysis = await fetchSection(snapWithSm, sec.key);
+        fullReport += `
+
+${'='.repeat(60)}
+${sec.label.toUpperCase()}
+${'='.repeat(60)}
+
+${analysis}`;
+      }
+      
+      lastAnalysis = fullReport;
+      lastSection = 'all';
+      
+    } else {
+      const analysis = await fetchSection(snapWithSm, selectedSection);
+      lastAnalysis = analysis;
+      lastSection = selectedSection;
+    }
     
-    const response = await fetch(FUNC_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ snapData: snapWithSm, section: selectedSection })
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) throw new Error(data.error || 'Xato');
-    
-    lastAnalysis = data.analysis;
-    
-    // Render markdown-like text
-    const formatted = data.analysis
-      .replace(/### (.*)/g, '<h3>$1</h3>')
-      .replace(/## (.*)/g, '<h2>$1</h2>')
-      .replace(/# (.*)/g, '<h1>$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br>');
-    
-    document.getElementById('aiResultText').innerHTML = formatted;
+    document.getElementById('aiResultText').innerHTML = formatAnalysis(lastAnalysis);
     document.getElementById('aiResultDiv').style.display = 'block';
     document.getElementById('aiLoadingDiv').style.display = 'none';
     btn.disabled = false;
@@ -1766,7 +1815,8 @@ function downloadPdf() {
     subjects: 'Fanlar tahlili',
     dropout: 'Dropout tahlili',
     sales: 'Sales tahlili',
-    marketing: 'Marketing tahlili'
+    marketing: 'Marketing tahlili',
+    all: 'To'liq Hisobot — Barcha Bo'limlar'
   };
   
   const win = window.open('', '_blank');
