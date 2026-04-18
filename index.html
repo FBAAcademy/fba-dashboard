@@ -1832,33 +1832,39 @@ function downloadPdf() {
       return '<tr>' + cells.map((c,i)=> isHeader===0 ? `<th>${c.trim()}</th>` : `<td>${c.trim()}</td>`).join('') + '</tr>';
     });
   
-  // Simpler approach
   let body = lastAnalysis;
-  // Convert markdown tables
-  body = body.replace(/(\|[^
-]+\|
-)+/g, (tableBlock) => {
-    const rows = tableBlock.trim().split('
-').filter(r => !r.match(/^\|[-:| ]+\|$/));
-    const htmlRows = rows.map((row, i) => {
-      const cells = row.split('|').filter(c=>c.trim());
-      const tag = i===0 ? 'th' : 'td';
-      return '<tr>' + cells.map(c=>`<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
-    });
-    return '<table>' + htmlRows.join('') + '</table>';
+  // Convert markdown tables to HTML
+  const tableLines = body.split('\n');
+  let inTable = false;
+  let tableHtml = '';
+  let result = [];
+  let isFirstRow = true;
+  tableLines.forEach(line => {
+    if (line.startsWith('|') && line.endsWith('|')) {
+      if (line.match(/^[|\-: ]+$/)) { inTable = true; return; }
+      if (!inTable && !tableHtml) { inTable = true; isFirstRow = true; tableHtml = '<table>'; }
+      const cells = line.split('|').filter(c => c.trim());
+      const tag = isFirstRow ? 'th' : 'td';
+      tableHtml += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+      isFirstRow = false;
+    } else {
+      if (inTable && tableHtml) { result.push(tableHtml + '</table>'); tableHtml = ''; inTable = false; isFirstRow = true; }
+      result.push(line);
+    }
   });
+  if (tableHtml) result.push(tableHtml + '</table>');
+  body = result.join('\n');
   body = body
-    .replace(/### (.*)/g,'<h3>$1</h3>')
-    .replace(/## (.*)/g,'<h2>$1</h2>')
-    .replace(/# (.*)/g,'<h1>$1</h1>')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/
-
-/g,'</p><p>')
-    .replace(/
-/g,'<br>');
+    .split('### ').join('<h3>').split('\n').join('</h3>\n')
+    .replace(/<h3>([^<]+)/g, '<h3>$1</h3>');
+  body = body.replace(/### ([^\n]+)/g,'<h3>$1</h3>');
+  body = body.replace(/## ([^\n]+)/g,'<h2>$1</h2>');
+  body = body.replace(/# ([^\n]+)/g,'<h1>$1</h1>');
+  body = body.replace(/[*][*]([^*]+)[*][*]/g,'<strong>$1</strong>');
+  body = body.replace(/\n\n/g,'</p><p>');
+  body = body.replace(/\n/g,'<br>');
   
-  const win = window.open('', '_blank');
+    const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <title>FBA Academy - ${secName}</title>
