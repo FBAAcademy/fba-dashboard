@@ -5,8 +5,8 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBhMGEwZiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iNzAwIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMmVjYThhIj5GQTwvdGV4dD4KPC9zdmc+">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FBA Academy — Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
@@ -920,18 +920,19 @@ const ANALYTICS = {
       
       const leads = rows.filter(r => r[cEtap]).map(r => {
         const dateVal = r[cDate];
-        let sana = null;
-        if (dateVal) {
-          sana = new Date(dateVal);
-          if (isNaN(sana.getTime())) sana = null;
-        }
+        let sana = null, oy = null;
+        try {
+          if (dateVal) {
+            const d = new Date(dateVal);
+            if (!isNaN(d.getTime())) { sana = d; oy = d.toISOString().substring(0,7); }
+          }
+        } catch(e) {}
         return {
-          sana,
+          sana, oy,
           operator: (r[cOp] || '').toString().trim().toUpperCase(),
           manba: (r[cManba] || '').toString().trim(),
           etap: (r[cEtap] || '').toString().trim(),
           muvaffaqiyatli: (r[cEtap] || '').includes('Успешно'),
-          oy: sana ? sana.toISOString().substring(0,7) : null,
         };
       });
 
@@ -1010,14 +1011,22 @@ const ANALYTICS = {
       const cLeads = 7;   // Lead soni
       const cValyuta = 6;
       
-      const mktRows = rows.map(r => ({
-        sana: r[cSana] ? new Date(r[cSana]) : null,
-        manba: (r[cManba] || '').toString().trim(),
-        xarajat: parseFloat(r[cXarajat]) || 0,
-        leads: parseFloat(r[cLeads]) || 0,
-        valyuta: (r[cValyuta] || 'UZS').toString().trim(),
-        oy: r[cSana] ? new Date(r[cSana]).toISOString().substring(0,7) : null,
-      })).filter(r => r.sana && !isNaN(r.sana.getTime()));
+      const mktRows = rows.map(r => {
+        let sana = null, oy = null;
+        try {
+          if (r[cSana]) {
+            const d = new Date(r[cSana]);
+            if (!isNaN(d.getTime())) { sana = d; oy = d.toISOString().substring(0,7); }
+          }
+        } catch(e) {}
+        return {
+          sana, oy,
+          manba: (r[cManba] || '').toString().trim(),
+          xarajat: parseFloat(r[cXarajat]) || 0,
+          leads: parseFloat(r[cLeads]) || 0,
+          valyuta: (r[cValyuta] || 'UZS').toString().trim(),
+        };
+      }).filter(r => r.sana !== null);
 
       // Oylik
       const monthly = {};
