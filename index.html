@@ -1525,57 +1525,37 @@ function renderDropout() {
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'}},y:{grid:{display:false},ticks:{font:{size:9}}}}}
   });
   
-  // Operator stats with real filtering
-  let ops = JSON.parse(JSON.stringify(snap.operator_stats || []));
-  
-  // Year filter
-  if (dY !== 'all') {
-    const yd = snap.yearly?.[dY];
-    if (yd) {
-      const ratio = yd.jami / Math.max(snap.summary?.jami || 1, 1);
-      ops = ops.map(o => ({
-        ...o,
-        jami: Math.max(1, Math.round(o.jami * ratio)),
-        stopped: Math.round(o.stopped * ratio),
-        passed: Math.round((o.passed||0) * ratio),
-        no_exam: Math.round((o.no_exam||0) * ratio),
-        dropout_pct: o.dropout_pct
-      }));
+  // Operator stats - by_year dan to'g'ridan-to'g'ri olish
+  let ops = [];
+  (snap.operator_stats || []).forEach(opData => {
+    let opRow = null;
+    
+    if (dY !== 'all') {
+      // Yil filtri: by_year dan aniq ma'lumot olish
+      const yd = opData.by_year?.[dY];
+      if (!yd || yd.jami === 0) return; // Bu yilda sotmagan operator ko'rinmaydi
+      opRow = {
+        operator: opData.operator,
+        jami: yd.jami,
+        stopped: yd.stopped,
+        passed: yd.passed || 0,
+        no_exam: yd.no_exam || 0,
+        dropout_pct: yd.dropout_pct
+      };
+    } else {
+      // Barcha yillar
+      opRow = {
+        operator: opData.operator,
+        jami: opData.jami,
+        stopped: opData.stopped,
+        passed: opData.passed || 0,
+        no_exam: opData.no_exam || 0,
+        dropout_pct: opData.dropout_pct
+      };
     }
-  }
-  
-  // Fan filter
-  if (fan !== 'all') {
-    const subData = snap.subjects?.find(s => s.Product === fan);
-    if (subData) {
-      const ratio = subData.jami / Math.max(snap.summary?.jami || 1, 1);
-      ops = ops.map(o => ({
-        ...o,
-        jami: Math.max(1, Math.round(o.jami * ratio)),
-        stopped: Math.round(o.stopped * ratio),
-        passed: Math.round((o.passed||0) * ratio),
-        dropout_pct: o.dropout_pct
-      }));
-    }
-  }
-  
-  // Period filter
-  if (dD !== 'all') {
-    const periodKey = {
-      '1-darsgacha': '1-darsgacha chiqqanlar',
-      '3-darsgacha': '3-darsgacha chiqqanlar',
-      '1-oyda': '1-oyda chiqqanlar',
-      '2-oyda': '2-oyda chiqqanlar'
-    }[dD];
-    if (periodKey && dp[periodKey]) {
-      const ratio = dp[periodKey].count / Math.max(snap.summary?.stopped || 1, 1);
-      ops = ops.map(o => ({
-        ...o,
-        stopped: Math.max(0, Math.round(o.stopped * ratio)),
-        dropout_pct: Math.round(Math.round(o.stopped * ratio) / Math.max(o.jami, 1) * 100)
-      }));
-    }
-  }
+    
+    if (opRow && opRow.jami > 0) ops.push(opRow);
+  });
   
   ops = ops.filter(o => o.jami > 0);
   const maxD = Math.max(...ops.map(o => o.dropout_pct), 1);
