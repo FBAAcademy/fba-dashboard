@@ -1696,15 +1696,17 @@ function renderMarketing() {
   dc('mktMonthly');
   const pf_data = m.monthly_pf || [];
   const mm = pf_data.length > 0 ? pf_data : (m.monthly||[]).filter(x=>x.oy>='2026-01');
-  charts['mktMonthly']=new Chart(document.getElementById('mktMonthlyChart'),{data:{labels:mm.map(x=>x.oy?.substring(5)||''),datasets: isPF ? [
-      {type:'bar',label:'Plan $',data:mm.map(x=>Math.round(x.plan_xarajat||0)),backgroundColor:'rgba(91,141,238,0.3)',yAxisID:'y'},
-      {type:'bar',label:'Fakt $',data:mm.map(x=>Math.round(x.fakt_xarajat||0)),backgroundColor:'rgba(232,91,91,0.6)',yAxisID:'y'},
-      {type:'line',label:'Plan lidlar',data:mm.map(x=>Math.round(x.plan_lidlar||0)),borderColor:'#5b8dee',borderDash:[4,2],backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'},
-      {type:'line',label:'Fakt lidlar',data:mm.map(x=>Math.round(x.fakt_lidlar||0)),borderColor:'#2eca8a',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}
-    ] : [
-      {type:'bar',label:'Xarajat $',data:mm.map(x=>x.xarajat_usd),backgroundColor:'rgba(232,91,91,0.4)',yAxisID:'y'},
-      {type:'line',label:'Lidlar',data:mm.map(x=>x.leadlar),borderColor:'#5b8dee',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
+  const isPF = mm.length > 0 && mm[0] && 'plan_xarajat' in mm[0];
+  const mktDatasets = isPF ? [
+    {type:'bar',label:'Plan $',data:mm.map(x=>Math.round(x.plan_xarajat||0)),backgroundColor:'rgba(91,141,238,0.3)',yAxisID:'y'},
+    {type:'bar',label:'Fakt $',data:mm.map(x=>Math.round(x.fakt_xarajat||0)),backgroundColor:'rgba(232,91,91,0.6)',yAxisID:'y'},
+    {type:'line',label:'Plan lidlar',data:mm.map(x=>Math.round(x.plan_lidlar||0)),borderColor:'#5b8dee',borderDash:[4,2],backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'},
+    {type:'line',label:'Fakt lidlar',data:mm.map(x=>Math.round(x.fakt_lidlar||0)),borderColor:'#2eca8a',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}
+  ] : [
+    {type:'bar',label:'Xarajat $',data:mm.map(x=>x.xarajat_usd||0),backgroundColor:'rgba(232,91,91,0.4)',yAxisID:'y'},
+    {type:'line',label:'Lidlar',data:mm.map(x=>x.leadlar||0),borderColor:'#5b8dee',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}
+  ];
+  charts['mktMonthly']=new Chart(document.getElementById('mktMonthlyChart'),{data:{labels:mm.map(x=>(x.oy||'').toString().substring(5)||''),datasets:mktDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
   dc('mktRevenue');
   charts['mktRevenue']=new Chart(document.getElementById('mktRevenueChart'),{type:'line',data:{labels:(m.revenue||[]).map(x=>x.oy?.substring(5)||''),datasets:[{data:(m.revenue||[]).map(x=>x.revenue/1000000),borderColor:'#2eca8a',backgroundColor:'rgba(46,202,138,0.1)',fill:true,tension:0.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v.toFixed(0)+'M'}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
   const mb=document.getElementById('mktManbaBody'); mb.innerHTML='';
