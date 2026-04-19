@@ -353,6 +353,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <button class="fyb active" id="dy-all" onclick="setDY('all',this)">Barchasi</button>
     <button class="fyb" id="dy-2024" onclick="setDY('2024',this)">2024</button>
     <button class="fyb" id="dy-2025" onclick="setDY('2025',this)">2025</button>
+    <button class="fyb" id="dy-2026" onclick="setDY('2026',this)">2026</button>
     <div class="fsep"></div>
     <span class="flabel">Davr:</span>
     <button class="fyb active" id="dd-all" onclick="setDD('all',this)">Barchasi</button>
@@ -869,31 +870,42 @@ const ANALYTICS = {
   },
 
   calcOperatorStats(data) {
+    // "Boshqa guruhga o'tdi" ni avval chiqarib tashlaymiz
+    const cleanData = data.filter(r => !r.boshqaGuruh);
     const ops = {};
-    data.forEach(r => {
-      const op = r.Sotuv_mng || 'Nomalum';
+    cleanData.forEach(r => {
+      const op = (r.Sotuv_mng || '').toString().trim();
+      if (!op) return;
       if (!ops[op]) ops[op] = [];
       ops[op].push(r);
     });
     return Object.entries(ops)
-      .filter(([k]) => k && k !== 'Nomalum' && k !== '')
+      .filter(([k]) => k && k.length > 0)
       .map(([op, rows]) => {
-        const s = this.calcStats(rows);
+        // Umumiy stats (boshqaGuruh allaqachon chiqarilgan)
+        const jami = rows.length;
+        const stopped = rows.filter(r => r.Final_status === 'Stopped').length;
+        const passed = rows.filter(r => r.Final_status === 'Passed').length;
+        const failed = rows.filter(r => r.Final_status === 'Failed').length;
+        const no_exam = rows.filter(r => r.Final_status === 'No Exam').length;
+        const in_progress = rows.filter(r => r.Final_status === 'In Progress').length;
+        const dropout_pct = jami > 0 ? Math.round(stopped/jami*1000)/10 : 0;
         // Yillar kesimida
         const by_year = {};
         [2024, 2025, 2026].forEach(yr => {
           const yRows = rows.filter(r => r.Year === yr);
-          if (yRows.length > 0) by_year[yr] = this.calcStats(yRows);
+          if (yRows.length > 0) {
+            const yStopped = yRows.filter(r => r.Final_status === 'Stopped').length;
+            by_year[yr] = {
+              jami: yRows.length,
+              stopped: yStopped,
+              passed: yRows.filter(r => r.Final_status === 'Passed').length,
+              no_exam: yRows.filter(r => r.Final_status === 'No Exam').length,
+              dropout_pct: Math.round(yStopped/yRows.length*1000)/10
+            };
+          }
         });
-        return {
-          operator: op,
-          jami: s.jami,
-          stopped: s.stopped,
-          passed: s.passed,
-          no_exam: s.no_exam,
-          dropout_pct: s.dropout_rate,
-          by_year
-        };
+        return { operator: op, jami, stopped, passed, failed, no_exam, in_progress, dropout_pct, by_year };
       })
       .sort((a, b) => b.jami - a.jami);
   },
@@ -1463,7 +1475,7 @@ function renderSubjects() {
 // ── DROPOUT ──
 function setDY(y, btn) {
   dY = y;
-  ['dy-all','dy-2024','dy-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  ['dy-all','dy-2024','dy-2025','dy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   btn.classList.add('active'); renderDropout();
 }
 function setDD(d, btn) {
