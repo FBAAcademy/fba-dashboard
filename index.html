@@ -663,9 +663,11 @@ const ANALYTICS = {
       const boshlangan = row[col.Boshlangan];
       let bDate = null;
       if (boshlangan) {
-        bDate = new Date(boshlangan);
-        if (isNaN(bDate.getTime())) bDate = null;
+        try { bDate = new Date(boshlangan); if (isNaN(bDate.getTime())) bDate = null; } catch(e) { bDate = null; }
       }
+      
+      const sabab = (row[col.Sabab] || '').toString().trim();
+      const finalStatus = (row[col.Final_status] || '').toString().trim();
       
       data.push({
         ID: Number(id),
@@ -676,8 +678,10 @@ const ANALYTICS = {
         Sotuv_mng: (row[col.Sotuv_mng] || '').toString().trim().toUpperCase(),
         Tolov_op: (row[col.Tolov_op] || '').toString().trim(),
         Status: (row[col.Status] || '').toString().trim(),
-        Final_status: (row[col.Final_status] || '').toString().trim(),
-        Sabab: (row[col.Sabab] || '').toString().trim(),
+        Final_status: finalStatus,
+        Sabab: sabab,
+        // TZ: "Boshqa guruhga o'tdi" ni alohida belgi
+        boshqaGuruh: sabab === "Boshqa guruhga o'tdi",
         Year: bDate ? bDate.getFullYear() : null,
         Month: bDate ? `${bDate.getFullYear()}-${String(bDate.getMonth()+1).padStart(2,'0')}` : null,
       });
@@ -700,26 +704,44 @@ const ANALYTICS = {
   },
 
   // ── ASOSIY STATISTIKA ──
+  // TZ: "Boshqa guruhga o'tdi" Enrolled va Stopped dan chiqariladi
   calcStats(rows) {
-    const jami = rows.length;
-    const stopped = rows.filter(r => r.Final_status === 'Stopped').length;
+    const boshqaRows = rows.filter(r => r.boshqaGuruh);
+    const boshqaCount = boshqaRows.length;
+    
+    // Enrolled = jami - "Boshqa guruhga o'tdi"
+    const jami = rows.length - boshqaCount;
+    
+    const stoppedAll = rows.filter(r => r.Final_status === 'Stopped');
+    // Stopped = stopped - "Boshqa guruhga o'tdi"
+    const stopped = stoppedAll.filter(r => !r.boshqaGuruh).length;
+    
     const passed = rows.filter(r => r.Final_status === 'Passed').length;
     const failed = rows.filter(r => r.Final_status === 'Failed').length;
     const no_exam = rows.filter(r => r.Final_status === 'No Exam').length;
     const in_progress = rows.filter(r => r.Final_status === 'In Progress').length;
     const yakunlagan = passed + failed + no_exam;
+    
+    // Retention = (Enrolled - Stopped) / Enrolled
     const retention = jami > 0 ? Math.round((jami - stopped) / jami * 1000) / 10 : 0;
     const pass_rate = (passed + failed) > 0 ? Math.round(passed / (passed + failed) * 1000) / 10 : 0;
     const exam_entry = yakunlagan > 0 ? Math.round((passed + failed) / yakunlagan * 1000) / 10 : 0;
-    return { jami, stopped, passed, failed, no_exam, in_progress, yakunlagan, retention, pass_rate, exam_entry };
+    // Dropout = Stopped / Enrolled
+    const dropout_rate = jami > 0 ? Math.round(stopped / jami * 1000) / 10 : 0;
+    
+    return { jami, stopped, passed, failed, no_exam, in_progress, yakunlagan, retention, pass_rate, exam_entry, dropout_rate, boshqaCount };
   },
 
   calcSummary(data, sana) {
     const s = this.calcStats(data);
-    // Converted - keyingi kursga o'tganlar (bir nechta kurs o'qigan)
-    const idCounts = {};
-    data.forEach(r => { idCounts[r.ID] = (idCounts[r.ID] || 0) + 1; });
-    const converted = Object.values(idCounts).filter(c => c > 1).length;
+    // Converted = 2+ kurs o'qigan - "Boshqa guruhga o'tdi" chiqariladi
+    const idGroups = {};
+    data.forEach(r => {
+      if (r.boshqaGuruh) return; // "Boshqa guruhga o'tdi" ni hisobga olmaymiz
+      if (!idGroups[r.ID]) idGroups[r.ID] = 0;
+      idGroups[r.ID]++;
+    });
+    const converted = Object.values(idGroups).filter(c => c > 1).length;
     
     return {
       sana,
@@ -857,13 +879,20 @@ const ANALYTICS = {
       .filter(([k]) => k && k !== 'Nomalum' && k !== '')
       .map(([op, rows]) => {
         const s = this.calcStats(rows);
+        // Yillar kesimida
+        const by_year = {};
+        [2024, 2025, 2026].forEach(yr => {
+          const yRows = rows.filter(r => r.Year === yr);
+          if (yRows.length > 0) by_year[yr] = this.calcStats(yRows);
+        });
         return {
           operator: op,
           jami: s.jami,
           stopped: s.stopped,
           passed: s.passed,
           no_exam: s.no_exam,
-          dropout_pct: Math.round(s.stopped / Math.max(s.jami, 1) * 1000) / 10
+          dropout_pct: s.dropout_rate,
+          by_year
         };
       })
       .sort((a, b) => b.jami - a.jami);
@@ -1583,12 +1612,31 @@ function renderDropout() {
 
 function renderRating() {
   if (!snap) return;
-  function cPb(pr){if(pr>=95)return 25;if(pr>=85)return 20;if(pr>=75)return 15;if(pr>=65)return 10;if(pr>=55)return 5;return 0;}
+  // Fan bo'yicha pass rate kriteriyalari (ACCA global + 5%)
+  const PASS_CRITERIA = {"BT": {"A": 92, "B": 80, "C": 70, "D": 60, "E": 50}, "MA": {"A": 72, "B": 62, "C": 52, "D": 42, "E": 35}, "FA": {"A": 90, "B": 80, "C": 70, "D": 60, "E": 50}, "LW": {"A": 74, "B": 64, "C": 54, "D": 44, "E": 35}, "PM": {"A": 48, "B": 40, "C": 33, "D": 27, "E": 20}, "TX": {"A": 59, "B": 50, "C": 42, "D": 35, "E": 28}, "FR": {"A": 56, "B": 48, "C": 40, "D": 33, "E": 26}, "AA": {"A": 50, "B": 43, "C": 36, "D": 29, "E": 22}, "FM": {"A": 53, "B": 45, "C": 38, "D": 31, "E": 24}, "SBL": {"A": 56, "B": 48, "C": 40, "D": 33, "E": 26}, "SBR": {"A": 54, "B": 46, "C": 39, "D": 32, "E": 25}, "AFM": {"A": 50, "B": 42, "C": 35, "D": 28, "E": 21}, "APM": {"A": 42, "B": 35, "C": 29, "D": 23, "E": 18}, "ATX": {"A": 54, "B": 46, "C": 39, "D": 32, "E": 25}, "AAA": {"A": 43, "B": 36, "C": 30, "D": 24, "E": 18}, "DipIFR": {"A": 55, "B": 47, "C": 40, "D": 33, "E": 26}, "default": {"A": 55, "B": 47, "C": 40, "D": 33, "E": 26}};
+  
+  function getPassCriteria(subject) {
+    return PASS_CRITERIA[subject] || PASS_CRITERIA['default'];
+  }
+  
+  function cPb(pr, subject) {
+    const c = getPassCriteria(subject);
+    if(pr>=c.A) return 25;
+    if(pr>=c.B) return 20;
+    if(pr>=c.C) return 15;
+    if(pr>=c.D) return 10;
+    if(pr>=c.E) return 5;
+    return 0;
+  }
   function cEb(e){if(e>=90)return 8;if(e>=70)return 6;if(e>=50)return 4;if(e>=30)return 2;return 0;}
   function cRb(r){if(r>=85)return 15;if(r>=75)return 12;if(r>=65)return 9;if(r>=55)return 6;if(r>=45)return 3;return 0;}
   function gBadge(p){if(p>=85)return'<span class="badge bg">A</span>';if(p>=70)return'<span class="badge bb">B</span>';if(p>=55)return'<span class="badge ba">C</span>';return'<span class="badge br">D</span>';}
+  // O'qituvchining asosiy fanini topish
   const rated=(snap.teachers||[]).filter(t=>t.jami>=20).map(t=>{
-    const pb_=cPb(t.pass_rate),eb_=cEb(t.exam_entry),b1=pb_+eb_,rb_=cRb(t.retention),b2=rb_,total=b1+b2;
+    // O'qituvchining eng ko'p dars bergan fani
+    const mainSubject = Object.entries(t.by_subject||{})
+      .sort((a,b)=>b[1].jami-a[1].jami)[0]?.[0] || 'default';
+    const pb_=cPb(t.pass_rate, mainSubject),eb_=cEb(t.exam_entry),b1=pb_+eb_,rb_=cRb(t.retention),b2=rb_,total=b1+b2;
     const y24r=t.by_year?.['2024']?.retention,y25r=t.by_year?.['2025']?.retention;
     const tr=y24r&&y25r?(y25r-y24r>2?'<span style="color:var(--green)">+</span>':y25r-y24r<-2?'<span style="color:var(--red)">-</span>':'<span style="color:var(--muted)">~</span>'):'<span style="color:var(--muted)">-</span>';
     return{...t,pb_,eb_,b1,rb_,b2,total,tr};
@@ -1598,7 +1646,7 @@ function renderRating() {
     tbody.innerHTML+=`<tr>
       <td style="color:var(--muted);font-family:'DM Mono',monospace;">${i+1}</td>
       <td style="font-size:11px;font-weight:500;">${t.Oqituvchi}</td>
-      <td style="text-align:center;">${rb(t.pb_,25)}</td>
+      <td style="text-align:center;" title="Kriteriya: ${getPassCriteria(mainSubject).A}%">${rb(t.pb_,25)}</td>
       <td style="text-align:center;">${rb(t.eb_,8)}</td>
       <td style="text-align:center;font-weight:600;">${rb(t.b1,33)}</td>
       <td style="text-align:center;">${rb(t.rb_,15)}</td>
