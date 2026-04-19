@@ -1633,10 +1633,11 @@ function renderRating() {
   }).sort((a,b)=>b.total-a.total);
   const tbody=document.getElementById('rBody'); tbody.innerHTML='';
   rated.forEach((t,i)=>{
+    const tMainSubject = Object.entries(t.by_subject||{}).sort((a,b)=>b[1].jami-a[1].jami)[0]?.[0] || 'default';
     tbody.innerHTML+=`<tr>
       <td style="color:var(--muted);font-family:'DM Mono',monospace;">${i+1}</td>
       <td style="font-size:11px;font-weight:500;">${t.Oqituvchi}</td>
-      <td style="text-align:center;" title="Kriteriya: ${getPassCriteria(mainSubject).A}%">${rb(t.pb_,25)}</td>
+      <td style="text-align:center;" title="Fan: ${tMainSubject}, Kriteriya: ${getPassCriteria(tMainSubject).A}%">${rb(t.pb_,25)}</td>
       <td style="text-align:center;">${rb(t.eb_,8)}</td>
       <td style="text-align:center;font-weight:600;">${rb(t.b1,33)}</td>
       <td style="text-align:center;">${rb(t.rb_,15)}</td>
