@@ -2215,6 +2215,9 @@ function renderFinance() {
   const mData = mLabel ? (finData.pl[mLabel] || {}) : {};
   const cfData = mLabel ? (finData.cashflow[mLabel] || {}) : {};
 
+  // Debug
+  console.log('selMonth:', selMonth?.label, 'mData keys:', Object.keys(mData));
+
   // KPI kartalar
   const kpis = [
     ['revenue', 'fkv-revenue'],
@@ -2226,11 +2229,11 @@ function renderFinance() {
   ];
   kpis.forEach(([key, id]) => {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = fmtMln(mData[key]);
-    const card = el?.closest('.kc');
-    if (card) {
+    if (el) {
+      el.innerHTML = fmtMln(mData[key]);
       const val = mData[key] || 0;
-      card.style.borderColor = val >= 0 ? 'var(--green)' : '#e83a3a';
+      const card = el.closest ? el.closest('.kc') : null;
+      if (card) card.style.borderColor = val >= 0 ? 'var(--green)' : '#e83a3a';
     }
   });
 
