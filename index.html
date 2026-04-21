@@ -2197,7 +2197,7 @@ function fmtMlnPlain(v) {
 async function loadFinanceData() {
   if (finData && finData.months && finData.months.length > 0) return; // allaqachon yuklangan
   try {
-    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">⏳ Moliya ma'lumotlari yuklanmoqda...</p>';
+    document.getElementById('fin-pl-table').innerHTML = `<p style="color:var(--dim);padding:20px">⏳ Moliya ma'lumotlari yuklanmoqda...</p>`;
     const token = await getToken();
     const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`, {
       headers: { Authorization: `Bearer ${token}` }, cache: 'no-store'
@@ -2230,7 +2230,7 @@ function renderFinance() {
 
 function renderFinanceUI() {
   if (!finData || !finData.months || !finData.months.length) {
-    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">Moliya malumotlari yuklanmadi.</p>';
+    document.getElementById('fin-pl-table').innerHTML = `<p style="color:var(--dim);padding:20px">Moliya malumotlari yuklanmadi.</p>`;
     return;
   }
 
