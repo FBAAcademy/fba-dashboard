@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FBA Academy — Moliya</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;background:#0A0A1A;color:#E0E0E0;min-height:100vh}
+  .header{background:#111133;border-bottom:1px solid rgba(46,202,138,0.2);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+  .logo{color:#2EC47E;font-weight:700;font-size:14px;letter-spacing:3px}
+  .subtitle{color:#888;font-size:11px}
+  .btn{background:#1A7F5A;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px}
+  .btn:hover{background:#2EC47E}
+  .btn-sec{background:transparent;border:1px solid rgba(46,202,138,0.3);color:#2EC47E;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:11px}
+  .container{padding:16px 20px}
+  .loading{display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:16px}
+  .spinner{width:40px;height:40px;border:3px solid rgba(46,202,138,0.2);border-top-color:#2EC47E;border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .load-text{color:#888;font-size:13px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .card{background:#111133;border:1px solid rgba(46,202,138,0.15);border-radius:10px;padding:14px}
+  .card-title{font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+  .card-val{font-size:22px;font-weight:700;margin-bottom:2px}
+  .card-sub{font-size:10px;color:#666}
+  .green{color:#2EC47E} .red{color:#E83A3A} .amber{color:#F5A623} .blue{color:#88AAFF}
+  .section{background:#111133;border:1px solid rgba(46,202,138,0.1);border-radius:10px;padding:16px;margin-bottom:16px}
+  .section-title{font-size:12px;font-weight:700;color:#2EC47E;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(46,202,138,0.15)}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th{background:#0A1A0A;color:#2EC47E;padding:6px 10px;text-align:left;font-weight:600;white-space:nowrap}
+  td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  tr:hover td{background:rgba(46,202,138,0.04)}
+  .pos{color:#2EC47E;font-weight:600} .neg{color:#E83A3A;font-weight:600}
+  .bold{font-weight:700}
+  .indent{color:#aaa;padding-left:20px!important}
+  .highlight-row td{background:rgba(26,127,90,0.08)!important;font-weight:700}
+  .bar-bg{background:rgba(255,255,255,0.08);border-radius:3px;height:6px;margin-top:4px}
+  .bar-fill{height:6px;border-radius:3px}
+  .controls{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  select{background:#111133;color:#E0E0E0;border:1px solid rgba(46,202,138,0.3);padding:5px 10px;border-radius:6px;font-size:11px}
+  .cf-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .cf-label{font-size:12px;color:#aaa}
+  .cf-val{font-size:12px;font-weight:600}
+  .daily-wrap{max-height:350px;overflow-y:auto}
+  .error-box{background:rgba(232,58,58,0.1);border:1px solid rgba(232,58,58,0.3);border-radius:8px;padding:16px;color:#E83A3A;font-size:12px}
+  #loginView{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:20px}
+  #loginView h2{color:#2EC47E;font-size:20px}
+  #loginView p{color:#888;font-size:12px}
+  #mainView{display:none}
+</style>
+</head>
+<body>
+
+<div id="loginView">
+  <div style="font-size:24px;font-weight:700;color:#2EC47E;letter-spacing:3px">FBA ACADEMY</div>
+  <h2>Moliya Bo'limi</h2>
+  <p>Microsoft hisobi bilan kiring</p>
+  <button class="btn" onclick="signIn()" style="padding:10px 28px;font-size:14px">Microsoft bilan kirish</button>
+</div>
+
+<div id="mainView">
+  <div class="header">
+    <div>
+      <div class="logo">FBA ACADEMY — MOLIYA</div>
+      <div class="subtitle">Fin Model + Cashier | Real-time SharePoint</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="lastUpdate" style="font-size:10px;color:#666"></span>
+      <button class="btn-sec" onclick="loadAll()">&#8635; Yangilash</button>
+      <button class="btn-sec" onclick="signOut()">Chiqish</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Loading -->
+    <div id="loadingDiv" class="loading">
+      <div class="spinner"></div>
+      <div class="load-text" id="loadText">Yuklanmoqda...</div>
+    </div>
+
+    <!-- Content -->
+    <div id="content" style="display:none">
+      <!-- Controls -->
+      <div class="controls">
+        <label style="font-size:11px;color:#888">Oy:</label>
+        <select id="monthSel" onchange="renderAll()"></select>
+        <label style="font-size:11px;color:#888">Yil:</label>
+        <select id="yearSel" onchange="renderAll()"></select>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid-4" id="kpiCards"></div>
+
+      <!-- P&L + Revenue -->
+      <div class="grid-2">
+        <div class="section">
+          <div class="section-title">P&amp;L Statement</div>
+          <div id="plTable"></div>
+        </div>
+        <div>
+          <div class="section" style="margin-bottom:16px">
+            <div class="section-title">Revenue Tarkibi</div>
+            <div id="revBreakdown"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Cash Flow</div>
+            <div id="cashFlow"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Balance -->
+      <div class="section">
+        <div class="section-title">Kunlik Balans (Cashier)</div>
+        <div class="daily-wrap">
+          <table id="dailyTable">
+            <thead><tr><th>Sana</th><th>Tushum</th><th>Chiqim</th><th>Balans</th><th>Faoliyat</th><th>Kategoriya</th></tr></thead>
+            <tbody id="dailyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MSAL_CONFIG = {
+  auth: {
+    clientId: '57ded34f-3662-4c62-bfc2-da717ef8db46',
+    authority: 'https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c',
+    redirectUri: window.location.origin + window.location.pathname
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+const SITE_HOSTNAME = 'fbaacademy.sharepoint.com';
+const SITE_PATH = '/sites/FBATeam';
+const SCOPES = ['https://graph.microsoft.com/Files.Read.All'];
+
+const msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+let finData = { months: [], pl: {}, cashflow: {}, daily: [] };
+let driveId = null;
+
+async function signIn() {
+  try {
+    await msalInstance.loginPopup({ scopes: SCOPES });
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('mainView').style.display = 'block';
+    await loadAll();
+  } catch(e) {
+    alert('Kirish xatosi: ' + e.message);
+  }
+}
+
+function signOut() {
+  msalInstance.logoutPopup();
+  document.getElementById('loginView').style.display = 'flex';
+  document.getElementById('mainView').style.display = 'none';
+}
+
+async function getToken() {
+  const accounts = msalInstance.getAllAccounts();
+  if (!accounts.length) throw new Error('Login qilmagan');
+  const res = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+  return res.accessToken;
+}
+
+async function getDriveId(token) {
+  if (driveId) return driveId;
+  const sr = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+  const site = await sr.json();
+  const dr = await fetch(`https://graph.microsoft.com/v1.0/sites/${site.id}/drive`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+  const drive = await dr.json();
+  driveId = drive.id;
+  return driveId;
+}
+
+async function downloadFile(token, did, fileName) {
+  const baseFileName = fileName.replace(/\.(xlsx|xlsb)$/i, '');
+  
+  async function searchFolder(folderId) {
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/drives/${did}/items/${folderId}/children?$top=100`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+    );
+    const data = await res.json();
+    const items = (data.value || []);
+    const found = items.find(i => i.name === fileName ||
+      i.name === baseFileName + '.xlsb' || i.name === baseFileName + '.xlsx');
+    if (found) {
+      found._sortKey = found.lastModifiedDateTime;
+      return found;
+    }
+    for (const item of items) {
+      if (item.folder) {
+        const r = await searchFolder(item.id);
+        if (r) return r;
+      }
+    }
+    return null;
+  }
+
+  const rootRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${did}/root`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+  const root = await rootRes.json();
+  const found = await searchFolder(root.id);
+  if (!found) throw new Error(fileName + ' topilmadi');
+
+  console.log('Downloading:', found.name, found.lastModifiedDateTime);
+  const ts = Date.now();
+  const fileRes = await fetch(
+    `https://graph.microsoft.com/v1.0/drives/${did}/items/${found.id}/content?ts=${ts}`,
+    { headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache, no-store' }, cache: 'no-store' }
+  );
+  return await fileRes.arrayBuffer();
+}
+
+function excelDateToJS(serial) {
+  return new Date(Math.round((serial - 25569) * 86400 * 1000));
+}
+
+function parseFinModel(buffer) {
+  const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', raw: true });
+  const ws = wb.Sheets['SPL SFP SCF'];
+  if (!ws) return;
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+
+  // Find month columns from row 0
+  const monthRow = rows[0] || [];
+  const months = [];
+  for (let c = 0; c < monthRow.length; c++) {
+    const v = monthRow[c];
+    if (v && typeof v === 'number' && v > 40000 && v < 60000) {
+      const dt = excelDateToJS(v);
+      months.push({ col: c, date: dt, year: dt.getFullYear(), month: dt.getMonth() });
+    }
+  }
+  finData.months = months;
+
+  // P&L row mapping
+  const rowMap = {
+    'Revenue': 'revenue',
+    'Full course': 'rev_fc',
+    'Revision': 'rev_rev',
+    'Video lesson': 'rev_vl',
+    'Marginal cost of sales': 'cogs',
+    'Marginal profit': 'marginal',
+    'Production costs': 'prod_costs',
+    'Gross profit': 'gross',
+    'Admin expenses': 'admin',
+    'Selling costs': 'selling',
+    'EBITDA': 'ebitda',
+    'EBIT': 'ebit',
+    'Tax': 'tax',
+    'Net profit': 'net'
+  };
+
+  const cfMap = {
+    'OPENING BALANCE': 'opening',
+    'OPERATING ACTIVITIES': 'operating',
+    'INVESTING ACTIVITIES': 'investing',
+    'FINANCING ACTIVITIES': 'financing',
+    'CLOSING BALANCE': 'closing'
+  };
+
+  finData.pl = {};
+  finData.cashflow = {};
+  months.forEach(m => {
+    finData.pl[m.col] = {};
+    finData.cashflow[m.col] = {};
+  });
+
+  rows.forEach(row => {
+    const label = (row[3] || '').toString().trim();
+    const plKey = rowMap[label];
+    const cfKey = cfMap[label.toUpperCase()];
+    if (!plKey && !cfKey) return;
+    months.forEach(m => {
+      const val = parseFloat(row[m.col]) || 0;
+      if (plKey) finData.pl[m.col][plKey] = val;
+      if (cfKey) finData.cashflow[m.col][cfKey] = val;
+    });
+  });
+}
+
+function parseCashier(buffer) {
+  const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', raw: true });
+  const ws = wb.Sheets['Cash Data'];
+  if (!ws) return;
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  finData.daily = [];
+  rows.slice(4).forEach(row => {
+    const dv = row[1];
+    if (!dv || typeof dv !== 'number') return;
+    const dt = excelDateToJS(dv);
+    if (isNaN(dt.getTime())) return;
+    const inflow = parseFloat(row[12]) || 0;
+    const outflow = Math.abs(parseFloat(row[13]) || 0);
+    const balance = parseFloat(row[21]) || 0;
+    if (inflow === 0 && outflow === 0) return;
+    finData.daily.push({
+      date: dt,
+      inflow,
+      outflow,
+      balance,
+      activity: (row[20] || '').toString(),
+      category: (row[22] || '').toString()
+    });
+  });
+}
+
+function setLoad(txt) {
+  document.getElementById('loadText').textContent = txt;
+}
+
+async function loadAll() {
+  document.getElementById('loadingDiv').style.display = 'flex';
+  document.getElementById('content').style.display = 'none';
+
+  try {
+    const token = await getToken();
+    const did = await getDriveId(token);
+
+    setLoad('Fin Model yuklanmoqda...');
+    const finBuf = await downloadFile(token, did, 'Fin Model - Fact Only.xlsb');
+    parseFinModel(finBuf);
+
+    setLoad('Cashier yuklanmoqda...');
+    const cashBuf = await downloadFile(token, did, 'Cashier.xlsb');
+    parseCashier(cashBuf);
+
+    // Populate selects
+    populateSelects();
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
+    document.getElementById('loadingDiv').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    renderAll();
+  } catch(e) {
+    document.getElementById('loadText').innerHTML =
+      '<div class="error-box">Xato: ' + e.message + '</div>';
+    console.error(e);
+  }
+}
+
+function populateSelects() {
+  const years = [...new Set(finData.months.map(m => m.year))].sort();
+  const ySel = document.getElementById('yearSel');
+  ySel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  ySel.value = years[years.length - 1];
+
+  const mSel = document.getElementById('monthSel');
+  const monthNames = ['Yanvar','Fevral','Mart','Aprel','May','Iyun',
+                      'Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+  mSel.innerHTML = monthNames.map((n, i) => `<option value="${i}">${n}</option>`).join('');
+
+  // Select latest month
+  const last = finData.months[finData.months.length - 1];
+  if (last) mSel.value = last.month;
+}
+
+function getSelectedMonth() {
+  const year = parseInt(document.getElementById('yearSel').value);
+  const month = parseInt(document.getElementById('monthSel').value);
+  return finData.months.find(m => m.year === year && m.month === month);
+}
+
+function fmt(v) {
+  if (v === null || v === undefined) return '—';
+  const m = v / 1e6;
+  return (m >= 0 ? '' : '') + m.toFixed(1) + 'M';
+}
+
+function fmtColor(v) {
+  if (v === null || v === undefined) return '<span style="color:#666">—</span>';
+  const m = v / 1e6;
+  const c = v >= 0 ? '#2EC47E' : '#E83A3A';
+  return `<span style="color:${c};font-weight:600">${m.toFixed(1)}M</span>`;
+}
+
+function renderAll() {
+  const sel = getSelectedMonth();
+  if (!sel) return;
+  const pl = finData.pl[sel.col] || {};
+  const cf = finData.cashflow[sel.col] || {};
+
+  // KPI Cards
+  const kpis = [
+    { label: 'Revenue', key: 'revenue', color: '#88AAFF' },
+    { label: 'Marginal Profit', key: 'marginal', color: '#2EC47E' },
+    { label: 'Gross Profit', key: 'gross', color: '#2EC47E' },
+    { label: 'Net Profit', key: 'net', color: pl.net >= 0 ? '#2EC47E' : '#E83A3A' }
+  ];
+  document.getElementById('kpiCards').innerHTML = kpis.map(k => {
+    const v = pl[k.key];
+    const pct = pl.revenue ? Math.round((v / pl.revenue) * 100) : 0;
+    return `<div class="card" style="border-color:${k.color}33">
+      <div class="card-title">${k.label}</div>
+      <div class="card-val" style="color:${k.color}">${fmt(v)} so'm</div>
+      <div class="card-sub">${k.key !== 'revenue' ? 'Revenue dan ' + pct + '%' : 'Jami tushum'}</div>
+    </div>`;
+  }).join('');
+
+  // P&L Table - all months
+  const plRows = [
+    { key: 'revenue', label: 'Revenue', bold: true, class: '' },
+    { key: 'rev_fc', label: 'Full course', class: 'indent' },
+    { key: 'rev_rev', label: 'Revision', class: 'indent' },
+    { key: 'rev_vl', label: 'Video lesson', class: 'indent' },
+    { key: 'cogs', label: "Tutor's salary (COGS)", class: '' },
+    { key: 'marginal', label: 'Marginal Profit', bold: true, class: '' },
+    { key: 'prod_costs', label: 'Production costs', class: '' },
+    { key: 'gross', label: 'Gross Profit', bold: true, highlight: true },
+    { key: 'admin', label: 'Admin expenses', class: '' },
+    { key: 'selling', label: 'Selling costs', class: '' },
+    { key: 'ebitda', label: 'EBITDA', bold: true, class: '' },
+    { key: 'ebit', label: 'EBIT', bold: true, class: '' },
+    { key: 'tax', label: 'Tax', class: '' },
+    { key: 'net', label: 'Net Profit', bold: true, highlight: true }
+  ];
+
+  const monthNames = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  const visMonths = finData.months.filter(m =>
+    m.year === parseInt(document.getElementById('yearSel').value)
+  );
+
+  let tbl = `<table><thead><tr><th style="min-width:160px">Ko'rsatkich</th>`;
+  visMonths.forEach(m => {
+    tbl += `<th style="text-align:right">${monthNames[m.month]}</th>`;
+  });
+  tbl += '</tr></thead><tbody>';
+
+  plRows.forEach(r => {
+    const cls = r.highlight ? 'highlight-row' : '';
+    tbl += `<tr class="${cls}">`;
+    tbl += `<td class="${r.class || ''}" style="${r.bold ? 'font-weight:700' : ''}">${r.label}</td>`;
+    visMonths.forEach(m => {
+      const v = (finData.pl[m.col] || {})[r.key];
+      tbl += `<td style="text-align:right">${fmtColor(v)}</td>`;
+    });
+    tbl += '</tr>';
+  });
+  tbl += '</tbody></table>';
+  document.getElementById('plTable').innerHTML = tbl;
+
+  // Revenue breakdown
+  const rev = pl.revenue || 1;
+  const revItems = [
+    { label: 'Full course', key: 'rev_fc', color: '#2EC47E' },
+    { label: 'Revision', key: 'rev_rev', color: '#F5A623' },
+    { label: 'Video lesson', key: 'rev_vl', color: '#88AAFF' }
+  ];
+  document.getElementById('revBreakdown').innerHTML = revItems.map(r => {
+    const v = pl[r.key] || 0;
+    const pct = Math.max(0, Math.round(v / rev * 100));
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px">${r.label}</span>
+        <span style="font-size:11px;font-weight:600;color:${r.color}">${fmt(v)} so'm (${pct}%)</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${r.color}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Cash Flow
+  const cfItems = [
+    { key: 'opening', label: 'Opening Balance' },
+    { key: 'operating', label: 'Operating Activities' },
+    { key: 'investing', label: 'Investing Activities' },
+    { key: 'financing', label: 'Financing Activities' },
+    { key: 'closing', label: 'Closing Balance', bold: true }
+  ];
+  document.getElementById('cashFlow').innerHTML = cfItems.map(r => {
+    const v = cf[r.key];
+    const c = !v ? '#666' : v >= 0 ? '#2EC47E' : '#E83A3A';
+    return `<div class="cf-row">
+      <span class="cf-label" style="${r.bold ? 'font-weight:700;color:#E0E0E0' : ''}">${r.label}</span>
+      <span class="cf-val" style="color:${c}">${v !== undefined ? fmt(v) + " so'm" : '—'}</span>
+    </div>`;
+  }).join('');
+
+  // Daily balance
+  const year = parseInt(document.getElementById('yearSel').value);
+  const month = parseInt(document.getElementById('monthSel').value);
+  const daily = finData.daily.filter(d =>
+    d.date.getFullYear() === year && d.date.getMonth() === month
+  );
+
+  const tbody = document.getElementById('dailyBody');
+  if (!daily.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;padding:20px">Bu oy uchun ma\'lumot topilmadi</td></tr>';
+    return;
+  }
+  tbody.innerHTML = daily.map((d, i) => {
+    const bc = d.balance >= 0 ? '#2EC47E' : '#E83A3A';
+    return `<tr>
+      <td>${d.date.toLocaleDateString('ru')}</td>
+      <td class="pos">${d.inflow > 0 ? '+' + (d.inflow/1000).toFixed(0) + 'K' : '—'}</td>
+      <td class="neg">${d.outflow > 0 ? '-' + (d.outflow/1000).toFixed(0) + 'K' : '—'}</td>
+      <td style="font-weight:600;color:${bc}">${(d.balance/1e6).toFixed(2)}M</td>
+      <td style="color:#666;font-size:10px">${d.activity}</td>
+      <td style="color:#666;font-size:10px">${d.category}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Check if already logged in
+(async function() {
+  await msalInstance.initialize();
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('mainView').style.display = 'block';
+    await loadAll();
+  }
+})();
+</script>
+</body>
+</html>
