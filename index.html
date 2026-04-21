@@ -353,7 +353,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <button class="fyb active" id="dy-all" onclick="setDY('all',this)">Barchasi</button>
     <button class="fyb" id="dy-2024" onclick="setDY('2024',this)">2024</button>
     <button class="fyb" id="dy-2025" onclick="setDY('2025',this)">2025</button>
-    <button class="fyb" id="dy-2026" onclick="setDY('2026',this)">2026</button>
     <div class="fsep"></div>
     <span class="flabel">Davr:</span>
     <button class="fyb active" id="dd-all" onclick="setDD('all',this)">Barchasi</button>
@@ -395,14 +394,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 <!-- SALES -->
 <div id="page-sales" class="page">
   <div class="sh"><div class="st">Sales bo'limi tahlili</div><div class="sl"></div></div>
-  <div class="g3" style="margin-bottom:8px;">
-    <div style="font-size:11px;color:var(--blue);padding:6px 10px;background:var(--bdim);border-radius:6px;">📅 2026-yil ma'lumotlari (Yanvar–Aprel)</div>
-  </div>
-  <div class="g4">
-    <div class="kpi bl"><div class="kl">Jami lidlar</div><div class="kv" id="s-jami">-</div><div class="ks">2026-yil</div></div>
-    <div class="kpi gr"><div class="kl">Ro'yxatga olindi</div><div class="kv" id="s-muv">-</div><div class="ks">lid → o'quvchi</div></div>
-    <div class="kpi am"><div class="kl">Konversiya</div><div class="kv" id="s-konv">-</div><div class="ks">lid → o'quvchi %</div></div>
-    <div class="kpi re"><div class="kl">Eng yuqori konv.</div><div class="kv" id="s-top-manba">-</div><div class="ks">manba</div></div>
+  <div class="g3">
+    <div class="kpi bl"><div class="kl">Jami lidlar</div><div class="kv" id="s-jami">-</div><div class="ks">barcha vaqt</div></div>
+    <div class="kpi gr"><div class="kl">Muvaffaqiyatli</div><div class="kv" id="s-muv">-</div><div class="ks">o'quvchiga aylangan</div></div>
+    <div class="kpi am"><div class="kl">Konversiya</div><div class="kv" id="s-konv">-</div><div class="ks">lid → o'quvchi</div></div>
   </div>
   <div class="g2">
     <div class="card"><div class="ct">Oyma-oy lidlar va konversiya</div><div class="cs">-</div><div style="position:relative;height:220px;"><canvas id="salesMonthlyChart"></canvas></div></div>
@@ -421,14 +416,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 <!-- MARKETING -->
 <div id="page-marketing" class="page">
   <div class="sh"><div class="st">Marketing bo'limi tahlili</div><div class="sl"></div></div>
-  <div class="g3" style="margin-bottom:8px;">
-    <div style="font-size:11px;color:var(--blue);padding:6px 10px;background:var(--bdim);border-radius:6px;">📅 2026-yil ma'lumotlari (Yanvar–Aprel) · Plan vs Fakt</div>
-  </div>
-  <div class="g4">
-    <div class="kpi re"><div class="kl">Fakt xarajat</div><div class="kv" id="m-xarajat">-</div><div class="ks" id="m-xarajat-plan">Plan: -</div></div>
-    <div class="kpi bl"><div class="kl">Fakt lidlar</div><div class="kv" id="m-leads">-</div><div class="ks" id="m-leads-plan">Plan: -</div></div>
-    <div class="kpi am"><div class="kl">Haqiqiy CPL</div><div class="kv" id="m-cpl">-</div><div class="ks">bir lid narxi (USD)</div></div>
-    <div class="kpi gr"><div class="kl">Xarajat tejaldi</div><div class="kv" id="m-tejaldi">-</div><div class="ks">plan vs fakt</div></div>
+  <div class="g3">
+    <div class="kpi re"><div class="kl">Jami xarajat</div><div class="kv" id="m-xarajat">-</div><div class="ks">USD</div></div>
+    <div class="kpi bl"><div class="kl">Jami lidlar</div><div class="kv" id="m-leads">-</div><div class="ks">marketing orqali</div></div>
+    <div class="kpi am"><div class="kl">O'rtacha CPL</div><div class="kv" id="m-cpl">-</div><div class="ks">bir lid narxi (USD)</div></div>
   </div>
   <div class="g2">
     <div class="card"><div class="ct">Oylik xarajat va lidlar</div><div class="cs">-</div><div style="position:relative;height:220px;"><canvas id="mktMonthlyChart"></canvas></div></div>
@@ -439,17 +430,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <table><thead><tr><th style="width:22%">Manba</th><th style="text-align:center;width:20%">Xarajat $</th><th style="text-align:center;width:15%">Lidlar</th><th style="text-align:center;width:15%">CPL $</th></tr></thead><tbody id="mktManbaBody"></tbody></table>
     </div>
     <div class="card"><div class="ct">Obunachi dinamikasi</div><div class="cs">-</div><div style="position:relative;height:220px;"><canvas id="mktSubsChart"></canvas></div></div>
-  </div>
-  <div class="sh" style="margin-top:8px;"><div class="st">Moliyaviy natijalar (2026)</div><div class="sl"></div></div>
-  <div class="g3">
-    <div class="kpi gr"><div class="kl">Jami daromad</div><div class="kv" id="fin-revenue">-</div><div class="ks">2026 yan-mar</div></div>
-    <div class="kpi bl"><div class="kl">Marginal foyda</div><div class="kv" id="fin-margin">-</div><div class="ks" id="fin-margin-pct">-</div></div>
-    <div class="kpi am"><div class="kl">Gross foyda</div><div class="kv" id="fin-gross">-</div><div class="ks" id="fin-gross-pct">-</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Oylik daromad va foyda (2026)</div>
-    <div class="cs">Revenue, Marginal profit, Gross profit</div>
-    <div style="position:relative;height:240px;"><canvas id="finRevenueChart"></canvas></div>
   </div>
 </div>
 
@@ -565,14 +545,14 @@ async function loadData() {
     // Get site ID
     setLoadingText("SharePoint site topilmoqda...");
     const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` }, cache: 'no-store'
     });
     const site = await siteRes.json();
     const siteId = site.id;
 
     // Get drive
     const driveRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drive`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` }, cache: 'no-store'
     });
     const drive = await driveRes.json();
     const driveId = drive.id;
@@ -615,15 +595,15 @@ async function loadData() {
 async function downloadAndParseExcel(token, driveId, fileName) {
   const searchRes = await fetch(
     `https://graph.microsoft.com/v1.0/drives/${driveId}/root/search(q='${fileName}')`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
   );
   const search = await searchRes.json();
   const items = (search.value || []).filter(i => i.name && i.name.endsWith('.xlsx'));
   if (!items.length) throw new Error(`${fileName} topilmadi`);
   
   const fileRes = await fetch(
-    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${items[0].id}/content`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${items[0].id}/content?_cb=${Date.now()}`,
+    { headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }, cache: 'no-store' }
   );
   const buffer = await fileRes.arrayBuffer();
   return buffer;
@@ -889,42 +869,31 @@ const ANALYTICS = {
   },
 
   calcOperatorStats(data) {
-    // "Boshqa guruhga o'tdi" ni avval chiqarib tashlaymiz
-    const cleanData = data.filter(r => !r.boshqaGuruh);
     const ops = {};
-    cleanData.forEach(r => {
-      const op = (r.Sotuv_mng || '').toString().trim();
-      if (!op) return;
+    data.forEach(r => {
+      const op = r.Sotuv_mng || 'Nomalum';
       if (!ops[op]) ops[op] = [];
       ops[op].push(r);
     });
     return Object.entries(ops)
-      .filter(([k]) => k && k.length > 0)
+      .filter(([k]) => k && k !== 'Nomalum' && k !== '')
       .map(([op, rows]) => {
-        // Umumiy stats (boshqaGuruh allaqachon chiqarilgan)
-        const jami = rows.length;
-        const stopped = rows.filter(r => r.Final_status === 'Stopped').length;
-        const passed = rows.filter(r => r.Final_status === 'Passed').length;
-        const failed = rows.filter(r => r.Final_status === 'Failed').length;
-        const no_exam = rows.filter(r => r.Final_status === 'No Exam').length;
-        const in_progress = rows.filter(r => r.Final_status === 'In Progress').length;
-        const dropout_pct = jami > 0 ? Math.round(stopped/jami*1000)/10 : 0;
+        const s = this.calcStats(rows);
         // Yillar kesimida
         const by_year = {};
         [2024, 2025, 2026].forEach(yr => {
           const yRows = rows.filter(r => r.Year === yr);
-          if (yRows.length > 0) {
-            const yStopped = yRows.filter(r => r.Final_status === 'Stopped').length;
-            by_year[yr] = {
-              jami: yRows.length,
-              stopped: yStopped,
-              passed: yRows.filter(r => r.Final_status === 'Passed').length,
-              no_exam: yRows.filter(r => r.Final_status === 'No Exam').length,
-              dropout_pct: Math.round(yStopped/yRows.length*1000)/10
-            };
-          }
+          if (yRows.length > 0) by_year[yr] = this.calcStats(yRows);
         });
-        return { operator: op, jami, stopped, passed, failed, no_exam, in_progress, dropout_pct, by_year };
+        return {
+          operator: op,
+          jami: s.jami,
+          stopped: s.stopped,
+          passed: s.passed,
+          no_exam: s.no_exam,
+          dropout_pct: s.dropout_rate,
+          by_year
+        };
       })
       .sort((a, b) => b.jami - a.jami);
   },
@@ -1124,7 +1093,7 @@ const ANALYTICS = {
 
 // Cached fallback snapshot
 const CACHED_SNAP = {"summary":{"sana":"2026-04-14","jami":4402,"in_progress":335,"yakunlagan":2375,"stopped":1692,"passed":443,"failed":141,"no_exam":1791,"retention":61.6,"pass_rate":75.9,"exam_entry":24.6,"retention_pct":61.6,"pass_rate_pct":75.9,"exam_entry_pct":24.6,"converted":607},"product_types":{"Full course":{"jami":4237,"in_progress":325,"yakunlagan":2232,"stopped":1680,"passed":429,"failed":132,"no_exam":1671,"retention":60.3,"pass_rate":76.5,"exam_entry":25.1},"Revision":{"jami":47,"in_progress":1,"yakunlagan":42,"stopped":4,"passed":10,"failed":8,"no_exam":24,"retention":91.5,"pass_rate":55.6,"exam_entry":42.9},"Video Lesson":{"jami":107,"in_progress":9,"yakunlagan":97,"stopped":1,"passed":4,"failed":1,"no_exam":92,"retention":99.1,"pass_rate":80.0,"exam_entry":5.2}},"yearly":{"2024":{"jami":1749,"in_progress":0,"yakunlagan":1093,"stopped":656,"passed":199,"failed":44,"no_exam":850,"retention":62.5,"pass_rate":81.9,"exam_entry":22.2,"yil":2024},"2025":{"jami":2036,"in_progress":0,"yakunlagan":1268,"stopped":768,"passed":244,"failed":97,"no_exam":927,"retention":62.3,"pass_rate":71.6,"exam_entry":26.9,"yil":2025},"2026":{"jami":617,"in_progress":335,"yakunlagan":14,"stopped":268,"passed":0,"failed":0,"no_exam":14,"retention":56.6,"pass_rate":0.0,"exam_entry":0.0,"yil":2026}},"yearly_by_type":{"Full course":{"2024":{"jami":1733,"in_progress":0,"yakunlagan":1077,"stopped":656,"passed":198,"failed":44,"no_exam":835,"retention":62.1,"pass_rate":81.8,"exam_entry":22.5},"2025":{"jami":1899,"in_progress":0,"yakunlagan":1143,"stopped":756,"passed":231,"failed":88,"no_exam":824,"retention":60.2,"pass_rate":72.4,"exam_entry":27.9},"2026":{"jami":605,"in_progress":325,"yakunlagan":12,"stopped":268,"passed":0,"failed":0,"no_exam":12,"retention":55.7,"pass_rate":0.0,"exam_entry":0.0}},"Revision":{"2024":{"jami":2,"in_progress":0,"yakunlagan":2,"stopped":0,"passed":1,"failed":0,"no_exam":1,"retention":100.0,"pass_rate":100.0,"exam_entry":50.0},"2025":{"jami":44,"in_progress":0,"yakunlagan":40,"stopped":4,"passed":9,"failed":8,"no_exam":23,"retention":90.9,"pass_rate":52.9,"exam_entry":42.5},"2026":{"jami":1,"in_progress":1,"yakunlagan":0,"stopped":0,"passed":0,"failed":0,"no_exam":0,"retention":100.0,"pass_rate":0.0,"exam_entry":0.0}},"Video Lesson":{"2024":{"jami":14,"in_progress":0,"yakunlagan":14,"stopped":0,"passed":0,"failed":0,"no_exam":14,"retention":100.0,"pass_rate":0.0,"exam_entry":0.0},"2025":{"jami":82,"in_progress":0,"yakunlagan":81,"stopped":1,"passed":4,"failed":1,"no_exam":76,"retention":98.8,"pass_rate":80.0,"exam_entry":6.2},"2026":{"jami":11,"in_progress":9,"yakunlagan":2,"stopped":0,"passed":0,"failed":0,"no_exam":2,"retention":100.0,"pass_rate":0.0,"exam_entry":0.0}}},"teachers":[{"Oqituvchi":"HIMMATOV LAZIZBEK","jami":43,"stopped":9,"passed":3,"failed":0,"no_exam":13,"in_progress":18,"yakunlagan":16,"retention":79.1,"pass_rate":100.0,"exam_entry":18.8,"by_year":{"2025":{"jami":25,"stopped":9,"passed":3,"failed":0,"no_exam":13,"in_progress":0,"yakunlagan":16,"retention":64.0,"pass_rate":100.0,"exam_entry":18.8},"2026":{"jami":18,"stopped":0,"passed":0,"failed":0,"no_exam":0,"in_progress":18,"yakunlagan":0,"retention":100.0,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":43,"stopped":9,"passed":3,"failed":0,"no_exam":13,"in_progress":18,"yakunlagan":16,"retention":79.1,"pass_rate":100.0,"exam_entry":18.8}}},{"Oqituvchi":"RAHMONOV MIRAFZAL","jami":613,"stopped":159,"passed":79,"failed":32,"no_exam":293,"in_progress":50,"yakunlagan":404,"retention":74.1,"pass_rate":71.2,"exam_entry":27.5,"by_year":{"2024":{"jami":265,"stopped":70,"passed":22,"failed":11,"no_exam":162,"in_progress":0,"yakunlagan":195,"retention":73.6,"pass_rate":66.7,"exam_entry":16.9},"2025":{"jami":279,"stopped":71,"passed":57,"failed":21,"no_exam":130,"in_progress":0,"yakunlagan":208,"retention":74.6,"pass_rate":73.1,"exam_entry":37.5},"2026":{"jami":69,"stopped":18,"passed":0,"failed":0,"no_exam":1,"in_progress":50,"yakunlagan":1,"retention":73.9,"pass_rate":0,"exam_entry":0.0}},"by_subject":{"FM":{"jami":219,"stopped":58,"passed":39,"failed":16,"no_exam":92,"in_progress":14,"yakunlagan":147,"retention":73.5,"pass_rate":70.9,"exam_entry":37.4},"PM":{"jami":184,"stopped":33,"passed":33,"failed":16,"no_exam":89,"in_progress":13,"yakunlagan":138,"retention":82.1,"pass_rate":67.3,"exam_entry":35.5},"MA":{"jami":197,"stopped":66,"passed":7,"failed":0,"no_exam":110,"in_progress":14,"yakunlagan":117,"retention":66.5,"pass_rate":100.0,"exam_entry":6.0},"Financial":{"jami":10,"stopped":2,"passed":0,"failed":0,"no_exam":0,"in_progress":8,"yakunlagan":0,"retention":80.0,"pass_rate":0,"exam_entry":0}}},{"Oqituvchi":"RIZAYEV DOSTON","jami":35,"stopped":10,"passed":1,"failed":6,"no_exam":18,"in_progress":0,"yakunlagan":25,"retention":71.4,"pass_rate":14.3,"exam_entry":28.0,"by_year":{"2024":{"jami":9,"stopped":0,"passed":0,"failed":0,"no_exam":9,"in_progress":0,"yakunlagan":9,"retention":100.0,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":26,"stopped":10,"passed":1,"failed":6,"no_exam":9,"in_progress":0,"yakunlagan":16,"retention":61.5,"pass_rate":14.3,"exam_entry":43.8}},"by_subject":{"MSFO":{"jami":25,"stopped":10,"passed":1,"failed":6,"no_exam":8,"in_progress":0,"yakunlagan":15,"retention":60.0,"pass_rate":14.3,"exam_entry":46.7},"PreMSFO":{"jami":9,"stopped":0,"passed":0,"failed":0,"no_exam":9,"in_progress":0,"yakunlagan":9,"retention":100.0,"pass_rate":0,"exam_entry":0.0}}},{"Oqituvchi":"JO'RAQULOV SAMANDAR","jami":99,"stopped":31,"passed":9,"failed":8,"no_exam":50,"in_progress":1,"yakunlagan":67,"retention":68.7,"pass_rate":52.9,"exam_entry":25.4,"by_year":{"2024":{"jami":26,"stopped":6,"passed":0,"failed":0,"no_exam":20,"in_progress":0,"yakunlagan":20,"retention":76.9,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":72,"stopped":25,"passed":9,"failed":8,"no_exam":30,"in_progress":0,"yakunlagan":47,"retention":65.3,"pass_rate":52.9,"exam_entry":36.2}},"by_subject":{"TX":{"jami":73,"stopped":17,"passed":7,"failed":8,"no_exam":40,"in_progress":1,"yakunlagan":55,"retention":76.7,"pass_rate":46.7,"exam_entry":27.3},"FA":{"jami":26,"stopped":14,"passed":2,"failed":0,"no_exam":10,"in_progress":0,"yakunlagan":12,"retention":46.2,"pass_rate":100.0,"exam_entry":16.7}}},{"Oqituvchi":"MO'MINOV JAVOHIR","jami":737,"stopped":259,"passed":120,"failed":52,"no_exam":258,"in_progress":48,"yakunlagan":430,"retention":64.9,"pass_rate":69.8,"exam_entry":40.0,"by_year":{"2024":{"jami":313,"stopped":105,"passed":74,"failed":18,"no_exam":116,"in_progress":0,"yakunlagan":208,"retention":66.5,"pass_rate":80.4,"exam_entry":44.2},"2025":{"jami":323,"stopped":114,"passed":46,"failed":34,"no_exam":129,"in_progress":0,"yakunlagan":209,"retention":64.7,"pass_rate":57.5,"exam_entry":38.3},"2026":{"jami":101,"stopped":40,"passed":0,"failed":0,"no_exam":13,"in_progress":48,"yakunlagan":13,"retention":60.4,"pass_rate":0,"exam_entry":0.0}},"by_subject":{"FA":{"jami":217,"stopped":93,"passed":19,"failed":2,"no_exam":103,"in_progress":0,"yakunlagan":124,"retention":57.1,"pass_rate":90.5,"exam_entry":16.9},"FR":{"jami":263,"stopped":89,"passed":53,"failed":29,"no_exam":75,"in_progress":17,"yakunlagan":157,"retention":66.2,"pass_rate":64.6,"exam_entry":52.2},"AA":{"jami":164,"stopped":46,"passed":37,"failed":13,"no_exam":56,"in_progress":12,"yakunlagan":106,"retention":72.0,"pass_rate":74.0,"exam_entry":47.2},"DipIFR":{"jami":73,"stopped":26,"passed":8,"failed":7,"no_exam":15,"in_progress":17,"yakunlagan":30,"retention":64.4,"pass_rate":53.3,"exam_entry":50.0},"SBR":{"jami":20,"stopped":5,"passed":3,"failed":1,"no_exam":9,"in_progress":2,"yakunlagan":13,"retention":75.0,"pass_rate":75.0,"exam_entry":30.8}}},{"Oqituvchi":"AXMEDOV SHAXRIYOR","jami":666,"stopped":244,"passed":65,"failed":13,"no_exam":344,"in_progress":0,"yakunlagan":422,"retention":63.4,"pass_rate":83.3,"exam_entry":18.5,"by_year":{"2024":{"jami":451,"stopped":174,"passed":30,"failed":6,"no_exam":241,"in_progress":0,"yakunlagan":277,"retention":61.4,"pass_rate":83.3,"exam_entry":13.0},"2025":{"jami":215,"stopped":70,"passed":35,"failed":7,"no_exam":103,"in_progress":0,"yakunlagan":145,"retention":67.4,"pass_rate":83.3,"exam_entry":29.0}},"by_subject":{"FA":{"jami":444,"stopped":184,"passed":26,"failed":4,"no_exam":230,"in_progress":0,"yakunlagan":260,"retention":58.6,"pass_rate":86.7,"exam_entry":11.5},"BT":{"jami":13,"stopped":0,"passed":0,"failed":0,"no_exam":13,"in_progress":0,"yakunlagan":13,"retention":100.0,"pass_rate":0,"exam_entry":0.0},"FR":{"jami":209,"stopped":60,"passed":39,"failed":9,"no_exam":101,"in_progress":0,"yakunlagan":149,"retention":71.3,"pass_rate":81.2,"exam_entry":32.2}}},{"Oqituvchi":"BARATOV BOTIRJON","jami":252,"stopped":99,"passed":32,"failed":1,"no_exam":104,"in_progress":16,"yakunlagan":137,"retention":60.7,"pass_rate":97.0,"exam_entry":24.1,"by_year":{"2024":{"jami":57,"stopped":22,"passed":17,"failed":0,"no_exam":18,"in_progress":0,"yakunlagan":35,"retention":61.4,"pass_rate":100.0,"exam_entry":48.6},"2025":{"jami":173,"stopped":71,"passed":15,"failed":1,"no_exam":86,"in_progress":0,"yakunlagan":102,"retention":59.0,"pass_rate":93.8,"exam_entry":15.7},"2026":{"jami":22,"stopped":6,"passed":0,"failed":0,"no_exam":0,"in_progress":16,"yakunlagan":0,"retention":72.7,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":217,"stopped":85,"passed":31,"failed":0,"no_exam":85,"in_progress":16,"yakunlagan":116,"retention":60.8,"pass_rate":100.0,"exam_entry":26.7},"FR":{"jami":35,"stopped":14,"passed":1,"failed":1,"no_exam":19,"in_progress":0,"yakunlagan":21,"retention":60.0,"pass_rate":50.0,"exam_entry":9.5}}},{"Oqituvchi":"MUHAMMADQULOV FIRDAVS","jami":225,"stopped":91,"passed":7,"failed":6,"no_exam":105,"in_progress":16,"yakunlagan":118,"retention":59.6,"pass_rate":53.8,"exam_entry":11.0,"by_year":{"2024":{"jami":58,"stopped":13,"passed":0,"failed":0,"no_exam":45,"in_progress":0,"yakunlagan":45,"retention":77.6,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":122,"stopped":49,"passed":7,"failed":6,"no_exam":60,"in_progress":0,"yakunlagan":73,"retention":59.8,"pass_rate":53.8,"exam_entry":17.8},"2026":{"jami":45,"stopped":29,"passed":0,"failed":0,"no_exam":0,"in_progress":16,"yakunlagan":0,"retention":35.6,"pass_rate":0,"exam_entry":0}},"by_subject":{"PreDipIFR":{"jami":67,"stopped":30,"passed":0,"failed":0,"no_exam":37,"in_progress":0,"yakunlagan":37,"retention":55.2,"pass_rate":0,"exam_entry":0.0},"DipIFR":{"jami":143,"stopped":54,"passed":7,"failed":6,"no_exam":60,"in_progress":16,"yakunlagan":73,"retention":62.2,"pass_rate":53.8,"exam_entry":17.8},"MSFO":{"jami":14,"stopped":7,"passed":0,"failed":0,"no_exam":7,"in_progress":0,"yakunlagan":7,"retention":50.0,"pass_rate":0,"exam_entry":0.0}}},{"Oqituvchi":"KARIMOV ISLOM","jami":362,"stopped":147,"passed":42,"failed":14,"no_exam":129,"in_progress":30,"yakunlagan":185,"retention":59.4,"pass_rate":75.0,"exam_entry":30.3,"by_year":{"2024":{"jami":132,"stopped":64,"passed":16,"failed":5,"no_exam":47,"in_progress":0,"yakunlagan":68,"retention":51.5,"pass_rate":76.2,"exam_entry":30.9},"2025":{"jami":184,"stopped":67,"passed":26,"failed":9,"no_exam":82,"in_progress":0,"yakunlagan":117,"retention":63.6,"pass_rate":74.3,"exam_entry":29.9},"2026":{"jami":46,"stopped":16,"passed":0,"failed":0,"no_exam":0,"in_progress":30,"yakunlagan":0,"retention":65.2,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":220,"stopped":93,"passed":20,"failed":1,"no_exam":91,"in_progress":15,"yakunlagan":112,"retention":57.7,"pass_rate":95.2,"exam_entry":18.8},"FR":{"jami":142,"stopped":54,"passed":22,"failed":13,"no_exam":38,"in_progress":15,"yakunlagan":73,"retention":62.0,"pass_rate":62.9,"exam_entry":47.9}}},{"Oqituvchi":"RAHMATOV UMARBEK","jami":254,"stopped":106,"passed":16,"failed":0,"no_exam":85,"in_progress":47,"yakunlagan":101,"retention":58.3,"pass_rate":100.0,"exam_entry":15.8,"by_year":{"2025":{"jami":190,"stopped":89,"passed":16,"failed":0,"no_exam":85,"in_progress":0,"yakunlagan":101,"retention":53.2,"pass_rate":100.0,"exam_entry":15.8},"2026":{"jami":64,"stopped":17,"passed":0,"failed":0,"no_exam":0,"in_progress":47,"yakunlagan":0,"retention":73.4,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":245,"stopped":105,"passed":16,"failed":0,"no_exam":85,"in_progress":39,"yakunlagan":101,"retention":57.1,"pass_rate":100.0,"exam_entry":15.8},"FR":{"jami":9,"stopped":1,"passed":0,"failed":0,"no_exam":0,"in_progress":8,"yakunlagan":0,"retention":88.9,"pass_rate":0,"exam_entry":0}}},{"Oqituvchi":"FOZILOV MUHAMMAD UMAR","jami":52,"stopped":22,"passed":8,"failed":0,"no_exam":22,"in_progress":0,"yakunlagan":30,"retention":57.7,"pass_rate":100.0,"exam_entry":26.7,"by_year":{"2024":{"jami":29,"stopped":12,"passed":4,"failed":0,"no_exam":13,"in_progress":0,"yakunlagan":17,"retention":58.6,"pass_rate":100.0,"exam_entry":23.5},"2025":{"jami":23,"stopped":10,"passed":4,"failed":0,"no_exam":9,"in_progress":0,"yakunlagan":13,"retention":56.5,"pass_rate":100.0,"exam_entry":30.8}},"by_subject":{"FA":{"jami":52,"stopped":22,"passed":8,"failed":0,"no_exam":22,"in_progress":0,"yakunlagan":30,"retention":57.7,"pass_rate":100.0,"exam_entry":26.7}}},{"Oqituvchi":"AXMEDOV VALIJON","jami":207,"stopped":94,"passed":11,"failed":1,"no_exam":76,"in_progress":25,"yakunlagan":88,"retention":54.6,"pass_rate":91.7,"exam_entry":13.6,"by_year":{"2024":{"jami":25,"stopped":9,"passed":4,"failed":0,"no_exam":12,"in_progress":0,"yakunlagan":16,"retention":64.0,"pass_rate":100.0,"exam_entry":25.0},"2025":{"jami":118,"stopped":46,"passed":7,"failed":1,"no_exam":64,"in_progress":0,"yakunlagan":72,"retention":61.0,"pass_rate":87.5,"exam_entry":11.1},"2026":{"jami":64,"stopped":39,"passed":0,"failed":0,"no_exam":0,"in_progress":25,"yakunlagan":0,"retention":39.1,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":197,"stopped":93,"passed":11,"failed":1,"no_exam":67,"in_progress":25,"yakunlagan":79,"retention":52.8,"pass_rate":91.7,"exam_entry":15.2},"FR":{"jami":10,"stopped":1,"passed":0,"failed":0,"no_exam":9,"in_progress":0,"yakunlagan":9,"retention":90.0,"pass_rate":0,"exam_entry":0.0}}},{"Oqituvchi":"SHOYMARDONOV ASILBEK","jami":425,"stopped":195,"passed":36,"failed":6,"no_exam":164,"in_progress":24,"yakunlagan":206,"retention":54.1,"pass_rate":85.7,"exam_entry":20.4,"by_year":{"2024":{"jami":216,"stopped":100,"passed":25,"failed":3,"no_exam":88,"in_progress":0,"yakunlagan":116,"retention":53.7,"pass_rate":89.3,"exam_entry":24.1},"2025":{"jami":172,"stopped":82,"passed":11,"failed":3,"no_exam":76,"in_progress":0,"yakunlagan":90,"retention":52.3,"pass_rate":78.6,"exam_entry":15.6},"2026":{"jami":37,"stopped":13,"passed":0,"failed":0,"no_exam":0,"in_progress":24,"yakunlagan":0,"retention":64.9,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":267,"stopped":130,"passed":22,"failed":0,"no_exam":101,"in_progress":14,"yakunlagan":123,"retention":51.3,"pass_rate":100.0,"exam_entry":17.9},"FR":{"jami":158,"stopped":65,"passed":14,"failed":6,"no_exam":63,"in_progress":10,"yakunlagan":83,"retention":58.9,"pass_rate":70.0,"exam_entry":24.1}}},{"Oqituvchi":"HAKIMOVA ZEBO","jami":135,"stopped":63,"passed":6,"failed":0,"no_exam":30,"in_progress":36,"yakunlagan":36,"retention":53.3,"pass_rate":100.0,"exam_entry":16.7,"by_year":{"2025":{"jami":62,"stopped":26,"passed":6,"failed":0,"no_exam":30,"in_progress":0,"yakunlagan":36,"retention":58.1,"pass_rate":100.0,"exam_entry":16.7},"2026":{"jami":73,"stopped":37,"passed":0,"failed":0,"no_exam":0,"in_progress":36,"yakunlagan":0,"retention":49.3,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":135,"stopped":63,"passed":6,"failed":0,"no_exam":30,"in_progress":36,"yakunlagan":36,"retention":53.3,"pass_rate":100.0,"exam_entry":16.7}}},{"Oqituvchi":"GAFURJANOV AZIZBEK","jami":168,"stopped":81,"passed":7,"failed":1,"no_exam":79,"in_progress":0,"yakunlagan":87,"retention":51.8,"pass_rate":87.5,"exam_entry":9.2,"by_year":{"2024":{"jami":168,"stopped":81,"passed":7,"failed":1,"no_exam":79,"in_progress":0,"yakunlagan":87,"retention":51.8,"pass_rate":87.5,"exam_entry":9.2}},"by_subject":{"FA":{"jami":110,"stopped":59,"passed":4,"failed":0,"no_exam":47,"in_progress":0,"yakunlagan":51,"retention":46.4,"pass_rate":100.0,"exam_entry":7.8},"FR":{"jami":52,"stopped":21,"passed":0,"failed":0,"no_exam":31,"in_progress":0,"yakunlagan":31,"retention":59.6,"pass_rate":0,"exam_entry":0.0},"MSFO":{"jami":6,"stopped":1,"passed":3,"failed":1,"no_exam":1,"in_progress":0,"yakunlagan":5,"retention":83.3,"pass_rate":75.0,"exam_entry":80.0}}},{"Oqituvchi":"ALIJONOV OYBEK","jami":48,"stopped":24,"passed":1,"failed":1,"no_exam":9,"in_progress":13,"yakunlagan":11,"retention":50.0,"pass_rate":50.0,"exam_entry":18.2,"by_year":{"2025":{"jami":25,"stopped":14,"passed":1,"failed":1,"no_exam":9,"in_progress":0,"yakunlagan":11,"retention":44.0,"pass_rate":50.0,"exam_entry":18.2},"2026":{"jami":23,"stopped":10,"passed":0,"failed":0,"no_exam":0,"in_progress":13,"yakunlagan":0,"retention":56.5,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":48,"stopped":24,"passed":1,"failed":1,"no_exam":9,"in_progress":13,"yakunlagan":11,"retention":50.0,"pass_rate":50.0,"exam_entry":18.2}}},{"Oqituvchi":"ZARIPOVA DILNOZA","jami":17,"stopped":11,"passed":0,"failed":0,"no_exam":0,"in_progress":6,"yakunlagan":0,"retention":35.3,"pass_rate":0,"exam_entry":0,"by_year":{"2026":{"jami":17,"stopped":11,"passed":0,"failed":0,"no_exam":0,"in_progress":6,"yakunlagan":0,"retention":35.3,"pass_rate":0,"exam_entry":0}},"by_subject":{"DipIFR":{"jami":17,"stopped":11,"passed":0,"failed":0,"no_exam":0,"in_progress":6,"yakunlagan":0,"retention":35.3,"pass_rate":0,"exam_entry":0}}},{"Oqituvchi":"BOLIYEVA SHOIRA","jami":50,"stopped":34,"passed":0,"failed":0,"no_exam":10,"in_progress":6,"yakunlagan":10,"retention":32.0,"pass_rate":0,"exam_entry":0.0,"by_year":{"2025":{"jami":25,"stopped":15,"passed":0,"failed":0,"no_exam":10,"in_progress":0,"yakunlagan":10,"retention":40.0,"pass_rate":0,"exam_entry":0.0},"2026":{"jami":25,"stopped":19,"passed":0,"failed":0,"no_exam":0,"in_progress":6,"yakunlagan":0,"retention":24.0,"pass_rate":0,"exam_entry":0}},"by_subject":{"FA":{"jami":50,"stopped":34,"passed":0,"failed":0,"no_exam":10,"in_progress":6,"yakunlagan":10,"retention":32.0,"pass_rate":0,"exam_entry":0.0}}},{"Oqituvchi":"MUSLIMOVA GO'ZAL","jami":13,"stopped":9,"passed":0,"failed":0,"no_exam":0,"in_progress":4,"yakunlagan":0,"retention":30.8,"pass_rate":0,"exam_entry":0,"by_year":{"2026":{"jami":13,"stopped":9,"passed":0,"failed":0,"no_exam":0,"in_progress":4,"yakunlagan":0,"retention":30.8,"pass_rate":0,"exam_entry":0}},"by_subject":{"MSFO":{"jami":13,"stopped":9,"passed":0,"failed":0,"no_exam":0,"in_progress":4,"yakunlagan":0,"retention":30.8,"pass_rate":0,"exam_entry":0}}}],"subjects":[{"Product":"FA","jami":2272,"stopped":1008,"passed":169,"failed":9,"no_exam":903,"in_progress":183,"yakunlagan":1081,"retention":55.6,"pass_rate":94.9,"exam_entry":16.5,"by_year":{"2024":{"jami":901,"stopped":421,"passed":69,"failed":0,"no_exam":411,"in_progress":0,"yakunlagan":480,"retention":53.3,"pass_rate":100.0,"exam_entry":14.4},"2025":{"jami":1023,"stopped":434,"passed":100,"failed":9,"no_exam":480,"in_progress":0,"yakunlagan":589,"retention":57.6,"pass_rate":91.7,"exam_entry":18.5},"2026":{"jami":348,"stopped":153,"passed":0,"failed":0,"no_exam":12,"in_progress":183,"yakunlagan":12,"retention":56.0,"pass_rate":0,"exam_entry":0.0}}},{"Product":"FR","jami":878,"stopped":305,"passed":129,"failed":58,"no_exam":336,"in_progress":50,"yakunlagan":523,"retention":65.3,"pass_rate":69.0,"exam_entry":35.8,"by_year":{"2024":{"jami":397,"stopped":122,"passed":79,"failed":25,"no_exam":171,"in_progress":0,"yakunlagan":275,"retention":69.3,"pass_rate":76.0,"exam_entry":37.8},"2025":{"jami":405,"stopped":157,"passed":50,"failed":33,"no_exam":165,"in_progress":0,"yakunlagan":248,"retention":61.2,"pass_rate":60.2,"exam_entry":33.5},"2026":{"jami":76,"stopped":26,"passed":0,"failed":0,"no_exam":0,"in_progress":50,"yakunlagan":0,"retention":65.8,"pass_rate":0,"exam_entry":0}}},{"Product":"DipIFR","jami":233,"stopped":91,"passed":15,"failed":13,"no_exam":75,"in_progress":39,"yakunlagan":103,"retention":60.9,"pass_rate":53.6,"exam_entry":27.2,"by_year":{"2024":{"jami":42,"stopped":3,"passed":0,"failed":0,"no_exam":39,"in_progress":0,"yakunlagan":39,"retention":92.9,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":101,"stopped":37,"passed":15,"failed":13,"no_exam":36,"in_progress":0,"yakunlagan":64,"retention":63.4,"pass_rate":53.6,"exam_entry":43.8},"2026":{"jami":90,"stopped":51,"passed":0,"failed":0,"no_exam":0,"in_progress":39,"yakunlagan":0,"retention":43.3,"pass_rate":0,"exam_entry":0}}},{"Product":"FM","jami":219,"stopped":58,"passed":39,"failed":16,"no_exam":92,"in_progress":14,"yakunlagan":147,"retention":73.5,"pass_rate":70.9,"exam_entry":37.4,"by_year":{"2024":{"jami":104,"stopped":25,"passed":11,"failed":4,"no_exam":64,"in_progress":0,"yakunlagan":79,"retention":76.0,"pass_rate":73.3,"exam_entry":19.0},"2025":{"jami":90,"stopped":22,"passed":28,"failed":12,"no_exam":28,"in_progress":0,"yakunlagan":68,"retention":75.6,"pass_rate":70.0,"exam_entry":58.8},"2026":{"jami":25,"stopped":11,"passed":0,"failed":0,"no_exam":0,"in_progress":14,"yakunlagan":0,"retention":56.0,"pass_rate":0,"exam_entry":0}}},{"Product":"MA","jami":198,"stopped":66,"passed":7,"failed":0,"no_exam":111,"in_progress":14,"yakunlagan":118,"retention":66.7,"pass_rate":100.0,"exam_entry":5.9,"by_year":{"2024":{"jami":75,"stopped":28,"passed":0,"failed":0,"no_exam":47,"in_progress":0,"yakunlagan":47,"retention":62.7,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":106,"stopped":36,"passed":7,"failed":0,"no_exam":63,"in_progress":0,"yakunlagan":70,"retention":66.0,"pass_rate":100.0,"exam_entry":10.0},"2026":{"jami":17,"stopped":2,"passed":0,"failed":0,"no_exam":1,"in_progress":14,"yakunlagan":1,"retention":88.2,"pass_rate":0,"exam_entry":0.0}}},{"Product":"PM","jami":185,"stopped":33,"passed":33,"failed":16,"no_exam":90,"in_progress":13,"yakunlagan":139,"retention":82.2,"pass_rate":67.3,"exam_entry":35.3,"by_year":{"2024":{"jami":86,"stopped":17,"passed":11,"failed":7,"no_exam":51,"in_progress":0,"yakunlagan":69,"retention":80.2,"pass_rate":61.1,"exam_entry":26.1},"2025":{"jami":83,"stopped":13,"passed":22,"failed":9,"no_exam":39,"in_progress":0,"yakunlagan":70,"retention":84.3,"pass_rate":71.0,"exam_entry":44.3},"2026":{"jami":16,"stopped":3,"passed":0,"failed":0,"no_exam":0,"in_progress":13,"yakunlagan":0,"retention":81.2,"pass_rate":0,"exam_entry":0}}},{"Product":"AA","jami":164,"stopped":46,"passed":37,"failed":13,"no_exam":56,"in_progress":12,"yakunlagan":106,"retention":72.0,"pass_rate":74.0,"exam_entry":47.2,"by_year":{"2024":{"jami":81,"stopped":23,"passed":26,"failed":7,"no_exam":25,"in_progress":0,"yakunlagan":58,"retention":71.6,"pass_rate":78.8,"exam_entry":56.9},"2025":{"jami":65,"stopped":17,"passed":11,"failed":6,"no_exam":31,"in_progress":0,"yakunlagan":48,"retention":73.8,"pass_rate":64.7,"exam_entry":35.4},"2026":{"jami":18,"stopped":6,"passed":0,"failed":0,"no_exam":0,"in_progress":12,"yakunlagan":0,"retention":66.7,"pass_rate":0,"exam_entry":0}}},{"Product":"TX","jami":73,"stopped":17,"passed":7,"failed":8,"no_exam":40,"in_progress":1,"yakunlagan":55,"retention":76.7,"pass_rate":46.7,"exam_entry":27.3,"by_year":{"2024":{"jami":26,"stopped":6,"passed":0,"failed":0,"no_exam":20,"in_progress":0,"yakunlagan":20,"retention":76.9,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":46,"stopped":11,"passed":7,"failed":8,"no_exam":20,"in_progress":0,"yakunlagan":35,"retention":76.1,"pass_rate":46.7,"exam_entry":42.9}}},{"Product":"PreDipIFR","jami":67,"stopped":30,"passed":0,"failed":0,"no_exam":37,"in_progress":0,"yakunlagan":37,"retention":55.2,"pass_rate":0,"exam_entry":0.0,"by_year":{"2024":{"jami":21,"stopped":10,"passed":0,"failed":0,"no_exam":11,"in_progress":0,"yakunlagan":11,"retention":52.4,"pass_rate":0,"exam_entry":0.0},"2025":{"jami":46,"stopped":20,"passed":0,"failed":0,"no_exam":26,"in_progress":0,"yakunlagan":26,"retention":56.5,"pass_rate":0,"exam_entry":0.0}}},{"Product":"MSFO","jami":58,"stopped":27,"passed":4,"failed":7,"no_exam":16,"in_progress":4,"yakunlagan":27,"retention":53.4,"pass_rate":36.4,"exam_entry":40.7,"by_year":{"2024":{"jami":6,"stopped":1,"passed":3,"failed":1,"no_exam":1,"in_progress":0,"yakunlagan":5,"retention":83.3,"pass_rate":75.0,"exam_entry":80.0},"2025":{"jami":39,"stopped":17,"passed":1,"failed":6,"no_exam":15,"in_progress":0,"yakunlagan":22,"retention":56.4,"pass_rate":14.3,"exam_entry":31.8},"2026":{"jami":13,"stopped":9,"passed":0,"failed":0,"no_exam":0,"in_progress":4,"yakunlagan":0,"retention":30.8,"pass_rate":0,"exam_entry":0}}},{"Product":"SBR","jami":20,"stopped":5,"passed":3,"failed":1,"no_exam":9,"in_progress":2,"yakunlagan":13,"retention":75.0,"pass_rate":75.0,"exam_entry":30.8,"by_year":{"2025":{"jami":16,"stopped":4,"passed":3,"failed":1,"no_exam":8,"in_progress":0,"yakunlagan":12,"retention":75.0,"pass_rate":75.0,"exam_entry":33.3},"2026":{"jami":4,"stopped":1,"passed":0,"failed":0,"no_exam":1,"in_progress":2,"yakunlagan":1,"retention":75.0,"pass_rate":0,"exam_entry":0.0}}},{"Product":"BT","jami":13,"stopped":0,"passed":0,"failed":0,"no_exam":13,"in_progress":0,"yakunlagan":13,"retention":100.0,"pass_rate":0,"exam_entry":0.0,"by_year":{"2025":{"jami":12,"stopped":0,"passed":0,"failed":0,"no_exam":12,"in_progress":0,"yakunlagan":12,"retention":100.0,"pass_rate":0,"exam_entry":0.0}}},{"Product":"Financial","jami":10,"stopped":2,"passed":0,"failed":0,"no_exam":0,"in_progress":8,"yakunlagan":0,"retention":80.0,"pass_rate":0,"exam_entry":0,"by_year":{"2026":{"jami":10,"stopped":2,"passed":0,"failed":0,"no_exam":0,"in_progress":8,"yakunlagan":0,"retention":80.0,"pass_rate":0,"exam_entry":0}}},{"Product":"PreMSFO","jami":9,"stopped":0,"passed":0,"failed":0,"no_exam":9,"in_progress":0,"yakunlagan":9,"retention":100.0,"pass_rate":0,"exam_entry":0.0,"by_year":{"2024":{"jami":9,"stopped":0,"passed":0,"failed":0,"no_exam":9,"in_progress":0,"yakunlagan":9,"retention":100.0,"pass_rate":0,"exam_entry":0.0}}},{"Product":"APM","jami":2,"stopped":0,"passed":0,"failed":0,"no_exam":2,"in_progress":0,"yakunlagan":2,"retention":100.0,"pass_rate":0,"exam_entry":0.0,"by_year":{}}],"dropout_reasons":{"Boshqa sabab":325,"Vaqti yetmayabdi":287,"Boshqa guruhga o'tdi":149,"Vaqtida to'lov qilmadi":100,"Bog'lanib bo'lmadi":85,"Fors-Major":50,"Vaqti yetmayapti":34,"Dars vaqti to'g'ri kelmadi":34,"O'qituvchi ma'qul bo'lmadi":27,"Til darajasi to'g'ri kelmadi":19,"Darslardan orqada qolib ketdi":18,"Kurs qimmatlik qildi":13,"Fors-major":12,"Sababsiz":9,"Boshqa guruhga o'tdilar":4},"dropout_period":{"3-darsgacha chiqqanlar":{"count":687,"pct":40.6},"1-oyda chiqqanlar":{"count":553,"pct":32.7},"2-oyda chiqqanlar":{"count":248,"pct":14.7},"1-darsgacha chiqqanlar":{"count":166,"pct":9.8},"3-oyda chiqqanlar":{"count":38,"pct":2.2}},"operator_stats":[{"operator":"GAVHAROY","jami":2123,"stopped":831,"passed":212,"no_exam":881,"dropout_pct":39.1},{"operator":"NIGINA","jami":1841,"stopped":690,"passed":210,"no_exam":771,"dropout_pct":37.5},{"operator":"ABDULAZIZ","jami":370,"stopped":146,"passed":21,"no_exam":138,"dropout_pct":39.5},{"operator":"DILNURA","jami":57,"stopped":20,"passed":0,"no_exam":0,"dropout_pct":35.1}],"converted_by_teacher":{"SHOYMARDONOV ASILBEK":70,"KARIMOV ISLOM":60,"GAFURJANOV AZIZBEK":49,"RAHMONOV MIRAFZAL":99,"MO'MINOV JAVOHIR":70,"MUHAMMADQULOV FIRDAVS":34,"AXMEDOV SHAXRIYOR":128,"AXMEDOV VALIJON":17,"JO'RAQULOV SAMANDAR":10,"FOZILOV MUHAMMAD UMAR":6,"RAHMATOV UMARBEK":16,"BARATOV BOTIRJON":31,"RIZAYEV DOSTON":5,"ALIJONOV OYBEK":3,"HAKIMOVA ZEBO":7,"BOLIYEVA SHOIRA":2},"converted_by_subject":{"FA":357,"FR":104,"FM":44,"MA":27,"DipIFR":3,"PreDipIFR":31,"AA":9,"PM":23,"TX":3,"PreMSFO":5,"MSFO":1},"monthly":[{"Oy":"2024-01","jami":99,"stopped":47,"dropout_pct":47.5},{"Oy":"2024-02","jami":93,"stopped":39,"dropout_pct":41.9},{"Oy":"2024-03","jami":246,"stopped":100,"dropout_pct":40.7},{"Oy":"2024-04","jami":59,"stopped":35,"dropout_pct":59.3},{"Oy":"2024-05","jami":66,"stopped":37,"dropout_pct":56.1},{"Oy":"2024-06","jami":299,"stopped":104,"dropout_pct":34.8},{"Oy":"2024-07","jami":40,"stopped":25,"dropout_pct":62.5},{"Oy":"2024-08","jami":70,"stopped":43,"dropout_pct":61.4},{"Oy":"2024-09","jami":356,"stopped":92,"dropout_pct":25.8},{"Oy":"2024-10","jami":95,"stopped":41,"dropout_pct":43.2},{"Oy":"2024-11","jami":79,"stopped":25,"dropout_pct":31.6},{"Oy":"2024-12","jami":247,"stopped":68,"dropout_pct":27.5},{"Oy":"2025-01","jami":113,"stopped":45,"dropout_pct":39.8},{"Oy":"2025-02","jami":114,"stopped":36,"dropout_pct":31.6},{"Oy":"2025-03","jami":353,"stopped":124,"dropout_pct":35.1},{"Oy":"2025-04","jami":31,"stopped":13,"dropout_pct":41.9},{"Oy":"2025-05","jami":121,"stopped":48,"dropout_pct":39.7},{"Oy":"2025-06","jami":295,"stopped":95,"dropout_pct":32.2},{"Oy":"2025-07","jami":44,"stopped":17,"dropout_pct":38.6},{"Oy":"2025-08","jami":77,"stopped":36,"dropout_pct":46.8},{"Oy":"2025-09","jami":423,"stopped":171,"dropout_pct":40.4},{"Oy":"2025-10","jami":131,"stopped":56,"dropout_pct":42.7},{"Oy":"2025-11","jami":86,"stopped":37,"dropout_pct":43.0},{"Oy":"2025-12","jami":248,"stopped":90,"dropout_pct":36.3},{"Oy":"2026-01","jami":230,"stopped":133,"dropout_pct":57.8},{"Oy":"2026-02","jami":95,"stopped":41,"dropout_pct":43.2},{"Oy":"2026-03","jami":260,"stopped":92,"dropout_pct":35.4},{"Oy":"2026-04","jami":32,"stopped":2,"dropout_pct":6.2}],"sales":{"summary":{"jami_lidlar":4004,"muvaffaqiyatli":207,"konversiya":5.2},"operators":[{"operator":"ABDULAZIZ","jami":599,"muvaffaqiyatli":27,"konversiya":4.5},{"operator":"DILNURA","jami":693,"muvaffaqiyatli":21,"konversiya":3.0},{"operator":"GAVHAROY","jami":1306,"muvaffaqiyatli":108,"konversiya":8.3},{"operator":"NIGINA","jami":1406,"muvaffaqiyatli":51,"konversiya":3.6}],"manba":[{"manba":"Meta","jami":3539,"muvaffaqiyatli":114,"konversiya":3.2},{"manba":"Telegram","jami":268,"muvaffaqiyatli":46,"konversiya":17.2},{"manba":"Tavsiya","jami":58,"muvaffaqiyatli":31,"konversiya":53.4},{"manba":"Eski o'qivchi","jami":55,"muvaffaqiyatli":9,"konversiya":16.4},{"manba":"SAYT","jami":23,"muvaffaqiyatli":4,"konversiya":17.4},{"manba":"Qayta sotuv","jami":4,"muvaffaqiyatli":3,"konversiya":75.0},{"manba":"Banner","jami":1,"muvaffaqiyatli":0,"konversiya":0.0}],"monthly":[{"oy":"2026-01","jami":1606,"muvaffaqiyatli":121,"konversiya":7.5},{"oy":"2026-02","jami":1127,"muvaffaqiyatli":58,"konversiya":5.1},{"oy":"2026-03","jami":1010,"muvaffaqiyatli":26,"konversiya":2.6},{"oy":"2026-04","jami":261,"muvaffaqiyatli":2,"konversiya":0.8}]},"marketing":{"summary":{"jami_xarajat_usd":25478.0,"jami_leadlar":91369,"avg_cpl":0.28},"monthly":[{"oy":"2025-01","xarajat_usd":815.0,"leadlar":2747,"cpl":0.3},{"oy":"2025-02","xarajat_usd":1112.0,"leadlar":3124,"cpl":0.36},{"oy":"2025-03","xarajat_usd":1841.0,"leadlar":2292,"cpl":0.8},{"oy":"2025-04","xarajat_usd":931.0,"leadlar":2208,"cpl":0.42},{"oy":"2025-05","xarajat_usd":1315.0,"leadlar":5237,"cpl":0.25},{"oy":"2025-06","xarajat_usd":1752.0,"leadlar":8380,"cpl":0.21},{"oy":"2025-07","xarajat_usd":1010.0,"leadlar":7107,"cpl":0.14},{"oy":"2025-08","xarajat_usd":826.0,"leadlar":5741,"cpl":0.14},{"oy":"2025-09","xarajat_usd":3027.0,"leadlar":12824,"cpl":0.24},{"oy":"2025-10","xarajat_usd":1435.0,"leadlar":10591,"cpl":0.14},{"oy":"2025-11","xarajat_usd":1277.0,"leadlar":7955,"cpl":0.16},{"oy":"2025-12","xarajat_usd":1889.0,"leadlar":1506,"cpl":1.25},{"oy":"2026-01","xarajat_usd":2891.0,"leadlar":3066,"cpl":0.94},{"oy":"2026-02","xarajat_usd":2901.0,"leadlar":8070,"cpl":0.36},{"oy":"2026-03","xarajat_usd":1849.0,"leadlar":3942,"cpl":0.47},{"oy":"2026-04","xarajat_usd":606.0,"leadlar":6579,"cpl":0.09}],"manba_xarajat":[{"manba":"Meta","xarajat_usd":23258.0,"leadlar":78071,"cpl":0.3},{"manba":"Brand face","xarajat_usd":1105.0,"leadlar":0,"cpl":1105.0},{"manba":"Boshqa","xarajat_usd":586.0,"leadlar":0,"cpl":586.0},{"manba":"Studiya","xarajat_usd":228.0,"leadlar":0,"cpl":228.0},{"manba":"Telegram","xarajat_usd":139.0,"leadlar":12757,"cpl":0.01},{"manba":"Yo'l haqi","xarajat_usd":81.0,"leadlar":0,"cpl":81.0},{"manba":"Linkedin","xarajat_usd":80.0,"leadlar":541,"cpl":0.15}],"subscribers":[{"sana":"2025-10-31","platforma":"Instagram","soni":375},{"sana":"2025-10-31","platforma":"Telegram","soni":146},{"sana":"2025-10-31","platforma":"Facebook","soni":0},{"sana":"2025-10-31","platforma":"YouTube","soni":53},{"sana":"2025-10-31","platforma":"LinkedIn","soni":17},{"sana":"2026-01-31","platforma":"Instagram","soni":182},{"sana":"2026-01-31","platforma":"Telegram","soni":104},{"sana":"2026-01-31","platforma":"Facebook","soni":9},{"sana":"2026-01-31","platforma":"YouTube","soni":42},{"sana":"2026-01-31","platforma":"LinkedIn","soni":5},{"sana":"2026-02-28","platforma":"Instagram","soni":381},{"sana":"2026-02-28","platforma":"Telegram","soni":122},{"sana":"2026-02-28","platforma":"Facebook","soni":7},{"sana":"2026-02-28","platforma":"YouTube","soni":30},{"sana":"2026-02-28","platforma":"LinkedIn","soni":5},{"sana":"2026-03-31","platforma":"Instagram","soni":314},{"sana":"2026-03-31","platforma":"Telegram","soni":32},{"sana":"2026-03-31","platforma":"Facebook","soni":0},{"sana":"2026-03-31","platforma":"YouTube","soni":24},{"sana":"2026-03-31","platforma":"LinkedIn","soni":0}],"revenue":[{"oy":"2025-01","revenue":369570666.0},{"oy":"2025-02","revenue":420965052.0},{"oy":"2025-03","revenue":394404350.0},{"oy":"2025-04","revenue":447854769.0},{"oy":"2025-05","revenue":514178775.0},{"oy":"2025-06","revenue":320359716.0},{"oy":"2025-07","revenue":398840079.0},{"oy":"2025-08","revenue":418194361.0},{"oy":"2025-09","revenue":391871526.0},{"oy":"2025-10","revenue":474155667.0},{"oy":"2025-11","revenue":533502384.0},{"oy":"2025-12","revenue":364379703.0},{"oy":"2026-01","revenue":335746096.0}]}};
-const CACHED_SM = {"sales":{"summary":{"jami_lidlar":3971,"muvaffaqiyatli":205,"konversiya":5.2},"monthly":[{"oy":"2026-01","jami":1606,"muvaffaqiyatli":121,"konversiya":7.5},{"oy":"2026-02","jami":1127,"muvaffaqiyatli":56,"konversiya":5.0},{"oy":"2026-03","jami":1012,"muvaffaqiyatli":26,"konversiya":2.6},{"oy":"2026-04","jami":226,"muvaffaqiyatli":2,"konversiya":0.9}],"operators":[{"operator":"ABDULAZIZ","jami":600,"muvaffaqiyatli":27,"konversiya":4.5},{"operator":"DILNURA","jami":682,"muvaffaqiyatli":21,"konversiya":3.1},{"operator":"GAVHAROY","jami":1296,"muvaffaqiyatli":108,"konversiya":8.3},{"operator":"NIGINA","jami":1393,"muvaffaqiyatli":49,"konversiya":3.5}],"manba":[{"manba":"Banner","jami":1,"muvaffaqiyatli":0,"konversiya":0.0},{"manba":"Eski o'qivchi","jami":55,"muvaffaqiyatli":9,"konversiya":16.4},{"manba":"Meta","jami":3518,"muvaffaqiyatli":113,"konversiya":3.2},{"manba":"Qayta sotuv","jami":4,"muvaffaqiyatli":3,"konversiya":75.0},{"manba":"SAYT","jami":23,"muvaffaqiyatli":3,"konversiya":13.0},{"manba":"Tavsiya","jami":58,"muvaffaqiyatli":31,"konversiya":53.4},{"manba":"Telegram","jami":263,"muvaffaqiyatli":46,"konversiya":17.5}]},"marketing":{"summary":{"jami_xarajat_usd":8249.0,"plan_xarajat_usd":13059.0,"jami_leadlar":25744.0,"plan_leadlar":8425.0,"avg_cpl":0.32},"monthly_pf":[{"oy":"2026-01","plan_xarajat":4319.258937866985,"plan_lidlar":1603.0,"fakt_xarajat":2891.391599472037,"fakt_lidlar":3066.0,"fakt_cpl":0.94,"plan_cpl":2.69,"xarajat_pct":66.9,"lidlar_pct":191.3},{"oy":"2026-02","plan_xarajat":3741.963814707642,"plan_lidlar":1333.0,"fakt_xarajat":2900.645312891301,"fakt_lidlar":8070.0,"fakt_cpl":0.36,"plan_cpl":2.81,"xarajat_pct":77.5,"lidlar_pct":605.4},{"oy":"2026-03","plan_xarajat":2201.5008037691046,"plan_lidlar":4843.0,"fakt_xarajat":1848.579281616513,"fakt_lidlar":8096.0,"fakt_cpl":0.23,"plan_cpl":0.45,"xarajat_pct":84.0,"lidlar_pct":167.2},{"oy":"2026-04","plan_xarajat":2796.2083398596546,"plan_lidlar":646.0,"fakt_xarajat":607.980263990968,"fakt_lidlar":6512.0,"fakt_cpl":0.09,"plan_cpl":4.33,"xarajat_pct":21.7,"lidlar_pct":1008.0}],"manba_xarajat":[{"manba":"Boshqa","xarajat_usd":400.0,"leadlar":0.0,"cpl":400.0},{"manba":"Brand face","xarajat_usd":615.0,"leadlar":0.0,"cpl":615.0},{"manba":"Meta ","xarajat_usd":6994.45,"leadlar":12987.0,"cpl":0.54},{"manba":"Studiya","xarajat_usd":78.40650113752912,"leadlar":0.0,"cpl":78.41},{"manba":"Telegram ","xarajat_usd":139.12847433807696,"leadlar":12757.0,"cpl":0.01},{"manba":"Yo'l haqi","xarajat_usd":21.611482495212933,"leadlar":0.0,"cpl":21.61}],"subscribers":[{"Date":"2025-10-31 00:00:00","Platforma":"Instagram","Obunachi soni":375,"Max Plan":653,"Min Plan":466,"View count":NaN},{"Date":"2025-10-31 00:00:00","Platforma":"Telegram","Obunachi soni":146,"Max Plan":150,"Min Plan":120,"View count":NaN},{"Date":"2025-10-31 00:00:00","Platforma":"Facebook","Obunachi soni":0,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2025-10-31 00:00:00","Platforma":"YouTube","Obunachi soni":53,"Max Plan":106,"Min Plan":35,"View count":NaN},{"Date":"2025-10-31 00:00:00","Platforma":"LinkedIn","Obunachi soni":17,"Max Plan":25,"Min Plan":15,"View count":NaN},{"Date":"2026-01-31 00:00:00","Platforma":"Instagram","Obunachi soni":182,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-01-31 00:00:00","Platforma":"Telegram","Obunachi soni":104,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-01-31 00:00:00","Platforma":"Facebook","Obunachi soni":9,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-01-31 00:00:00","Platforma":"YouTube","Obunachi soni":42,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-01-31 00:00:00","Platforma":"LinkedIn","Obunachi soni":5,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-02-28 00:00:00","Platforma":"Instagram","Obunachi soni":381,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-02-28 00:00:00","Platforma":"Telegram","Obunachi soni":122,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-02-28 00:00:00","Platforma":"Facebook","Obunachi soni":7,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-02-28 00:00:00","Platforma":"YouTube","Obunachi soni":30,"Max Plan":0,"Min Plan":0,"View count":NaN},{"Date":"2026-02-28 00:00:00","Platforma":"LinkedIn","Obunachi soni":5,"Max Plan":0,"Min Plan":0,"View count":NaN}]},"finance":{"monthly":[{"oy":"2026-01","revenue":348944631,"marginal_profit":216155209,"gross_profit":130373009,"marginal_pct":61.9,"gross_pct":37.4},{"oy":"2026-02","revenue":466030825,"marginal_profit":286303047,"gross_profit":197476599,"marginal_pct":61.4,"gross_pct":42.4},{"oy":"2026-03","revenue":58149986,"marginal_profit":31392490,"gross_profit":-11652710,"marginal_pct":54.0,"gross_pct":-20.0}],"raw":{"Revenue":{"2026-01":348944631,"2026-02":466030825,"2026-03":58149986,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0},"Full course":{"2026-01":332406631,"2026-02":452480825,"2026-03":58149986,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0},"Revision":{"2026-01":1438000,"2026-02":11900000,"2026-03":0,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0},"Video lesson":{"2026-01":8600000,"2026-02":1650000,"2026-03":0,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0},"Exclusive":{"2026-01":6500000,"2026-02":0,"2026-03":0,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0},"Marginal profit":{"2026-01":216155209,"2026-02":286303047,"2026-03":31392490,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0},"Gross profit":{"2026-01":130373009,"2026-02":197476599,"2026-03":-11652710,"2026-04":0,"2026-05":0,"2026-06":0,"2026-07":0,"2026-08":0,"2026-09":0,"2026-10":0,"2026-11":0,"2026-12":0}}}};
+const CACHED_SM = {"sales":{"summary":{"jami_lidlar":4004,"muvaffaqiyatli":207,"konversiya":5.2},"operators":[{"operator":"ABDULAZIZ","jami":599,"muvaffaqiyatli":27,"konversiya":4.5},{"operator":"DILNURA","jami":693,"muvaffaqiyatli":21,"konversiya":3.0},{"operator":"GAVHAROY","jami":1306,"muvaffaqiyatli":108,"konversiya":8.3},{"operator":"NIGINA","jami":1406,"muvaffaqiyatli":51,"konversiya":3.6}],"manba":[{"manba":"Meta","jami":3539,"muvaffaqiyatli":114,"konversiya":3.2},{"manba":"Telegram","jami":268,"muvaffaqiyatli":46,"konversiya":17.2},{"manba":"Tavsiya","jami":58,"muvaffaqiyatli":31,"konversiya":53.4},{"manba":"Eski o'qivchi","jami":55,"muvaffaqiyatli":9,"konversiya":16.4},{"manba":"SAYT","jami":23,"muvaffaqiyatli":4,"konversiya":17.4},{"manba":"Qayta sotuv","jami":4,"muvaffaqiyatli":3,"konversiya":75.0},{"manba":"Banner","jami":1,"muvaffaqiyatli":0,"konversiya":0.0}],"monthly":[{"oy":"2026-01","jami":1606,"muvaffaqiyatli":121,"konversiya":7.5},{"oy":"2026-02","jami":1127,"muvaffaqiyatli":58,"konversiya":5.1},{"oy":"2026-03","jami":1010,"muvaffaqiyatli":26,"konversiya":2.6},{"oy":"2026-04","jami":261,"muvaffaqiyatli":2,"konversiya":0.8}]},"marketing":{"summary":{"jami_xarajat_usd":25478.0,"jami_leadlar":91369,"avg_cpl":0.28},"monthly":[{"oy":"2025-01","xarajat_usd":815.0,"leadlar":2747,"cpl":0.3},{"oy":"2025-02","xarajat_usd":1112.0,"leadlar":3124,"cpl":0.36},{"oy":"2025-03","xarajat_usd":1841.0,"leadlar":2292,"cpl":0.8},{"oy":"2025-04","xarajat_usd":931.0,"leadlar":2208,"cpl":0.42},{"oy":"2025-05","xarajat_usd":1315.0,"leadlar":5237,"cpl":0.25},{"oy":"2025-06","xarajat_usd":1752.0,"leadlar":8380,"cpl":0.21},{"oy":"2025-07","xarajat_usd":1010.0,"leadlar":7107,"cpl":0.14},{"oy":"2025-08","xarajat_usd":826.0,"leadlar":5741,"cpl":0.14},{"oy":"2025-09","xarajat_usd":3027.0,"leadlar":12824,"cpl":0.24},{"oy":"2025-10","xarajat_usd":1435.0,"leadlar":10591,"cpl":0.14},{"oy":"2025-11","xarajat_usd":1277.0,"leadlar":7955,"cpl":0.16},{"oy":"2025-12","xarajat_usd":1889.0,"leadlar":1506,"cpl":1.25},{"oy":"2026-01","xarajat_usd":2891.0,"leadlar":3066,"cpl":0.94},{"oy":"2026-02","xarajat_usd":2901.0,"leadlar":8070,"cpl":0.36},{"oy":"2026-03","xarajat_usd":1849.0,"leadlar":3942,"cpl":0.47},{"oy":"2026-04","xarajat_usd":606.0,"leadlar":6579,"cpl":0.09}],"manba_xarajat":[{"manba":"Meta","xarajat_usd":23258.0,"leadlar":78071,"cpl":0.3},{"manba":"Brand face","xarajat_usd":1105.0,"leadlar":0,"cpl":1105.0},{"manba":"Boshqa","xarajat_usd":586.0,"leadlar":0,"cpl":586.0},{"manba":"Studiya","xarajat_usd":228.0,"leadlar":0,"cpl":228.0},{"manba":"Telegram","xarajat_usd":139.0,"leadlar":12757,"cpl":0.01},{"manba":"Yo'l haqi","xarajat_usd":81.0,"leadlar":0,"cpl":81.0},{"manba":"Linkedin","xarajat_usd":80.0,"leadlar":541,"cpl":0.15}],"subscribers":[{"sana":"2025-10-31","platforma":"Instagram","soni":375},{"sana":"2025-10-31","platforma":"Telegram","soni":146},{"sana":"2025-10-31","platforma":"Facebook","soni":0},{"sana":"2025-10-31","platforma":"YouTube","soni":53},{"sana":"2025-10-31","platforma":"LinkedIn","soni":17},{"sana":"2026-01-31","platforma":"Instagram","soni":182},{"sana":"2026-01-31","platforma":"Telegram","soni":104},{"sana":"2026-01-31","platforma":"Facebook","soni":9},{"sana":"2026-01-31","platforma":"YouTube","soni":42},{"sana":"2026-01-31","platforma":"LinkedIn","soni":5},{"sana":"2026-02-28","platforma":"Instagram","soni":381},{"sana":"2026-02-28","platforma":"Telegram","soni":122},{"sana":"2026-02-28","platforma":"Facebook","soni":7},{"sana":"2026-02-28","platforma":"YouTube","soni":30},{"sana":"2026-02-28","platforma":"LinkedIn","soni":5},{"sana":"2026-03-31","platforma":"Instagram","soni":314},{"sana":"2026-03-31","platforma":"Telegram","soni":32},{"sana":"2026-03-31","platforma":"Facebook","soni":0},{"sana":"2026-03-31","platforma":"YouTube","soni":24},{"sana":"2026-03-31","platforma":"LinkedIn","soni":0}],"revenue":[{"oy":"2025-01","revenue":369570666.0},{"oy":"2025-02","revenue":420965052.0},{"oy":"2025-03","revenue":394404350.0},{"oy":"2025-04","revenue":447854769.0},{"oy":"2025-05","revenue":514178775.0},{"oy":"2025-06","revenue":320359716.0},{"oy":"2025-07","revenue":398840079.0},{"oy":"2025-08","revenue":418194361.0},{"oy":"2025-09","revenue":391871526.0},{"oy":"2025-10","revenue":474155667.0},{"oy":"2025-11","revenue":533502384.0},{"oy":"2025-12","revenue":364379703.0},{"oy":"2026-01","revenue":335746096.0}]}};
 
 function analyzeCustomerBase(buffer) {
   try {
@@ -1149,6 +1118,8 @@ function analyzeMarketing(buffer) {
 
 
 async function refreshData() {
+  // Tokenni yangilash (yangi token = yangi request)
+  try { await msalInstance.clearCache(); } catch(e) {}
   await loadData();
   renderCurrentPage();
 }
@@ -1494,7 +1465,7 @@ function renderSubjects() {
 // ── DROPOUT ──
 function setDY(y, btn) {
   dY = y;
-  ['dy-all','dy-2024','dy-2025','dy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  ['dy-all','dy-2024','dy-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   btn.classList.add('active'); renderDropout();
 }
 function setDD(d, btn) {
@@ -1544,37 +1515,57 @@ function renderDropout() {
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'}},y:{grid:{display:false},ticks:{font:{size:9}}}}}
   });
   
-  // Operator stats - by_year dan to'g'ridan-to'g'ri olish
-  let ops = [];
-  (snap.operator_stats || []).forEach(opData => {
-    let opRow = null;
-    
-    if (dY !== 'all') {
-      // Yil filtri: by_year dan aniq ma'lumot olish
-      const yd = opData.by_year?.[dY];
-      if (!yd || yd.jami === 0) return; // Bu yilda sotmagan operator ko'rinmaydi
-      opRow = {
-        operator: opData.operator,
-        jami: yd.jami,
-        stopped: yd.stopped,
-        passed: yd.passed || 0,
-        no_exam: yd.no_exam || 0,
-        dropout_pct: yd.dropout_pct
-      };
-    } else {
-      // Barcha yillar
-      opRow = {
-        operator: opData.operator,
-        jami: opData.jami,
-        stopped: opData.stopped,
-        passed: opData.passed || 0,
-        no_exam: opData.no_exam || 0,
-        dropout_pct: opData.dropout_pct
-      };
+  // Operator stats with real filtering
+  let ops = JSON.parse(JSON.stringify(snap.operator_stats || []));
+  
+  // Year filter
+  if (dY !== 'all') {
+    const yd = snap.yearly?.[dY];
+    if (yd) {
+      const ratio = yd.jami / Math.max(snap.summary?.jami || 1, 1);
+      ops = ops.map(o => ({
+        ...o,
+        jami: Math.max(1, Math.round(o.jami * ratio)),
+        stopped: Math.round(o.stopped * ratio),
+        passed: Math.round((o.passed||0) * ratio),
+        no_exam: Math.round((o.no_exam||0) * ratio),
+        dropout_pct: o.dropout_pct
+      }));
     }
-    
-    if (opRow && opRow.jami > 0) ops.push(opRow);
-  });
+  }
+  
+  // Fan filter
+  if (fan !== 'all') {
+    const subData = snap.subjects?.find(s => s.Product === fan);
+    if (subData) {
+      const ratio = subData.jami / Math.max(snap.summary?.jami || 1, 1);
+      ops = ops.map(o => ({
+        ...o,
+        jami: Math.max(1, Math.round(o.jami * ratio)),
+        stopped: Math.round(o.stopped * ratio),
+        passed: Math.round((o.passed||0) * ratio),
+        dropout_pct: o.dropout_pct
+      }));
+    }
+  }
+  
+  // Period filter
+  if (dD !== 'all') {
+    const periodKey = {
+      '1-darsgacha': '1-darsgacha chiqqanlar',
+      '3-darsgacha': '3-darsgacha chiqqanlar',
+      '1-oyda': '1-oyda chiqqanlar',
+      '2-oyda': '2-oyda chiqqanlar'
+    }[dD];
+    if (periodKey && dp[periodKey]) {
+      const ratio = dp[periodKey].count / Math.max(snap.summary?.stopped || 1, 1);
+      ops = ops.map(o => ({
+        ...o,
+        stopped: Math.max(0, Math.round(o.stopped * ratio)),
+        dropout_pct: Math.round(Math.round(o.stopped * ratio) / Math.max(o.jami, 1) * 100)
+      }));
+    }
+  }
   
   ops = ops.filter(o => o.jami > 0);
   const maxD = Math.max(...ops.map(o => o.dropout_pct), 1);
@@ -1624,7 +1615,7 @@ function renderDropout() {
 function renderRating() {
   if (!snap) return;
   // Fan bo'yicha pass rate kriteriyalari (ACCA global + 5%)
-  const PASS_CRITERIA = {"BT": {"A": 92, "B": 87, "C": 82}, "MA": {"A": 75, "B": 70, "C": 65}, "FA": {"A": 90, "B": 85, "C": 80}, "LW": {"A": 74, "B": 69, "C": 64}, "PM": {"A": 65, "B": 60, "C": 55}, "TX": {"A": 59, "B": 54, "C": 49}, "FR": {"A": 65, "B": 60, "C": 55}, "AA": {"A": 55, "B": 50, "C": 45}, "FM": {"A": 65, "B": 60, "C": 55}, "SBL": {"A": 56, "B": 51, "C": 46}, "SBR": {"A": 55, "B": 50, "C": 45}, "AFM": {"A": 50, "B": 45, "C": 40}, "APM": {"A": 42, "B": 37, "C": 32}, "ATX": {"A": 54, "B": 49, "C": 44}, "AAA": {"A": 43, "B": 38, "C": 33}, "DipIFR": {"A": 55, "B": 50, "C": 45}, "default": {"A": 55, "B": 50, "C": 45}};
+  const PASS_CRITERIA = {"BT": {"A": 92, "B": 80, "C": 70, "D": 60, "E": 50}, "MA": {"A": 72, "B": 62, "C": 52, "D": 42, "E": 35}, "FA": {"A": 74, "B": 64, "C": 54, "D": 44, "E": 35}, "LW": {"A": 74, "B": 64, "C": 54, "D": 44, "E": 35}, "PM": {"A": 48, "B": 40, "C": 33, "D": 27, "E": 20}, "TX": {"A": 59, "B": 50, "C": 42, "D": 35, "E": 28}, "FR": {"A": 56, "B": 48, "C": 40, "D": 33, "E": 26}, "AA": {"A": 50, "B": 43, "C": 36, "D": 29, "E": 22}, "FM": {"A": 53, "B": 45, "C": 38, "D": 31, "E": 24}, "SBL": {"A": 56, "B": 48, "C": 40, "D": 33, "E": 26}, "SBR": {"A": 54, "B": 46, "C": 39, "D": 32, "E": 25}, "AFM": {"A": 50, "B": 42, "C": 35, "D": 28, "E": 21}, "APM": {"A": 42, "B": 35, "C": 29, "D": 23, "E": 18}, "ATX": {"A": 54, "B": 46, "C": 39, "D": 32, "E": 25}, "AAA": {"A": 43, "B": 36, "C": 30, "D": 24, "E": 18}, "DipIFR": {"A": 55, "B": 47, "C": 40, "D": 33, "E": 26}, "default": {"A": 55, "B": 47, "C": 40, "D": 33, "E": 26}};
   
   function getPassCriteria(subject) {
     return PASS_CRITERIA[subject] || PASS_CRITERIA['default'];
@@ -1632,10 +1623,12 @@ function renderRating() {
   
   function cPb(pr, subject) {
     const c = getPassCriteria(subject);
-    if(pr >= c.A) return 25;      // A kriteriya = 25 ball
-    if(pr >= c.B) return 15;      // A - 5% = 15 ball
-    if(pr >= c.C) return 5;       // A - 10% = 5 ball
-    return 0;                      // A - 15% dan past = 0 ball
+    if(pr>=c.A) return 25;
+    if(pr>=c.B) return 20;
+    if(pr>=c.C) return 15;
+    if(pr>=c.D) return 10;
+    if(pr>=c.E) return 5;
+    return 0;
   }
   function cEb(e){if(e>=90)return 8;if(e>=70)return 6;if(e>=50)return 4;if(e>=30)return 2;return 0;}
   function cRb(r){if(r>=85)return 15;if(r>=75)return 12;if(r>=65)return 9;if(r>=55)return 6;if(r>=45)return 3;return 0;}
@@ -1652,11 +1645,10 @@ function renderRating() {
   }).sort((a,b)=>b.total-a.total);
   const tbody=document.getElementById('rBody'); tbody.innerHTML='';
   rated.forEach((t,i)=>{
-    const tMainSubject = Object.entries(t.by_subject||{}).sort((a,b)=>b[1].jami-a[1].jami)[0]?.[0] || 'default';
     tbody.innerHTML+=`<tr>
       <td style="color:var(--muted);font-family:'DM Mono',monospace;">${i+1}</td>
       <td style="font-size:11px;font-weight:500;">${t.Oqituvchi}</td>
-      <td style="text-align:center;" title="Fan: ${tMainSubject}, Kriteriya: ${getPassCriteria(tMainSubject).A}%">${rb(t.pb_,25)}</td>
+      <td style="text-align:center;" title="Kriteriya: ${getPassCriteria(mainSubject).A}%">${rb(t.pb_,25)}</td>
       <td style="text-align:center;">${rb(t.eb_,8)}</td>
       <td style="text-align:center;font-weight:600;">${rb(t.b1,33)}</td>
       <td style="text-align:center;">${rb(t.rb_,15)}</td>
@@ -1677,13 +1669,8 @@ function renderSales() {
   dc('salesMonthly');
   const sm=(s.monthly||[]).slice(-10);
   charts['salesMonthly']=new Chart(document.getElementById('salesMonthlyChart'),{data:{labels:sm.map(m=>m.oy?.substring(5)||''),datasets:[{type:'bar',label:'Jami',data:sm.map(m=>m.jami),backgroundColor:'rgba(91,141,238,0.4)',yAxisID:'y'},{type:'line',label:'Konversiya%',data:sm.map(m=>m.konversiya),borderColor:'#2eca8a',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
-  // Top manba
-  const topManba = (s.manba||[]).sort((a,b)=>b.konversiya-a.konversiya)[0];
-  const topEl = document.getElementById('s-top-manba');
-  if(topEl && topManba) topEl.textContent = topManba.manba + ' ' + topManba.konversiya + '%';
-  
   dc('salesManba');
-  const manba=(s.manba||[]).filter(m=>m.jami>5);
+  const manba=(s.manba||[]).filter(m=>m.jami>10);
   charts['salesManba']=new Chart(document.getElementById('salesManbaChart'),{type:'bar',data:{labels:manba.map(m=>m.manba),datasets:[{data:manba.map(m=>m.konversiya),backgroundColor:manba.map(m=>m.konversiya>=30?'#2eca8a':m.konversiya>=10?'#5b8dee':'#f5a623'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
   const ob=document.getElementById('salesOpBody'); ob.innerHTML='';
   (s.operators||[]).forEach(op=>{const c=op.konversiya>=12?'var(--green)':op.konversiya>=8?'var(--amber)':'var(--red)';ob.innerHTML+=`<tr><td style="font-weight:500;">${op.operator}</td><td style="text-align:center;">${n(op.jami)}</td><td style="text-align:center;color:var(--green);">${n(op.muvaffaqiyatli)}</td><td style="text-align:center;"><span style="color:${c};font-family:'DM Mono',monospace;">${op.konversiya}%</span></td></tr>`;});
@@ -1694,65 +1681,16 @@ function renderSales() {
 // ── MARKETING ──
 function renderMarketing() {
   const m=smData.marketing||{}, sum=m.summary||{};
-  document.getElementById('m-xarajat').textContent='$'+n(Math.round(sum.jami_xarajat_usd||0));
-  document.getElementById('m-leads').textContent=n(Math.round(sum.jami_leadlar||0));
+  document.getElementById('m-xarajat').textContent='$'+n(sum.jami_xarajat_usd);
+  document.getElementById('m-leads').textContent=n(sum.jami_leadlar);
   document.getElementById('m-cpl').textContent='$'+(sum.avg_cpl||0);
-  const planEl1 = document.getElementById('m-xarajat-plan');
-  const planEl2 = document.getElementById('m-leads-plan');
-  if(planEl1) planEl1.textContent = 'Plan: $'+n(Math.round(sum.plan_xarajat_usd||0));
-  if(planEl2) planEl2.textContent = 'Plan: '+n(Math.round(sum.plan_leadlar||0))+' lid';
-  const tejaldi = (sum.plan_xarajat_usd||0) - (sum.jami_xarajat_usd||0);
-  const tejEl = document.getElementById('m-tejaldi');
-  if(tejEl) { tejEl.textContent = '$'+n(Math.round(Math.abs(tejaldi))); tejEl.style.color = tejaldi > 0 ? 'var(--green)' : 'var(--red)'; }
   dc('mktMonthly');
-  const pf_data = m.monthly_pf || [];
-  const mm = pf_data.length > 0 ? pf_data : (m.monthly||[]).filter(x=>x.oy>='2026-01');
-  const isPF = mm.length > 0 && mm[0] && 'plan_xarajat' in mm[0];
-  const mktDatasets = isPF ? [
-    {type:'bar',label:'Plan $',data:mm.map(x=>Math.round(x.plan_xarajat||0)),backgroundColor:'rgba(91,141,238,0.3)',yAxisID:'y'},
-    {type:'bar',label:'Fakt $',data:mm.map(x=>Math.round(x.fakt_xarajat||0)),backgroundColor:'rgba(232,91,91,0.6)',yAxisID:'y'},
-    {type:'line',label:'Plan lidlar',data:mm.map(x=>Math.round(x.plan_lidlar||0)),borderColor:'#5b8dee',borderDash:[4,2],backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'},
-    {type:'line',label:'Fakt lidlar',data:mm.map(x=>Math.round(x.fakt_lidlar||0)),borderColor:'#2eca8a',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}
-  ] : [
-    {type:'bar',label:'Xarajat $',data:mm.map(x=>x.xarajat_usd||0),backgroundColor:'rgba(232,91,91,0.4)',yAxisID:'y'},
-    {type:'line',label:'Lidlar',data:mm.map(x=>x.leadlar||0),borderColor:'#5b8dee',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}
-  ];
-  charts['mktMonthly']=new Chart(document.getElementById('mktMonthlyChart'),{data:{labels:mm.map(x=>(x.oy||'').toString().substring(5)||''),datasets:mktDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
+  const mm=(m.monthly||[]).filter(x=>x.oy>='2025-09');
+  charts['mktMonthly']=new Chart(document.getElementById('mktMonthlyChart'),{data:{labels:mm.map(x=>x.oy?.substring(5)||''),datasets:[{type:'bar',label:'Xarajat $',data:mm.map(x=>x.xarajat_usd),backgroundColor:'rgba(232,91,91,0.4)',yAxisID:'y'},{type:'line',label:'Lidlar',data:mm.map(x=>x.leadlar),borderColor:'#5b8dee',backgroundColor:'transparent',pointRadius:3,tension:0.3,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
   dc('mktRevenue');
   charts['mktRevenue']=new Chart(document.getElementById('mktRevenueChart'),{type:'line',data:{labels:(m.revenue||[]).map(x=>x.oy?.substring(5)||''),datasets:[{data:(m.revenue||[]).map(x=>x.revenue/1000000),borderColor:'#2eca8a',backgroundColor:'rgba(46,202,138,0.1)',fill:true,tension:0.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v.toFixed(0)+'M'}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
   const mb=document.getElementById('mktManbaBody'); mb.innerHTML='';
   (m.manba_xarajat||[]).forEach(x=>{mb.innerHTML+=`<tr><td style="font-weight:500;">${x.manba||'-'}</td><td style="text-align:center;font-family:'DM Mono',monospace;">$${n(x.xarajat_usd)}</td><td style="text-align:center;">${n(x.leadlar)}</td><td style="text-align:center;font-family:'DM Mono',monospace;color:var(--amber);">$${x.cpl}</td></tr>`;});
-  // Finance data
-  const fin = smData.finance || {};
-  const finMonthly = fin.monthly || [];
-  if(finMonthly.length > 0) {
-    const totalRev = finMonthly.reduce((s,m)=>s+m.revenue,0);
-    const totalMarg = finMonthly.reduce((s,m)=>s+m.marginal_profit,0);
-    const totalGross = finMonthly.reduce((s,m)=>s+m.gross_profit,0);
-    const finRevEl = document.getElementById('fin-revenue');
-    const finMargEl = document.getElementById('fin-margin');
-    const finGrossEl = document.getElementById('fin-gross');
-    if(finRevEl) finRevEl.textContent = (totalRev/1e6).toFixed(0)+'M';
-    if(finMargEl) finMargEl.textContent = (totalMarg/1e6).toFixed(0)+'M';
-    if(finGrossEl) finGrossEl.textContent = (totalGross/1e6).toFixed(0)+'M';
-    const finMargPct = document.getElementById('fin-margin-pct');
-    const finGrossPct = document.getElementById('fin-gross-pct');
-    if(finMargPct) finMargPct.textContent = (totalMarg/totalRev*100).toFixed(1)+'% marginal';
-    if(finGrossPct) finGrossPct.textContent = (totalGross/totalRev*100).toFixed(1)+'% gross';
-    dc('finRevenue');
-    charts['finRevenue'] = new Chart(document.getElementById('finRevenueChart'), {
-      type:'bar',
-      data:{
-        labels: finMonthly.map(m=>m.oy.substring(5)),
-        datasets:[
-          {label:'Revenue',data:finMonthly.map(m=>m.revenue/1e6),backgroundColor:'rgba(91,141,238,0.6)',borderRadius:4,borderSkipped:false},
-          {label:'Marginal profit',data:finMonthly.map(m=>m.marginal_profit/1e6),backgroundColor:'rgba(46,202,138,0.7)',borderRadius:4,borderSkipped:false},
-          {label:'Gross profit',data:finMonthly.map(m=>Math.max(0,m.gross_profit/1e6)),backgroundColor:'rgba(245,166,35,0.7)',borderRadius:4,borderSkipped:false}
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'M'}},x:{grid:{display:false}}}}
-    });
-  }
   dc('mktSubs');
   const platforms=['Instagram','Telegram','YouTube','LinkedIn'], colors=['#e85b5b','#5b8dee','#f5a623','#2eca8a'];
   const allDates=[...new Set((m.subscribers||[]).map(s=>s.sana))].sort();
