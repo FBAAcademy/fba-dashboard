@@ -593,42 +593,40 @@ async function loadData() {
 }
 
 async function downloadAndParseExcel(token, driveId, fileName) {
-  // Search o'rniga to'g'ridan-to'g'ri root children dan topamiz (cache muammosi yo'q)
-  const listRes = await fetch(
-    `https://graph.microsoft.com/v1.0/drives/${driveId}/root/children`,
-    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
-  );
-  const list = await listRes.json();
-  const items = (list.value || []).filter(i => i.name === fileName);
-  
-  // Root da topilmasa, Documents papkasida qidiramiz
-  let itemId = null;
-  if (items.length > 0) {
-    itemId = items[0].id;
-  } else {
-    // Documents yoki boshqa papkalarni ham ko'ramiz
-    const docRes = await fetch(
-      `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/Documents:/children`,
+  // Barcha papkalarni rekursiv ko'rib chiqib, faylni topamiz
+  async function searchInFolder(folderId) {
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children?$top=100`,
       { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
     );
-    const docs = await docRes.json();
-    const docItems = (docs.value || []).filter(i => i.name === fileName);
-    if (docItems.length > 0) {
-      itemId = docItems[0].id;
-    } else {
-      // Oxirgi urinish - search bilan (fallback)
-      const searchRes = await fetch(
-        `https://graph.microsoft.com/v1.0/drives/${driveId}/root/search(q='${encodeURIComponent(fileName)}')&$top=10`,
-        { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
-      );
-      const search = await searchRes.json();
-      const sItems = (search.value || []).filter(i => i.name === fileName);
-      if (!sItems.length) throw new Error(`${fileName} topilmadi`);
-      itemId = sItems[0].id;
+    const data = await res.json();
+    const items = data.value || [];
+    
+    // Shu papkada faylni qidiramiz
+    const found = items.find(i => i.name === fileName);
+    if (found) return found.id;
+    
+    // Papkalar ichida qidiramiz (subfolder)
+    for (const item of items) {
+      if (item.folder) {
+        const result = await searchInFolder(item.id);
+        if (result) return result;
+      }
     }
+    return null;
   }
 
-  // Fayl ID orqali to'g'ridan-to'g'ri yuklaymiz + timestamp = har doim yangi
+  // Root dan boshlaymiz
+  const rootRes = await fetch(
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/root`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+  );
+  const root = await rootRes.json();
+  
+  const itemId = await searchInFolder(root.id);
+  if (!itemId) throw new Error(`${fileName} topilmadi - barcha papkalar tekshirildi`);
+
+  // Fayl ID orqali yuklaymiz + timestamp = har doim yangi versiya
   const ts = Date.now();
   const fileRes = await fetch(
     `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?ts=${ts}`,
