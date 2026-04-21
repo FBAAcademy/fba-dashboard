@@ -593,17 +593,53 @@ async function loadData() {
 }
 
 async function downloadAndParseExcel(token, driveId, fileName) {
-  const searchRes = await fetch(
-    `https://graph.microsoft.com/v1.0/drives/${driveId}/root/search(q='${fileName}')`,
+  // Search o'rniga to'g'ridan-to'g'ri root children dan topamiz (cache muammosi yo'q)
+  const listRes = await fetch(
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/root/children`,
     { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
   );
-  const search = await searchRes.json();
-  const items = (search.value || []).filter(i => i.name && i.name.endsWith('.xlsx'));
-  if (!items.length) throw new Error(`${fileName} topilmadi`);
+  const list = await listRes.json();
+  const items = (list.value || []).filter(i => i.name === fileName);
   
+  // Root da topilmasa, Documents papkasida qidiramiz
+  let itemId = null;
+  if (items.length > 0) {
+    itemId = items[0].id;
+  } else {
+    // Documents yoki boshqa papkalarni ham ko'ramiz
+    const docRes = await fetch(
+      `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/Documents:/children`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+    );
+    const docs = await docRes.json();
+    const docItems = (docs.value || []).filter(i => i.name === fileName);
+    if (docItems.length > 0) {
+      itemId = docItems[0].id;
+    } else {
+      // Oxirgi urinish - search bilan (fallback)
+      const searchRes = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${driveId}/root/search(q='${encodeURIComponent(fileName)}')&$top=10`,
+        { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+      );
+      const search = await searchRes.json();
+      const sItems = (search.value || []).filter(i => i.name === fileName);
+      if (!sItems.length) throw new Error(`${fileName} topilmadi`);
+      itemId = sItems[0].id;
+    }
+  }
+
+  // Fayl ID orqali to'g'ridan-to'g'ri yuklaymiz + timestamp = har doim yangi
+  const ts = Date.now();
   const fileRes = await fetch(
-    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${items[0].id}/content?_cb=${Date.now()}`,
-    { headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }, cache: 'no-store' }
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?ts=${ts}`,
+    { 
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }, 
+      cache: 'no-store' 
+    }
   );
   const buffer = await fileRes.arrayBuffer();
   return buffer;
