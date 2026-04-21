@@ -2196,7 +2196,7 @@ function fmtMlnPlain(v) {
 
 function renderFinance() {
   if (!finData || !finData.months || !finData.months.length) {
-    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">Moliya ma'lumotlari yuklanmadi. Yangilang.</p>';
+    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">Moliya malumotlari yuklanmadi. Yangilang.</p>';
     return;
   }
 
@@ -2231,7 +2231,7 @@ function renderFinance() {
   // P/L jadvali - barcha oylar
   let plHtml = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
   plHtml += '<tr style="background:var(--header)">';
-  plHtml += '<th style="padding:6px 10px;text-align:left;color:var(--green)">Ko'rsatkich</th>';
+  plHtml += `<th style="padding:6px 10px;text-align:left;color:var(--green)">Ko'rsatkich</th>`;
   months.forEach(m => {
     plHtml += `<th style="padding:6px 8px;text-align:right;color:var(--dim)">${m.label}</th>`;
   });
