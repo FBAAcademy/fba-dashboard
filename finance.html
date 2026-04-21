@@ -140,12 +140,20 @@ const SITE_HOSTNAME = 'fbaacademy.sharepoint.com';
 const SITE_PATH = '/sites/FBATeam';
 const SCOPES = ['https://graph.microsoft.com/Files.Read.All'];
 
-const msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+let msalInstance = null;
 let finData = { months: [], pl: {}, cashflow: {}, daily: [] };
 let driveId = null;
 
+async function initMsal() {
+  if (msalInstance) return msalInstance;
+  msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+  await msalInstance.initialize();
+  return msalInstance;
+}
+
 async function signIn() {
   try {
+    await initMsal();
     await msalInstance.loginPopup({ scopes: SCOPES });
     document.getElementById('loginView').style.display = 'none';
     document.getElementById('mainView').style.display = 'block';
@@ -162,10 +170,16 @@ function signOut() {
 }
 
 async function getToken() {
+  await initMsal();
   const accounts = msalInstance.getAllAccounts();
   if (!accounts.length) throw new Error('Login qilmagan');
-  const res = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
-  return res.accessToken;
+  try {
+    const res = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+    return res.accessToken;
+  } catch(e) {
+    const res = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
+    return res.accessToken;
+  }
 }
 
 async function getDriveId(token) {
@@ -510,12 +524,16 @@ function renderAll() {
 
 // Check if already logged in
 (async function() {
-  await msalInstance.initialize();
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('mainView').style.display = 'block';
-    await loadAll();
+  try {
+    await initMsal();
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('mainView').style.display = 'block';
+      await loadAll();
+    }
+  } catch(e) {
+    console.log('Auto-login failed:', e.message);
   }
 })();
 </script>
