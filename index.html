@@ -641,14 +641,8 @@ async function loadData() {
     snap = analyzeCustomerBase(cbData);
     smData = { sales: salesData, marketing: mktData };
 
-    // Finance ma'lumotlarini yuklash
-    setLoadingText("Moliya ma'lumotlari yuklanmoqda...");
-    try {
-      const finBuffer = await downloadAndParseExcel(token, driveId, "Fin Model - Fact Only.xlsb");
-      const cashBuffer = await downloadAndParseExcel(token, driveId, "Cashier.xlsb");
-      finData = analyzeFinance(finBuffer, cashBuffer);
-      console.log("✅ Finance data yuklandi");
-    } catch(e) { console.warn("Finance xato:", e.message); }
+    // Finance lazy load - faqat Moliya sahifasi ochilganda yuklanadi
+    console.log("✅ Asosiy ma'lumotlar yuklandi. Moliya alohida yuklanadi.");
     
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
     hideLoading();
@@ -2200,9 +2194,43 @@ function fmtMlnPlain(v) {
   return (v / 1_000_000).toFixed(1) + 'M';
 }
 
+async function loadFinanceData() {
+  if (finData && finData.months && finData.months.length > 0) return; // allaqachon yuklangan
+  try {
+    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">⏳ Moliya ma'lumotlari yuklanmoqda...</p>';
+    const token = await getToken();
+    const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`, {
+      headers: { Authorization: `Bearer ${token}` }, cache: 'no-store'
+    });
+    const site = await siteRes.json();
+    const driveRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${site.id}/drive`, {
+      headers: { Authorization: `Bearer ${token}` }, cache: 'no-store'
+    });
+    const drive = await driveRes.json();
+    const driveId = drive.id;
+
+    const finBuffer = await downloadAndParseExcel(token, driveId, "Fin Model - Fact Only.xlsb");
+    const cashBuffer = await downloadAndParseExcel(token, driveId, "Cashier.xlsb");
+    finData = analyzeFinance(finBuffer, cashBuffer);
+    console.log("✅ Finance data yuklandi:", finData.months.length, "oy");
+  } catch(e) {
+    console.error("Finance yuklash xato:", e);
+    document.getElementById('fin-pl-table').innerHTML = `<p style="color:#e83a3a;padding:20px">❌ Xato: ${e.message}</p>`;
+  }
+}
+
 function renderFinance() {
+  // Lazy load - agar yuklanmagan bo'lsa yukla
   if (!finData || !finData.months || !finData.months.length) {
-    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">Moliya malumotlari yuklanmadi. Yangilang.</p>';
+    loadFinanceData().then(() => renderFinanceUI());
+    return;
+  }
+  renderFinanceUI();
+}
+
+function renderFinanceUI() {
+  if (!finData || !finData.months || !finData.months.length) {
+    document.getElementById('fin-pl-table').innerHTML = '<p style="color:var(--dim);padding:20px">Moliya malumotlari yuklanmadi.</p>';
     return;
   }
 
