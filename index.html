@@ -594,6 +594,9 @@ async function loadData() {
 
 async function downloadAndParseExcel(token, driveId, fileName) {
   // Barcha papkalarni rekursiv ko'rib chiqib, faylni topamiz
+  // Fayl nomining asosiy qismini olamiz (kengaytiksiz)
+  const baseFileName = fileName.replace(/\.xlsx$/i, '');
+  
   async function searchInFolder(folderId) {
     const res = await fetch(
       `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children?$top=100`,
@@ -602,9 +605,19 @@ async function downloadAndParseExcel(token, driveId, fileName) {
     const data = await res.json();
     const items = data.value || [];
     
-    // Shu papkada faylni qidiramiz
-    const found = items.find(i => i.name === fileName);
-    if (found) return found.id;
+    // .xlsx va .xlsb ikkalasini qidiramiz, eng yangi versiyani tanlaymiz
+    const matches = items.filter(i => 
+      i.name === fileName || 
+      i.name === baseFileName + '.xlsb' ||
+      i.name === baseFileName + '.xlsx'
+    );
+    
+    if (matches.length > 0) {
+      // Eng yangi faylni tanlaymiz
+      matches.sort((a, b) => new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime));
+      console.log(`✅ Topildi: ${matches[0].name} | ${new Date(matches[0].lastModifiedDateTime).toLocaleString()} | ${(matches[0].size/1024/1024).toFixed(2)}MB`);
+      return { id: matches[0].id, name: matches[0].name };
+    }
     
     // Papkalar ichida qidiramiz (subfolder)
     for (const item of items) {
@@ -623,16 +636,13 @@ async function downloadAndParseExcel(token, driveId, fileName) {
   );
   const root = await rootRes.json();
   
-  const itemId = await searchInFolder(root.id);
-  if (!itemId) throw new Error(`${fileName} topilmadi - barcha papkalar tekshirildi`);
+  const fileInfo = await searchInFolder(root.id);
+  if (!fileInfo) throw new Error(`${fileName} topilmadi - barcha papkalar tekshirildi`);
+  const itemId = fileInfo.id;
+  const actualFileName = fileInfo.name;
 
   // Fayl metadata ni tekshiramiz (hajm va o'zgarish vaqti)
-  const metaRes = await fetch(
-    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}`,
-    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
-  );
-  const meta = await metaRes.json();
-  console.log(`📁 ${fileName}: hajm=${(meta.size/1024/1024).toFixed(2)}MB, o'zgargan=${meta.lastModifiedDateTime}, ID=${itemId}`);
+  console.log(`📁 Yuklanmoqda: ${actualFileName} | ID=${itemId}`);
 
   // Fayl ID orqali yuklaymiz + timestamp = har doim yangi versiya
   const ts = Date.now();
