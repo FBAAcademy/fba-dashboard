@@ -653,36 +653,38 @@ async function fetchExcel(token, driveId, baseName) {
 // ══════════════════════════════════════════
 // EXCEL PARSERS
 // ══════════════════════════════════════════
+
+// SPL SFP SCF sheet strukturasi:
+// Row 7: header (col6=yil, col7..18=oylar, col19..22=kvartallar)
+// Row 8+: ma'lumotlar (col0=label, col6=yillik jami, col7..18=oy qiymatlari)
+// Row 117+: SCF qismi (OPERATING, INVESTING, FINANCING, CLOSING BALANCE)
+
 function parsePL(buffer) {
-  const wb = XLSX.read(buffer, { type:'array', cellDates:true });
-  // SPL sheet — P&L
-  const splSheet = wb.SheetNames.find(s => s === 'SPL' || s.toUpperCase().includes('SPL') || s.toUpperCase().includes('P&L') || s.toUpperCase().includes('INCOME'));
-  // SFP sheet — Balance Sheet
-  const sfpSheet = wb.SheetNames.find(s => s === 'SFP' || s.toUpperCase().includes('SFP') || s.toUpperCase().includes('BALANCE'));
-  // SCF sheet — Cash Flow
-  const scfSheet = wb.SheetNames.find(s => s === 'SCF' || s.toUpperCase().includes('SCF') || s.toUpperCase().includes('CASH'));
+  const wb = XLSX.read(buffer, { type:'array', cellDates:false });
+  console.log('Sheets:', wb.SheetNames);
 
-  console.log('Sheets:', wb.SheetNames, '| SPL:', splSheet, '| SCF:', scfSheet);
+  // SPL SFP SCF — asosiy sheet
+  const splSheet = wb.SheetNames.find(s => s.includes('SPL')) || wb.SheetNames[0];
+  // Direct CASH FLOW — oylik CF pivot
+  const cfSheet = wb.SheetNames.find(s => s.includes('CASH FLOW') || s.includes('Cash Flow'));
 
-  let pl = [], cf = [];
+  let splRows = [], cfRows = [];
 
   if (splSheet) {
     const ws = wb.Sheets[splSheet];
-    pl = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
+    splRows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
   }
-  if (scfSheet) {
-    const ws = wb.Sheets[scfSheet];
-    cf = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
+  if (cfSheet) {
+    const ws = wb.Sheets[cfSheet];
+    cfRows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
   }
 
-  return { pl, cf, sheetNames: wb.SheetNames };
+  return { splRows, cfRows };
 }
 
 function parseCashier(buffer) {
-  const wb = XLSX.read(buffer, { type:'array', cellDates:true });
-  const cashSheet = wb.SheetNames.find(s =>
-    s === 'Cash Data' || s.toLowerCase().includes('cash') || s.toLowerCase().includes('kunlik')
-  ) || wb.SheetNames[0];
+  const wb = XLSX.read(buffer, { type:'array', cellDates:false });
+  const cashSheet = wb.SheetNames.find(s => s === 'Cash Data' || s.toLowerCase().includes('cash')) || wb.SheetNames[0];
   console.log('Cashier sheet:', cashSheet);
   const ws = wb.Sheets[cashSheet];
   const rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:false, defval:null });
@@ -713,240 +715,238 @@ function renderAll() {
 }
 
 // ── P&L RENDERER ──
+// SPL SFP SCF sheet: Row 7 = header, col6=yillik, col7..18 = Jan..Dec
+// Label col = 0, data cols = 6 (annual) + 7-18 (monthly)
 function renderPL(data, year, month) {
-  const { pl } = data;
-  if (!pl || pl.length < 3) {
+  const { splRows } = data;
+  if (!splRows || splRows.length < 10) {
     document.getElementById('plTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot mavjud emas</div>';
     return;
   }
 
-  // Header qatorni topamiz (oylar yozilgan qator)
-  // Odatda: col 0 = row label, col 1..N = oylar / yillar
-  const headerRow = pl[0] || [];
-  const rows = pl.slice(1);
+  // Header row = row index 7
+  const HEADER_ROW = 7;
+  // Data starts from row 8, ends before SCF section (row ~117)
+  const DATA_START = 8;
+  const DATA_END = 117;
 
-  // Ustun indekslarini topamiz (yil/oy asosida)
-  // Header da "Jan", "Feb" yoki "2026-01" kabi formatlar bo'lishi mumkin
-  // Eng sodda: barcha raqamli ustunlarni olamiz
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec',
-                      'Yan','Fev','Mar','Apr','May','Iyu','Iyu','Avg','Sen','Okt','Noy','Dek'];
+  // Col 6 = yillik jami, col 7..18 = Jan..Dec
+  const ANNUAL_COL = 6;
+  const MONTH_COLS = [7,8,9,10,11,12,13,14,15,16,17,18]; // Jan=0..Dec=11
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // Ustunlarni aniqlash
-  const colMeta = []; // {idx, label, year, month}
-  headerRow.forEach((cell, i) => {
-    if (i === 0) return;
-    if (!cell) return;
-    const s = String(cell).trim();
-    colMeta.push({ idx: i, label: s });
-  });
-
-  // Filter: year & month
-  let cols = colMeta;
-  if (cols.length === 0) {
-    // Raqamli ustunlar bo'yicha topamiz
-    headerRow.forEach((cell, i) => {
-      if (i > 0) cols.push({ idx: i, label: cell || `Col${i}` });
-    });
+  // Oy tanlangan bo'lsa — faqat o'sha ustun, aks holda barcha oylar
+  let displayCols;
+  if (month !== null) {
+    displayCols = [{ idx: MONTH_COLS[month], label: MONTH_NAMES[month] }];
+  } else {
+    // Yillik jami + barcha oylar
+    displayCols = [
+      { idx: ANNUAL_COL, label: 'Yillik' },
+      ...MONTH_NAMES.map((m, i) => ({ idx: MONTH_COLS[i], label: m }))
+    ];
   }
 
-  // Agar oy tanlangan bo'lsa va ustunlar oy nomlarini o'z ichiga olsa — filter
-  // Aks holda barcha ustunlarni ko'rsatamiz
-  const MONTHS_UZ = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
-  const selectedLabel = month !== null ? MONTHS_UZ[month] : null;
+  const kpi = { revenue:0, marginal:0, gross:0, ebitda:0, ebit:0, net:0 };
 
-  // Build table
-  let html = '<table>';
-  html += '<thead><tr><th style="width:38%">Ko\'rsatkich</th>';
-  cols.forEach(c => {
-    const isSelected = selectedLabel && String(c.label).toLowerCase().includes(selectedLabel.toLowerCase().substring(0,3));
-    html += `<th class="num" ${isSelected ? 'style="color:var(--blue)"' : ''}>${c.label}</th>`;
-  });
-  html += '</tr></thead><tbody>';
-
-  // Key metrics to highlight
-  const keyMetrics = {
-    revenue: ['revenue','daromad','выручка','total revenue'],
-    marginal: ['marginal','gross margin'],
-    gross: ['gross profit','yalpi foyda'],
-    ebitda: ['ebitda'],
-    ebit: ['ebit'],
-    net: ['net profit','sof foyda','чистая прибыль']
+  // P&L da muhim qatorlar row indekslari (0-based)
+  const KEY_ROWS = {
+    revenue: 8,       // Revenue
+    marginal: 24,     // Marginal profit
+    gross: 38,        // Gross profit
+    ebitda: 89,       // EBITDA
+    ebit: 96,         // EBIT
+    net: 102,         // Net profit
   };
 
-  let kpiValues = { revenue:0, marginal:0, gross:0, ebitda:0, ebit:0, net:0 };
+  // KPI qiymatlarini olish
+  const getVal = (rowIdx, colIdx) => {
+    const row = splRows[rowIdx];
+    if (!row) return 0;
+    const v = row[colIdx];
+    const n = parseFloat(String(v === null || v === undefined ? '0' : v));
+    return isNaN(n) ? 0 : n;
+  };
 
-  rows.forEach((row, ri) => {
-    if (!row || row.every(c => c === null || c === '')) return;
-    const label = String(row[0] || '').trim();
-    if (!label) return;
-
-    const isSection = label.startsWith('=') || label.startsWith('—') || label.toUpperCase() === label && label.length > 3;
-    const isTotal = label.toLowerCase().includes('total') || label.toLowerCase().includes('jami') || label.toLowerCase().includes('итого');
-    const isIndented = label.startsWith(' ') || label.startsWith('\t') || label.startsWith('  ');
-
-    let rowClass = '';
-    if (isSection) rowClass = 'pl-row-section';
-    else if (isTotal) rowClass = 'pl-row-total';
-    else if (isIndented) rowClass = 'pl-indent';
-
-    html += `<tr class="${rowClass}">`;
-    html += `<td>${label.replace(/^[-=\s]+/, '')}</td>`;
-
-    cols.forEach((c, ci) => {
-      const val = row[c.idx];
-      const num = parseFloat(String(val || '').replace(/\s/g,'').replace(/,/g,'.'));
-      if (isNaN(num) || val === null || val === '') {
-        html += `<td class="num neu">—</td>`;
-      } else {
-        const fmt = fmtNum(num);
-        const cls = num > 0 ? 'pos' : num < 0 ? 'neg' : 'neu';
-        html += `<td class="num ${cls}">${fmt}</td>`;
-        // KPI extraction (oxirgi ustun yoki tanlangan ustun)
-        if (ci === cols.length - 1 || (selectedLabel && String(c.label).toLowerCase().includes(selectedLabel.toLowerCase().substring(0,3)))) {
-          const lbl = label.toLowerCase();
-          if (keyMetrics.revenue.some(k => lbl.includes(k))) kpiValues.revenue = num;
-          if (keyMetrics.marginal.some(k => lbl.includes(k))) kpiValues.marginal = num;
-          if (keyMetrics.gross.some(k => lbl.includes(k))) kpiValues.gross = num;
-          if (keyMetrics.ebitda.some(k => lbl.includes(k))) kpiValues.ebitda = num;
-          if (keyMetrics.ebit.some(k => lbl.includes(k)) && !lbl.includes('ebitda')) kpiValues.ebit = num;
-          if (keyMetrics.net.some(k => lbl.includes(k))) kpiValues.net = num;
-        }
-      }
-    });
-    html += '</tr>';
+  const displayColIdx = month !== null ? MONTH_COLS[month] : ANNUAL_COL;
+  Object.keys(KEY_ROWS).forEach(k => {
+    kpi[k] = getVal(KEY_ROWS[k], displayColIdx);
   });
 
-  html += '</tbody></table>';
-  document.getElementById('plTableWrap').innerHTML = html;
-
-  // Update KPI cards
+  // KPI cards yangilash
+  const KPI_COLORS = { revenue:'gr', marginal:'bl', gross:'bl', ebitda:'am', ebit:'am', net:'re' };
   ['revenue','marginal','gross','ebitda','ebit','net'].forEach(k => {
     const el = document.getElementById(`kv-${k}`);
     const sub = document.getElementById(`ks-${k}`);
-    if (el) {
-      const v = kpiValues[k];
-      el.textContent = fmtNum(v);
-      el.className = 'kv ' + (v > 0 ? '' : v < 0 ? '' : '');
-      if (sub) sub.textContent = v >= 1e9 ? 'mlrd so\'m' : v >= 1e6 ? 'mln so\'m' : 'so\'m';
-    }
-    // Swap card color based on positive/negative
-    const card = document.querySelector(`#kv-${k}`)?.closest('.kpi');
-    if (card && kpiValues[k] < 0) {
-      card.className = card.className.replace(/\b(gr|bl|am|re|pu|te)\b/, 're');
+    const card = el?.closest('.kpi');
+    if (el) el.textContent = fmtNum(kpi[k]);
+    if (sub) sub.textContent = Math.abs(kpi[k]) >= 1e9 ? 'mlrd so\'m' : Math.abs(kpi[k]) >= 1e6 ? 'mln so\'m' : 'so\'m';
+    if (card) {
+      const base = KPI_COLORS[k];
+      card.className = card.className.replace(/\b(gr|bl|am|re|pu|te)\b/, kpi[k] < 0 ? 're' : base);
     }
   });
 
-  // Revenue chart — oylik
-  const revChartData = buildMonthlyChartData(rows, cols, keyMetrics.revenue);
-  renderLineChart('revenueChart', revChartData.labels, [
-    { label:'Revenue', data: revChartData.data, color: '#2eca8a' }
-  ]);
+  // P&L jadval quramiz
+  // Faqat label bor va bo'sh bo'lmagan qatorlarni
+  const SKIP_LABELS = ['%', '0', ''];
+  let html = '<table><thead><tr><th style="min-width:200px">Ko\'rsatkich</th>';
+  displayCols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
+  html += '</tr></thead><tbody>';
 
-  // Profit chart
-  const grossData = buildMonthlyChartData(rows, cols, keyMetrics.gross);
-  const ebitdaData = buildMonthlyChartData(rows, cols, keyMetrics.ebitda);
-  const netData = buildMonthlyChartData(rows, cols, keyMetrics.net);
-  renderLineChart('profitChart', revChartData.labels, [
-    { label:'Gross Profit', data: grossData.data, color: '#5b8dee' },
-    { label:'EBITDA', data: ebitdaData.data, color: '#f5a623' },
-    { label:'Net Profit', data: netData.data, color: '#e85b5b' },
-  ]);
+  for (let ri = DATA_START; ri < Math.min(DATA_END, splRows.length); ri++) {
+    const row = splRows[ri];
+    if (!row) continue;
+    const rawLabel = row[0];
+    if (rawLabel === null || rawLabel === undefined) continue;
+    const label = String(rawLabel).trim();
+    if (!label || SKIP_LABELS.includes(label) || label === '0.0') continue;
 
-  // Revenue breakdown pie (simple — first few line items under revenue)
-  const revRows = rows.filter(r => {
-    const l = String(r[0]||'').toLowerCase();
-    return l.includes('daromad') || l.includes('revenue') || l.includes('income') || l.includes('sotuv');
-  }).slice(0,6);
-  const lastColIdx = cols.length > 0 ? cols[cols.length-1].idx : 1;
-  const revBreakLabels = revRows.map(r => String(r[0]||'').trim());
-  const revBreakData = revRows.map(r => Math.abs(parseFloat(String(r[lastColIdx]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0));
-  renderPieChart('revBreakChart', revBreakLabels, revBreakData, [
-    '#2eca8a','#5b8dee','#f5a623','#9b7fe8','#2ec4b6','#e85b5b'
-  ]);
+    // Qator uslubi
+    const isTotal = ['Revenue','Marginal profit','Gross profit','EBITDA','EBIT','Net profit',
+                     'Production costs','Admin expenses','Selling costs','Marginal cost of sal'].some(k => label.startsWith(k));
+    const isSub = !isTotal && label.length > 0;
+    let rowCls = isTotal ? 'pl-row-total' : 'pl-indent';
 
-  // Cost breakdown
-  const costRows = rows.filter(r => {
-    const l = String(r[0]||'').toLowerCase();
-    return l.includes('xarajat') || l.includes('cost') || l.includes('expense') || l.includes('расход');
-  }).slice(0,6);
-  const costLabels = costRows.map(r => String(r[0]||'').trim());
-  const costData = costRows.map(r => Math.abs(parseFloat(String(r[lastColIdx]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0));
-  renderPieChart('costBreakChart', costLabels, costData, [
-    '#e85b5b','#f5a623','#9b7fe8','#5b8dee','#2ec4b6','#2eca8a'
+    html += `<tr class="${rowCls}">`;
+    html += `<td style="${isSub && !isTotal ? 'padding-left:20px;color:var(--muted)' : 'font-weight:500'}">${label}</td>`;
+
+    displayCols.forEach(c => {
+      const v = row[c.idx];
+      const n = v === null || v === undefined ? null : parseFloat(String(v));
+      if (n === null || isNaN(n) || n === 0) {
+        html += `<td class="num neu">—</td>`;
+      } else {
+        html += `<td class="num ${n > 0 ? 'pos' : 'neg'}">${fmtNum(n)}</td>`;
+      }
+    });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('plTableWrap').innerHTML = html;
+
+  // Revenue breakdown pie — Full course, Hybrid, Revision, Video lesson, Exclusive
+  const revSubLabels = ['Full course','Hybrid','Revision','Video lesson','Exclusive'];
+  const revSubRows = [10,11,12,13,14]; // actual row indices
+  const revBreakLabels = [], revBreakData = [];
+  revSubRows.forEach((ri, i) => {
+    const v = Math.abs(getVal(ri, displayColIdx));
+    if (v > 0) { revBreakLabels.push(revSubLabels[i]); revBreakData.push(v); }
+  });
+  renderPieChart('revBreakChart', revBreakLabels, revBreakData, ['#2eca8a','#5b8dee','#f5a623','#9b7fe8','#2ec4b6']);
+
+  // Cost breakdown pie — main cost categories
+  const costLabels2 = ['Marginal cost','Production costs','Admin expenses','Selling costs','Marketing costs'];
+  const costRows2 = [16,26,43,72,82];
+  const costBL = [], costBD = [];
+  costRows2.forEach((ri, i) => {
+    const v = Math.abs(getVal(ri, displayColIdx));
+    if (v > 0) { costBL.push(costLabels2[i]); costBD.push(v); }
+  });
+  renderPieChart('costBreakChart', costBL, costBD, ['#e85b5b','#f5a623','#9b7fe8','#5b8dee','#2ec4b6']);
+
+  // Oylik grafiklar (barcha oylar)
+  const monthLabels = MONTH_NAMES;
+  const revMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.revenue, ci));
+  renderLineChart('revenueChart', monthLabels, [
+    { label:'Revenue', data: revMonthly, color:'#2eca8a' }
+  ]);
+  const grossMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.gross, ci));
+  const ebitdaMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.ebitda, ci));
+  const netMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.net, ci));
+  renderLineChart('profitChart', monthLabels, [
+    { label:'Gross Profit', data: grossMonthly, color:'#5b8dee' },
+    { label:'EBITDA', data: ebitdaMonthly, color:'#f5a623' },
+    { label:'Net Profit', data: netMonthly, color:'#e85b5b' },
   ]);
 }
 
 // ── CF RENDERER ──
+// Direct CASH FLOW sheet: Row 6 = header (Row Labels | Jan | Feb | Mar)
+// Row 7 = OPENING BALANCE, Row 9 = OPERATING, Row 11 = INVESTING,
+// Row 13 = FINANCING, Row 17 = CLOSING BALANCE
 function renderCF(data, year, month) {
-  const { cf } = data;
-  if (!cf || cf.length < 2) {
-    document.getElementById('cfTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot mavjud emas (SCF sheet topilmadi)</div>';
-    ['ocf','icf','fcf'].forEach(k => document.getElementById(`kv-${k}`).textContent = '—');
+  const { cfRows } = data;
+  if (!cfRows || cfRows.length < 8) {
+    document.getElementById('cfTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Cash Flow ma\'lumot topilmadi (Direct CASH FLOW sheet)</div>';
+    ['ocf','icf','fcf'].forEach(k => { const el = document.getElementById(`kv-${k}`); if(el) el.textContent='—'; });
     return;
   }
 
-  const headerRow = cf[0] || [];
-  const rows = cf.slice(1);
-  const cols = [];
-  headerRow.forEach((cell, i) => { if (i > 0 && cell) cols.push({ idx:i, label: String(cell).trim() }); });
+  // Row 6 = header: ['Row Labels', 'Jan', 'Feb', 'Mar', ...]
+  const headerRow = cfRows[6] || [];
+  const colLabels = [];
+  headerRow.forEach((c, i) => { if (i > 0 && c) colLabels.push({ idx:i, label: String(c) }); });
 
-  // Build table
-  let html = '<table><thead><tr><th style="width:38%">Ko\'rsatkich</th>';
-  cols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
-  html += '</tr></thead><tbody>';
+  // Oy filteri
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let displayCols = colLabels;
+  if (month !== null) {
+    const mName = MONTH_NAMES[month];
+    const found = colLabels.filter(c => c.label === mName);
+    if (found.length > 0) displayCols = found;
+  }
+
+  // Key rows: 7=OPENING, 9=OPERATING, 11=INVESTING, 13=FINANCING, 15=INTERNAL, 17=CLOSING
+  const CF_ROWS = [
+    { ri: 7,  label: 'OPENING BALANCE',      key: null },
+    { ri: 9,  label: 'OPERATING ACTIVITIES',  key: 'ocf' },
+    { ri: 11, label: 'INVESTING ACTIVITIES',  key: 'icf' },
+    { ri: 13, label: 'FINANCING ACTIVITIES',  key: 'fcf' },
+    { ri: 17, label: 'CLOSING BALANCE',       key: null },
+  ];
 
   const kpiCF = { ocf:0, icf:0, fcf:0 };
 
-  rows.forEach(row => {
-    if (!row || row.every(c => c === null || c === '')) return;
-    const label = String(row[0]||'').trim();
-    if (!label) return;
-    const lbl = label.toLowerCase();
-    html += '<tr>';
+  // KPI — oy tanlangan bo'lsa o'sha oy, aks holda barcha oylar yig'indisi
+  CF_ROWS.forEach(({ ri, key }) => {
+    if (!key) return;
+    const row = cfRows[ri];
+    if (!row) return;
+    if (month !== null) {
+      const col = displayCols[0];
+      if (col) kpiCF[key] = parseFloat(String(row[col.idx] || 0)) || 0;
+    } else {
+      kpiCF[key] = colLabels.reduce((sum, c) => sum + (parseFloat(String(row[c.idx] || 0)) || 0), 0);
+    }
+  });
+
+  ['ocf','icf','fcf'].forEach(k => {
+    const el = document.getElementById(`kv-${k}`);
+    if (el) el.textContent = fmtNum(kpiCF[k]);
+  });
+
+  // Jadval
+  let html = '<table><thead><tr><th style="width:220px">Ko\'rsatkich</th>';
+  displayCols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  CF_ROWS.forEach(({ ri, label }) => {
+    const row = cfRows[ri];
+    html += '<tr class="pl-row-total">';
     html += `<td>${label}</td>`;
-    cols.forEach((c, ci) => {
-      const val = row[c.idx];
-      const num = parseFloat(String(val||'').replace(/\s/g,'').replace(/,/g,'.'));
-      if (isNaN(num) || val === null || val === '') { html += `<td class="num neu">—</td>`; return; }
-      const cls = num > 0 ? 'pos' : num < 0 ? 'neg' : 'neu';
-      html += `<td class="num ${cls}">${fmtNum(num)}</td>`;
-      if (ci === cols.length - 1) {
-        if (lbl.includes('operat') || lbl.includes('asosiy') || lbl.includes('основн')) kpiCF.ocf = num;
-        if (lbl.includes('invest') || lbl.includes('капитал')) kpiCF.icf = num;
-        if (lbl.includes('financ') || lbl.includes('молия') || lbl.includes('finans')) kpiCF.fcf = num;
-      }
+    displayCols.forEach(c => {
+      const v = row ? parseFloat(String(row[c.idx] || 0)) || 0 : 0;
+      html += `<td class="num ${v > 0 ? 'pos' : v < 0 ? 'neg' : 'neu'}">${fmtNum(v)}</td>`;
     });
     html += '</tr>';
   });
   html += '</tbody></table>';
   document.getElementById('cfTableWrap').innerHTML = html;
 
-  // KPIs
-  ['ocf','icf','fcf'].forEach(k => {
-    const el = document.getElementById(`kv-${k}`);
-    if (el) el.textContent = fmtNum(kpiCF[k]);
-  });
-
   // CF Chart
-  const labels = cols.map(c => c.label);
-  const cfRows_op = rows.filter(r => String(r[0]||'').toLowerCase().includes('operat') || String(r[0]||'').toLowerCase().includes('asosiy'));
-  const cfRows_inv = rows.filter(r => String(r[0]||'').toLowerCase().includes('invest'));
-  const cfRows_fin = rows.filter(r => String(r[0]||'').toLowerCase().includes('financ') || String(r[0]||'').toLowerCase().includes('finans'));
-
-  const getColData = (rowArr) => cols.map(c => {
-    const row = rowArr[0];
-    if (!row) return 0;
-    const v = parseFloat(String(row[c.idx]||'0').replace(/\s/g,'').replace(/,/g,'.'));
-    return isNaN(v) ? 0 : v;
+  const chartLabels = colLabels.map(c => c.label);
+  const getRowData = (ri) => colLabels.map(c => {
+    const row = cfRows[ri];
+    return row ? parseFloat(String(row[c.idx] || 0)) || 0 : 0;
   });
-
-  renderBarChart('cfChart', labels, [
-    { label:'Operating CF', data: getColData(cfRows_op), color:'#2eca8a' },
-    { label:'Investing CF', data: getColData(cfRows_inv), color:'#5b8dee' },
-    { label:'Financing CF', data: getColData(cfRows_fin), color:'#f5a623' },
+  renderBarChart('cfChart', chartLabels, [
+    { label:'Operating CF',  data: getRowData(9),  color:'#2eca8a' },
+    { label:'Investing CF',  data: getRowData(11), color:'#5b8dee' },
+    { label:'Financing CF',  data: getRowData(13), color:'#f5a623' },
+    { label:'Closing Balance', data: getRowData(17), color:'#9b7fe8' },
   ]);
 }
-
 // ── CASHIER RENDERER ──
 function renderCashier(data, year, month) {
   const { rows } = data;
