@@ -862,89 +862,99 @@ function renderPL(data, year, month) {
 }
 
 // ── CF RENDERER ──
-// Direct CASH FLOW sheet: Row 6 = header (Row Labels | Jan | Feb | Mar)
-// Row 7 = OPENING BALANCE, Row 9 = OPERATING, Row 11 = INVESTING,
-// Row 13 = FINANCING, Row 17 = CLOSING BALANCE
+// SPL SFP SCF sheet, SCF qismi:
+// Row 117: header (col6=yillik, col7..18=Jan..Dec)
+// Row 118: OPENING BALANCE
+// Row 119: OPERATING ACTIVITIES  (yillik=col6, oylar=col7..18)
+// Row 183: INVESTING ACTIVITIES
+// Row 192: FINANCING ACTIVITIES
+// Row 201: Closing balance
 function renderCF(data, year, month) {
-  const { cfRows } = data;
-  if (!cfRows || cfRows.length < 8) {
-    document.getElementById('cfTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Cash Flow ma\'lumot topilmadi (Direct CASH FLOW sheet)</div>';
+  const { splRows } = data;
+  if (!splRows || splRows.length < 120) {
+    document.getElementById('cfTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Cash Flow ma\'lumot topilmadi</div>';
     ['ocf','icf','fcf'].forEach(k => { const el = document.getElementById(`kv-${k}`); if(el) el.textContent='—'; });
     return;
   }
 
-  // Row 6 = header: ['Row Labels', 'Jan', 'Feb', 'Mar', ...]
-  const headerRow = cfRows[6] || [];
-  const colLabels = [];
-  headerRow.forEach((c, i) => { if (i > 0 && c) colLabels.push({ idx:i, label: String(c) }); });
-
-  // Oy filteri
+  const ANNUAL_COL = 6;
+  const MONTH_COLS = [7,8,9,10,11,12,13,14,15,16,17,18];
   const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  let displayCols = colLabels;
-  if (month !== null) {
-    const mName = MONTH_NAMES[month];
-    const found = colLabels.filter(c => c.label === mName);
-    if (found.length > 0) displayCols = found;
-  }
 
-  // Key rows: 7=OPENING, 9=OPERATING, 11=INVESTING, 13=FINANCING, 15=INTERNAL, 17=CLOSING
-  const CF_ROWS = [
-    { ri: 7,  label: 'OPENING BALANCE',      key: null },
-    { ri: 9,  label: 'OPERATING ACTIVITIES',  key: 'ocf' },
-    { ri: 11, label: 'INVESTING ACTIVITIES',  key: 'icf' },
-    { ri: 13, label: 'FINANCING ACTIVITIES',  key: 'fcf' },
-    { ri: 17, label: 'CLOSING BALANCE',       key: null },
-  ];
+  const getVal = (rowIdx, colIdx) => {
+    const row = splRows[rowIdx];
+    if (!row) return 0;
+    const v = row[colIdx];
+    const n = parseFloat(String(v === null || v === undefined ? '0' : v));
+    return isNaN(n) ? 0 : n;
+  };
 
-  const kpiCF = { ocf:0, icf:0, fcf:0 };
+  // Tanlangan ustun
+  const displayColIdx = month !== null ? MONTH_COLS[month] : ANNUAL_COL;
 
-  // KPI — oy tanlangan bo'lsa o'sha oy, aks holda barcha oylar yig'indisi
-  CF_ROWS.forEach(({ ri, key }) => {
-    if (!key) return;
-    const row = cfRows[ri];
-    if (!row) return;
-    if (month !== null) {
-      const col = displayCols[0];
-      if (col) kpiCF[key] = parseFloat(String(row[col.idx] || 0)) || 0;
-    } else {
-      kpiCF[key] = colLabels.reduce((sum, c) => sum + (parseFloat(String(row[c.idx] || 0)) || 0), 0);
-    }
-  });
-
+  // KPI
+  const kpiCF = {
+    ocf: getVal(119, displayColIdx),
+    icf: getVal(183, displayColIdx),
+    fcf: getVal(192, displayColIdx),
+  };
   ['ocf','icf','fcf'].forEach(k => {
     const el = document.getElementById(`kv-${k}`);
     if (el) el.textContent = fmtNum(kpiCF[k]);
   });
 
-  // Jadval
-  let html = '<table><thead><tr><th style="width:220px">Ko\'rsatkich</th>';
+  // Jadval sarlavhalari
+  let displayCols;
+  if (month !== null) {
+    displayCols = [{ idx: MONTH_COLS[month], label: MONTH_NAMES[month] }];
+  } else {
+    displayCols = [
+      { idx: ANNUAL_COL, label: 'Yillik' },
+      ...MONTH_NAMES.map((m,i) => ({ idx: MONTH_COLS[i], label: m }))
+    ];
+  }
+
+  // CF qatorlari
+  const CF_ROWS = [
+    { ri: 118, label: 'Opening Balance',      indent: false },
+    { ri: 119, label: 'Operating Activities',  indent: false, key: 'ocf' },
+    { ri: 120, label: '↳ Receipts (main)',      indent: true },
+    { ri: 122, label: '↳ Refunds',              indent: true },
+    { ri: 124, label: '↳ Marginal cost',        indent: true },
+    { ri: 128, label: '↳ Production costs',     indent: true },
+    { ri: 183, label: 'Investing Activities',   indent: false, key: 'icf' },
+    { ri: 184, label: '↳ Inflow',               indent: true },
+    { ri: 188, label: '↳ Outflow',              indent: true },
+    { ri: 192, label: 'Financing Activities',   indent: false, key: 'fcf' },
+    { ri: 193, label: '↳ Inflow',               indent: true },
+    { ri: 197, label: '↳ Outflow',              indent: true },
+    { ri: 201, label: 'Closing Balance',        indent: false },
+  ];
+
+  let html = '<table><thead><tr><th style="min-width:200px">Ko\'rsatkich</th>';
   displayCols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
   html += '</tr></thead><tbody>';
 
-  CF_ROWS.forEach(({ ri, label }) => {
-    const row = cfRows[ri];
-    html += '<tr class="pl-row-total">';
-    html += `<td>${label}</td>`;
+  CF_ROWS.forEach(({ ri, label, indent }) => {
+    html += `<tr class="${indent ? '' : 'pl-row-total'}">`;
+    html += `<td style="${indent ? 'padding-left:20px;color:var(--muted);font-size:10px' : 'font-weight:600'}">${label}</td>`;
     displayCols.forEach(c => {
-      const v = row ? parseFloat(String(row[c.idx] || 0)) || 0 : 0;
-      html += `<td class="num ${v > 0 ? 'pos' : v < 0 ? 'neg' : 'neu'}">${fmtNum(v)}</td>`;
+      const v = getVal(ri, c.idx);
+      html += `<td class="num ${v > 0 ? 'pos' : v < 0 ? 'neg' : 'neu'}">${v !== 0 ? fmtNum(v) : '—'}</td>`;
     });
     html += '</tr>';
   });
   html += '</tbody></table>';
   document.getElementById('cfTableWrap').innerHTML = html;
 
-  // CF Chart
-  const chartLabels = colLabels.map(c => c.label);
-  const getRowData = (ri) => colLabels.map(c => {
-    const row = cfRows[ri];
-    return row ? parseFloat(String(row[c.idx] || 0)) || 0 : 0;
-  });
+  // CF Bar Chart — oylik
+  const chartLabels = MONTH_NAMES;
+  const getMonthData = (ri) => MONTH_COLS.map(ci => getVal(ri, ci));
   renderBarChart('cfChart', chartLabels, [
-    { label:'Operating CF',  data: getRowData(9),  color:'#2eca8a' },
-    { label:'Investing CF',  data: getRowData(11), color:'#5b8dee' },
-    { label:'Financing CF',  data: getRowData(13), color:'#f5a623' },
-    { label:'Closing Balance', data: getRowData(17), color:'#9b7fe8' },
+    { label:'Operating CF',   data: getMonthData(119), color:'#2eca8a' },
+    { label:'Investing CF',   data: getMonthData(183), color:'#5b8dee' },
+    { label:'Financing CF',   data: getMonthData(192), color:'#f5a623' },
+    { label:'Closing Balance', data: getMonthData(201), color:'#9b7fe8' },
   ]);
 }
 // ── CASHIER RENDERER ──
