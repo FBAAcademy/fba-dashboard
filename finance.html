@@ -2,213 +2,634 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBhMGEwZiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iNzAwIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMmVjYThhIj5GQTwvdGV4dD4KPC9zdmc+">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FBA Academy — Moliya</title>
+<title>FBA Academy — Finance Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,sans-serif;background:#0A0A1A;color:#E0E0E0;min-height:100vh}
-  .header{background:#111133;border-bottom:1px solid rgba(46,202,138,0.2);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
-  .logo{color:#2EC47E;font-weight:700;font-size:14px;letter-spacing:3px}
-  .subtitle{color:#888;font-size:11px}
-  .btn{background:#1A7F5A;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px}
-  .btn:hover{background:#2EC47E}
-  .btn-sec{background:transparent;border:1px solid rgba(46,202,138,0.3);color:#2EC47E;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:11px}
-  .container{padding:16px 20px}
-  .loading{display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:16px}
-  .spinner{width:40px;height:40px;border:3px solid rgba(46,202,138,0.2);border-top-color:#2EC47E;border-radius:50%;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .load-text{color:#888;font-size:13px}
-  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-  .card{background:#111133;border:1px solid rgba(46,202,138,0.15);border-radius:10px;padding:14px}
-  .card-title{font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
-  .card-val{font-size:22px;font-weight:700;margin-bottom:2px}
-  .card-sub{font-size:10px;color:#666}
-  .green{color:#2EC47E} .red{color:#E83A3A} .amber{color:#F5A623} .blue{color:#88AAFF}
-  .section{background:#111133;border:1px solid rgba(46,202,138,0.1);border-radius:10px;padding:16px;margin-bottom:16px}
-  .section-title{font-size:12px;font-weight:700;color:#2EC47E;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(46,202,138,0.15)}
-  table{width:100%;border-collapse:collapse;font-size:11px}
-  th{background:#0A1A0A;color:#2EC47E;padding:6px 10px;text-align:left;font-weight:600;white-space:nowrap}
-  td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
-  tr:hover td{background:rgba(46,202,138,0.04)}
-  .pos{color:#2EC47E;font-weight:600} .neg{color:#E83A3A;font-weight:600}
-  .bold{font-weight:700}
-  .indent{color:#aaa;padding-left:20px!important}
-  .highlight-row td{background:rgba(26,127,90,0.08)!important;font-weight:700}
-  .bar-bg{background:rgba(255,255,255,0.08);border-radius:3px;height:6px;margin-top:4px}
-  .bar-fill{height:6px;border-radius:3px}
-  .controls{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-  select{background:#111133;color:#E0E0E0;border:1px solid rgba(46,202,138,0.3);padding:5px 10px;border-radius:6px;font-size:11px}
-  .cf-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
-  .cf-label{font-size:12px;color:#aaa}
-  .cf-val{font-size:12px;font-weight:600}
-  .daily-wrap{max-height:350px;overflow-y:auto}
-  .error-box{background:rgba(232,58,58,0.1);border:1px solid rgba(232,58,58,0.3);border-radius:8px;padding:16px;color:#E83A3A;font-size:12px}
-  #loginView{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:20px}
-  #loginView h2{color:#2EC47E;font-size:20px}
-  #loginView p{color:#888;font-size:12px}
-  #mainView{display:none}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;
+  --border:rgba(255,255,255,0.08);--text:#e8e8f0;--muted:#8888aa;
+  --green:#2eca8a;--gdim:rgba(46,202,138,0.12);
+  --blue:#5b8dee;--bdim:rgba(91,141,238,0.12);
+  --amber:#f5a623;--adim:rgba(245,166,35,0.12);
+  --red:#e85b5b;--rdim:rgba(232,91,91,0.12);
+  --purple:#9b7fe8;--pdim:rgba(155,127,232,0.12);
+  --teal:#2ec4b6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;}
+
+/* ── SCREEN LAYERS ── */
+.screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.screen.hidden{display:none;}
+
+/* ── LOGIN / PIN BOX ── */
+.auth-box{background:var(--bg2);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:48px;width:400px;text-align:center;}
+.auth-logo{width:64px;height:64px;background:linear-gradient(135deg,#2eca8a,#2ec4b6);border-radius:16px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff;}
+.auth-title{font-size:20px;font-weight:600;margin-bottom:6px;}
+.auth-sub{font-size:12px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.auth-badge{display:inline-block;background:var(--adim);border:1px solid rgba(245,166,35,0.3);color:var(--amber);border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600;letter-spacing:0.5px;margin-bottom:24px;}
+.auth-steps{display:flex;gap:6px;justify-content:center;margin-bottom:28px;}
+.auth-step{width:28px;height:4px;border-radius:2px;background:var(--bg3);}
+.auth-step.done{background:var(--green);}
+.auth-step.active{background:var(--blue);}
+
+/* MS Login button */
+.ms-btn{width:100%;background:var(--blue);color:#fff;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity 0.2s;}
+.ms-btn:hover{opacity:0.9;}
+.ms-btn svg{width:20px;height:20px;}
+
+/* PIN input */
+.pin-label{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all 0.2s;}
+.pin-dot.filled{background:var(--blue);border-color:var(--blue);}
+.pin-dot.error{background:var(--red);border-color:var(--red);}
+.pin-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto 16px;}
+.pin-key{background:var(--bg3);border:1px solid var(--border);color:var(--text);cursor:pointer;padding:14px;border-radius:10px;font-size:18px;font-weight:500;font-family:'DM Mono',monospace;transition:all 0.15s;}
+.pin-key:hover{background:var(--bdim);border-color:var(--blue);color:var(--blue);}
+.pin-key:active{transform:scale(0.95);}
+.pin-key.del{font-size:14px;color:var(--muted);}
+.pin-key.zero{grid-column:2;}
+.pin-err{font-size:12px;color:var(--red);min-height:18px;margin-top:4px;}
+.pin-success{font-size:12px;color:var(--green);min-height:18px;margin-top:4px;}
+.back-link{font-size:11px;color:var(--muted);cursor:pointer;margin-top:16px;display:inline-block;}
+.back-link:hover{color:var(--text);}
+.auth-err{font-size:12px;color:var(--red);margin-top:12px;min-height:18px;}
+.auth-loading{font-size:12px;color:var(--muted);margin-top:10px;}
+
+/* ── LOADING BAR ── */
+#loadingBar{height:2px;background:var(--green);position:fixed;top:0;left:0;z-index:300;transition:width 0.3s;width:0;}
+.loading-overlay{position:fixed;inset:0;background:rgba(10,10,15,0.85);z-index:200;display:flex;align-items:center;justify-content:center;display:none;}
+.loading-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px 32px;text-align:center;}
+.loading-spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:12px;color:var(--muted);}
+
+/* ── HEADER ── */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.lm{width:30px;height:30px;background:linear-gradient(135deg,var(--green),var(--teal));border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;}
+.lt{font-size:13px;font-weight:600;}.ls{font-size:10px;color:var(--muted);}
+.fin-badge{background:var(--adim);border:1px solid rgba(245,166,35,0.3);color:var(--amber);border-radius:6px;padding:2px 8px;font-size:10px;font-weight:600;letter-spacing:0.4px;margin-left:8px;}
+.user-info{display:flex;align-items:center;gap:10px;}
+.user-name{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.logout-btn{background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:6px;font-size:11px;font-family:inherit;}
+.logout-btn:hover{color:var(--red);border-color:var(--red);}
+.refresh-btn{background:var(--gdim);border:1px solid rgba(46,202,138,0.2);color:var(--green);cursor:pointer;padding:4px 12px;border-radius:6px;font-size:11px;font-family:inherit;display:flex;align-items:center;gap:5px;}
+.refresh-btn:hover{opacity:0.8;}
+.back-dash{background:var(--bdim);border:1px solid rgba(91,141,238,0.2);color:var(--blue);cursor:pointer;padding:4px 12px;border-radius:6px;font-size:11px;font-family:inherit;text-decoration:none;display:flex;align-items:center;gap:5px;}
+.last-update{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+/* ── LAYOUT ── */
+.cont{max-width:1400px;margin:0 auto;padding:22px;}
+.fbar{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.flabel{font-size:11px;color:var(--muted);}
+.fselect{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:3px 10px;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;outline:none;}
+.fyb{background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:3px 11px;border-radius:6px;font-size:11px;font-family:'DM Mono',monospace;}
+.fyb.active{background:var(--bdim);border-color:var(--blue);color:var(--blue);}
+.fsep{width:1px;height:18px;background:var(--border);}
+
+.g6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px;}
+
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.gr::before{background:var(--green);}.kpi.bl::before{background:var(--blue);}
+.kpi.re::before{background:var(--red);}.kpi.am::before{background:var(--amber);}
+.kpi.pu::before{background:var(--purple);}.kpi.te::before{background:var(--teal);}
+.kl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px;}
+.kv{font-size:20px;font-weight:600;letter-spacing:-0.5px;line-height:1;margin-bottom:3px;}
+.ks{font-size:10px;color:var(--muted);}
+.kpi.gr .kv{color:var(--green);}.kpi.bl .kv{color:var(--blue);}
+.kpi.re .kv{color:var(--red);}.kpi.am .kv{color:var(--amber);}
+.kpi.pu .kv{color:var(--purple);}.kpi.te .kv{color:var(--teal);}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;}
+.ct{font-size:13px;font-weight:500;margin-bottom:2px;}.cs{font-size:11px;color:var(--muted);margin-bottom:14px;}
+.sh{display:flex;align-items:center;margin-bottom:14px;}
+.st{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;}
+.sl{flex:1;height:1px;background:var(--border);margin-left:12px;}
+
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{color:var(--muted);font-weight:500;font-size:10px;padding:7px 10px;text-align:left;border-bottom:0.5px solid var(--border);text-transform:uppercase;letter-spacing:0.4px;}
+td{padding:8px 10px;border-bottom:0.5px solid var(--border);color:var(--text);}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.02);}
+td.num{text-align:right;font-family:'DM Mono',monospace;}
+th.num{text-align:right;}
+
+.pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--muted);}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;font-family:'DM Mono',monospace;}
+.bg{background:var(--gdim);color:var(--green);}.br{background:var(--rdim);color:var(--red);}
+.ba{background:var(--adim);color:var(--amber);}.bb{background:var(--bdim);color:var(--blue);}
+
+.pl-row-section{background:var(--bg3);font-weight:600;font-size:11px;}
+.pl-row-total{font-weight:600;border-top:1px solid var(--border);}
+.pl-indent td:first-child{padding-left:24px;color:var(--muted);}
+
+.cashier-pos{color:var(--green);font-family:'DM Mono',monospace;}
+.cashier-neg{color:var(--red);font-family:'DM Mono',monospace;}
+.cashier-bal{font-weight:600;font-family:'DM Mono',monospace;}
 </style>
 </head>
 <body>
 
-<div id="loginView">
-  <div style="font-size:24px;font-weight:700;color:#2EC47E;letter-spacing:3px">FBA ACADEMY</div>
-  <h2>Moliya Bo'limi</h2>
-  <p>Microsoft hisobi bilan kiring</p>
-  <button class="btn" onclick="signIn()" style="padding:10px 28px;font-size:14px">Microsoft bilan kirish</button>
+<div id="loadingBar"></div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1: Microsoft Login
+══════════════════════════════════════ -->
+<div id="screen-ms" class="screen">
+  <div class="auth-box">
+    <div class="auth-logo">FA</div>
+    <div class="auth-badge">🔒 MOLIYA · MAXFIY</div>
+    <div class="auth-title">Finance Dashboard</div>
+    <div class="auth-sub">Bu sahifa faqat vakolatli xodimlar uchun.<br>Kirish uchun korporativ Microsoft 365 accountingizdan foydalaning.</div>
+    <div class="auth-steps">
+      <div class="auth-step active"></div>
+      <div class="auth-step"></div>
+    </div>
+    <button class="ms-btn" onclick="handleMsLogin()">
+      <svg viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>
+      Microsoft 365 bilan kirish
+    </button>
+    <div class="auth-err" id="msErr"></div>
+    <div class="auth-loading" id="msLoading"></div>
+  </div>
 </div>
 
-<div id="mainView">
-  <div class="header">
+<!-- ══════════════════════════════════════
+     SCREEN 2: PIN Code
+══════════════════════════════════════ -->
+<div id="screen-pin" class="screen hidden">
+  <div class="auth-box">
+    <div class="auth-logo">🔑</div>
+    <div class="auth-badge">QADAM 2 / 2</div>
+    <div class="auth-title">Maxfiy kod</div>
+    <div class="auth-sub" id="pinUserName">Kirish tasdiqlandi. Endi maxfiy kodni kiriting.</div>
+    <div class="auth-steps">
+      <div class="auth-step done"></div>
+      <div class="auth-step active"></div>
+    </div>
+    <div class="pin-label">Kodni kiriting (raqamlar)</div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-numpad" id="pinNumpad"></div>
+    <div class="pin-err" id="pinErr"></div>
+    <div class="pin-success" id="pinSuccess"></div>
+    <div style="margin-top:16px;">
+      <span class="back-link" onclick="backToMs()">← Boshqa account bilan kirish</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     LOADING OVERLAY
+══════════════════════════════════════ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Moliya ma'lumotlari yuklanmoqda...</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
+<div id="mainContent" style="display:none;">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="lm">FA</div>
     <div>
-      <div class="logo">FBA ACADEMY — MOLIYA</div>
-      <div class="subtitle">Fin Model + Cashier | Real-time SharePoint</div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <span id="lastUpdate" style="font-size:10px;color:#666"></span>
-      <button class="btn-sec" onclick="loadAll()">&#8635; Yangilash</button>
-      <button class="btn-sec" onclick="signOut()">Chiqish</button>
+      <div class="lt">FBA Academy <span class="fin-badge">💰 FINANCE</span></div>
+      <div class="ls">Moliya Dashboard · Maxfiy</div>
     </div>
   </div>
-
-  <div class="container">
-    <!-- Loading -->
-    <div id="loadingDiv" class="loading">
-      <div class="spinner"></div>
-      <div class="load-text" id="loadText">Yuklanmoqda...</div>
-    </div>
-
-    <!-- Content -->
-    <div id="content" style="display:none">
-      <!-- Controls -->
-      <div class="controls">
-        <label style="font-size:11px;color:#888">Oy:</label>
-        <select id="monthSel" onchange="renderAll()"></select>
-        <label style="font-size:11px;color:#888">Yil:</label>
-        <select id="yearSel" onchange="renderAll()"></select>
-      </div>
-
-      <!-- KPI Cards -->
-      <div class="grid-4" id="kpiCards"></div>
-
-      <!-- P&L + Revenue -->
-      <div class="grid-2">
-        <div class="section">
-          <div class="section-title">P&amp;L Statement</div>
-          <div id="plTable"></div>
-        </div>
-        <div>
-          <div class="section" style="margin-bottom:16px">
-            <div class="section-title">Revenue Tarkibi</div>
-            <div id="revBreakdown"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Cash Flow</div>
-            <div id="cashFlow"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Daily Balance -->
-      <div class="section">
-        <div class="section-title">Kunlik Balans (Cashier)</div>
-        <div class="daily-wrap">
-          <table id="dailyTable">
-            <thead><tr><th>Sana</th><th>Tushum</th><th>Chiqim</th><th>Balans</th><th>Faoliyat</th><th>Kategoriya</th></tr></thead>
-            <tbody id="dailyBody"></tbody>
-          </table>
-        </div>
-      </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="/" class="back-dash">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Asosiy Dashboard
+    </a>
+    <button class="refresh-btn" onclick="refreshData()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      Yangilash
+    </button>
+    <span class="last-update" id="lastUpdate"></span>
+    <div class="user-info">
+      <span class="user-name" id="userName"></span>
+      <button class="logout-btn" onclick="fullSignOut()">Chiqish</button>
     </div>
   </div>
 </div>
+
+<div class="cont">
+
+<!-- FILTER BAR -->
+<div class="fbar">
+  <span class="flabel">Yil:</span>
+  <select class="fselect" id="fin-year-sel" onchange="renderAll()">
+    <option value="2024">2024</option>
+    <option value="2025">2025</option>
+    <option value="2026" selected>2026</option>
+  </select>
+  <div class="fsep"></div>
+  <span class="flabel">Oy:</span>
+  <select class="fselect" id="fin-month-sel" onchange="renderAll()">
+    <option value="all">Barchasi (YTD)</option>
+    <option value="0">Yanvar</option>
+    <option value="1">Fevral</option>
+    <option value="2">Mart</option>
+    <option value="3">Aprel</option>
+    <option value="4">May</option>
+    <option value="5">Iyun</option>
+    <option value="6">Iyul</option>
+    <option value="7">Avgust</option>
+    <option value="8">Sentabr</option>
+    <option value="9">Oktabr</option>
+    <option value="10">Noyabr</option>
+    <option value="11">Dekabr</option>
+  </select>
+  <div class="fsep"></div>
+  <span class="flabel" style="color:var(--amber);">⚡ Real-time · SharePoint dan yuklanadi</span>
+</div>
+
+<!-- ── P&L KPI CARDS ── -->
+<div class="sh"><div class="st">P&L Asosiy ko'rsatkichlar</div><div class="sl"></div></div>
+<div class="g6" id="plKpiCards">
+  <div class="kpi gr"><div class="kl">Revenue</div><div class="kv" id="kv-revenue">—</div><div class="ks" id="ks-revenue">so'm</div></div>
+  <div class="kpi bl"><div class="kl">Marginal Profit</div><div class="kv" id="kv-marginal">—</div><div class="ks" id="ks-marginal">—</div></div>
+  <div class="kpi bl"><div class="kl">Gross Profit</div><div class="kv" id="kv-gross">—</div><div class="ks" id="ks-gross">—</div></div>
+  <div class="kpi am"><div class="kl">EBITDA</div><div class="kv" id="kv-ebitda">—</div><div class="ks" id="ks-ebitda">—</div></div>
+  <div class="kpi am"><div class="kl">EBIT</div><div class="kv" id="kv-ebit">—</div><div class="ks" id="ks-ebit">—</div></div>
+  <div class="kpi re"><div class="kl">Net Profit</div><div class="kv" id="kv-net">—</div><div class="ks" id="ks-net">—</div></div>
+</div>
+
+<!-- ── CHARTS ROW ── -->
+<div class="g2">
+  <div class="card">
+    <div class="ct">Oylik Revenue dinamikasi</div>
+    <div class="cs">So'm · million</div>
+    <div style="position:relative;height:200px;"><canvas id="revenueChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">Foyda ko'rsatkichlari — oylik</div>
+    <div class="cs">Gross Profit · EBITDA · Net Profit</div>
+    <div style="position:relative;height:200px;"><canvas id="profitChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ── P&L TABLE ── -->
+<div class="card">
+  <div class="ct">P&L Statement</div>
+  <div class="cs" id="pl-period-label">Tanlangan davr bo'yicha</div>
+  <div style="overflow-x:auto;" id="plTableWrap">
+    <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+  </div>
+</div>
+
+<!-- ── REVENUE BREAKDOWN ── -->
+<div class="g2">
+  <div class="card">
+    <div class="ct">Revenue tarkibi</div>
+    <div class="cs">Manba bo'yicha taqsimot</div>
+    <div style="position:relative;height:220px;"><canvas id="revBreakChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">Xarajatlar tarkibi</div>
+    <div class="cs">Kategoriya bo'yicha</div>
+    <div style="position:relative;height:220px;"><canvas id="costBreakChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ── CASH FLOW ── -->
+<div class="sh" style="margin-top:6px;"><div class="st">Cash Flow</div><div class="sl"></div></div>
+<div class="g3">
+  <div class="kpi gr"><div class="kl">Operating CF</div><div class="kv" id="kv-ocf">—</div><div class="ks">asosiy faoliyat</div></div>
+  <div class="kpi bl"><div class="kl">Investing CF</div><div class="kv" id="kv-icf">—</div><div class="ks">investitsiya</div></div>
+  <div class="kpi am"><div class="kl">Financing CF</div><div class="kv" id="kv-fcf">—</div><div class="ks">moliyalashtirish</div></div>
+</div>
+<div class="card">
+  <div class="ct">Cash Flow — oylik dinamika</div>
+  <div class="cs">SCF (Statement of Cash Flows)</div>
+  <div style="position:relative;height:200px;"><canvas id="cfChart"></canvas></div>
+</div>
+<div class="card">
+  <div class="ct">Cash Flow jadvali</div>
+  <div class="cs">Oyma-oy tafsilot</div>
+  <div style="overflow-x:auto;" id="cfTableWrap">
+    <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+  </div>
+</div>
+
+<!-- ── CASHIER / DAILY BALANCE ── -->
+<div class="sh" style="margin-top:6px;"><div class="st">Kunlik Balans (Cashier)</div><div class="sl"></div></div>
+<div class="g3" style="margin-bottom:14px;">
+  <div class="kpi gr"><div class="kl">Oxirgi balans</div><div class="kv" id="kv-lastbal">—</div><div class="ks" id="ks-lastbal">so'm</div></div>
+  <div class="kpi bl"><div class="kl">Jami kirim</div><div class="kv" id="kv-totalin">—</div><div class="ks">davrda</div></div>
+  <div class="kpi re"><div class="kl">Jami chiqim</div><div class="kv" id="kv-totalout">—</div><div class="ks">davrda</div></div>
+</div>
+<div class="card">
+  <div class="ct">Balans grafigi</div>
+  <div class="cs">Kunlik balans o'zgarishi</div>
+  <div style="position:relative;height:180px;"><canvas id="balanceChart"></canvas></div>
+</div>
+<div class="card">
+  <div class="ct">Kunlik operatsiyalar</div>
+  <div class="cs">Cash Data — Cashier.xlsb</div>
+  <div style="overflow-x:auto;max-height:420px;overflow-y:auto;" id="cashierTableWrap">
+    <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+  </div>
+</div>
+
+</div><!-- /cont -->
+</div><!-- /mainContent -->
 
 <script>
-const MSAL_CONFIG = {
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const msalConfig = {
   auth: {
-    clientId: '57ded34f-3662-4c62-bfc2-da717ef8db46',
-    authority: 'https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c',
-    redirectUri: window.location.origin + window.location.pathname
+    clientId: "57ded34f-3662-4c62-bfc2-da717ef8db46",
+    authority: "https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c",
+    redirectUri: window.location.origin + '/finance.html',
   },
-  cache: { cacheLocation: 'sessionStorage' }
+  cache: { cacheLocation: "sessionStorage" }
 };
-const SITE_HOSTNAME = 'fbaacademy.sharepoint.com';
-const SITE_PATH = '/sites/FBATeam';
-const SCOPES = ['https://graph.microsoft.com/Files.Read.All'];
+const loginRequest = {
+  scopes: ["https://graph.microsoft.com/Sites.Read.All","https://graph.microsoft.com/Files.Read.All"]
+};
+const SITE_HOSTNAME = "fbaacademy.sharepoint.com";
+const SITE_PATH = "/sites/FBATeam";
 
-let msalInstance = null;
-let finData = { months: [], pl: {}, cashflow: {}, daily: [] };
-let driveId = null;
+// ── PIN CONFIG ──
+// SHA-256 hash of the PIN (PIN o'zgartirish uchun: yangi PIN hashini bu yerga yozing)
+// Hozirgi PIN: "FBA2025" → quyidagi hash
+const PIN_HASH = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"; // PLACEHOLDER - pastda hashPIN() bilan o'zgartiriladi
+const PIN_STORAGE_KEY = "fba_fin_auth";
+const PIN_EXPIRY_DAYS = 7;
 
-async function initMsal() {
-  if (msalInstance) return msalInstance;
-  msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+// ── STATE ──
+let msalInstance = null; // init() ichida yaratiladi
+let currentPin = '';
+const PIN_LENGTH = 6;
+let finData = { pl: null, cf: null, cashier: null };
+let charts = {};
+
+// ══════════════════════════════════════════
+// PIN HASHING (SHA-256, browser native)
+// ══════════════════════════════════════════
+async function hashPin(pin) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin + "fba_salt_2025");
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ══════════════════════════════════════════
+// AUTH FLOW
+// ══════════════════════════════════════════
+async function init() {
+  // msal bu yerda yaratiladi (kutubxona yuklangandan keyin)
+  msalInstance = new msal.PublicClientApplication(msalConfig);
   await msalInstance.initialize();
-  return msalInstance;
+
+  // PIN allaqachon tekshirilganmi?
+  const stored = sessionStorage.getItem(PIN_STORAGE_KEY);
+  if (stored) {
+    try {
+      const obj = JSON.parse(stored);
+      if (obj.verified && Date.now() < obj.expiry) {
+        // MS account ham tekshiramiz
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+          msalInstance.setActiveAccount(accounts[0]);
+          document.getElementById('userName').textContent = accounts[0].name || accounts[0].username;
+          showMain();
+          await loadData();
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+  // MS login ekranini ko'rsatamiz
+  document.getElementById('screen-ms').classList.remove('hidden');
 }
 
-async function signIn() {
+async function handleMsLogin() {
+  const errEl = document.getElementById('msErr');
+  const loadEl = document.getElementById('msLoading');
+  errEl.textContent = '';
+  loadEl.textContent = 'Kirish...';
   try {
-    await initMsal();
-    await msalInstance.loginPopup({ scopes: SCOPES });
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('mainView').style.display = 'block';
-    await loadAll();
+    const result = await msalInstance.loginPopup(loginRequest);
+    msalInstance.setActiveAccount(result.account);
+    loadEl.textContent = '';
+    // PIN ekraniga o'tamiz
+    document.getElementById('pinUserName').textContent =
+      `✅ ${result.account.name || result.account.username} — endi maxfiy kodni kiriting.`;
+    document.getElementById('screen-ms').classList.add('hidden');
+    document.getElementById('screen-pin').classList.remove('hidden');
+    document.getElementById('userName').textContent = result.account.name || result.account.username;
+    initPinPad();
   } catch(e) {
-    alert('Kirish xatosi: ' + e.message);
+    errEl.textContent = "Kirish muvaffaqiyatsiz: " + (e.message || e);
+    loadEl.textContent = '';
   }
 }
 
-function signOut() {
-  msalInstance.logoutPopup();
-  document.getElementById('loginView').style.display = 'flex';
-  document.getElementById('mainView').style.display = 'none';
+function backToMs() {
+  currentPin = '';
+  document.getElementById('screen-pin').classList.add('hidden');
+  document.getElementById('screen-ms').classList.remove('hidden');
+  updatePinDots();
 }
 
+function fullSignOut() {
+  sessionStorage.removeItem(PIN_STORAGE_KEY);
+  msalInstance.logoutPopup().catch(()=>{});
+  document.getElementById('mainContent').style.display = 'none';
+  currentPin = '';
+  document.getElementById('screen-ms').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════
+// PIN PAD
+// ══════════════════════════════════════════
+function initPinPad() {
+  currentPin = '';
+  updatePinDots();
+  document.getElementById('pinErr').textContent = '';
+  document.getElementById('pinSuccess').textContent = '';
+
+  const numpad = document.getElementById('pinNumpad');
+  numpad.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach((k, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'pin-key' + (k === '⌫' ? ' del' : '') + (k === 0 ? ' zero' : '');
+    btn.textContent = k === '' ? '' : k;
+    if (k === '') { btn.style.visibility = 'hidden'; numpad.appendChild(btn); return; }
+    btn.onclick = () => {
+      if (k === '⌫') { currentPin = currentPin.slice(0,-1); }
+      else { if (currentPin.length < PIN_LENGTH) currentPin += k; }
+      updatePinDots();
+      if (currentPin.length === PIN_LENGTH) verifyPin();
+    };
+    numpad.appendChild(btn);
+  });
+
+  // Build dots
+  const dotsEl = document.getElementById('pinDots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < PIN_LENGTH; i++) {
+    const d = document.createElement('div');
+    d.className = 'pin-dot';
+    d.id = `dot-${i}`;
+    dotsEl.appendChild(d);
+  }
+}
+
+function updatePinDots() {
+  for (let i = 0; i < PIN_LENGTH; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    if (!dot) continue;
+    dot.classList.remove('filled','error');
+    if (i < currentPin.length) dot.classList.add('filled');
+  }
+}
+
+async function verifyPin() {
+  const errEl = document.getElementById('pinErr');
+  const okEl = document.getElementById('pinSuccess');
+  errEl.textContent = '';
+
+  const inputHash = await hashPin(currentPin);
+
+  // ⚠️ PAROL BU YERDA O'ZGARTIRILADI
+  // Yangi parol o'rnatish uchun: console.log(await hashPin('YANGI_PAROL')) → natijani PIN_CORRECT_HASH ga qo'ying
+  const PIN_CORRECT_HASH = await hashPin("FBA2025"); // ← PAROLNI BU YERDA O'ZGARTIRING
+
+  if (inputHash === PIN_CORRECT_HASH) {
+    // Success
+    okEl.textContent = '✅ Tasdiqlandi! Yuklanmoqda...';
+    for (let i = 0; i < PIN_LENGTH; i++) {
+      const dot = document.getElementById(`dot-${i}`);
+      if (dot) { dot.classList.remove('filled'); dot.classList.add('filled'); dot.style.background = 'var(--green)'; dot.style.borderColor = 'var(--green)'; }
+    }
+    // Session ga saqlash (7 kun)
+    sessionStorage.setItem(PIN_STORAGE_KEY, JSON.stringify({
+      verified: true,
+      expiry: Date.now() + PIN_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+    }));
+    setTimeout(async () => {
+      document.getElementById('screen-pin').classList.add('hidden');
+      showMain();
+      await loadData();
+    }, 600);
+  } else {
+    // Error
+    errEl.textContent = '❌ Noto\'g\'ri kod. Qayta urinib ko\'ring.';
+    for (let i = 0; i < PIN_LENGTH; i++) {
+      const dot = document.getElementById(`dot-${i}`);
+      if (dot) { dot.classList.add('error'); }
+    }
+    setTimeout(() => {
+      currentPin = '';
+      updatePinDots();
+      for (let i = 0; i < PIN_LENGTH; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (dot) dot.classList.remove('error');
+      }
+    }, 1000);
+  }
+}
+
+function showMain() {
+  document.getElementById('mainContent').style.display = 'block';
+}
+
+// ══════════════════════════════════════════
+// TOKEN
+// ══════════════════════════════════════════
 async function getToken() {
-  await initMsal();
-  const accounts = msalInstance.getAllAccounts();
-  if (!accounts.length) throw new Error('Login qilmagan');
+  const account = msalInstance.getActiveAccount();
+  if (!account) throw new Error("Login qilinmagan");
+  const result = await msalInstance.acquireTokenSilent({ ...loginRequest, account });
+  return result.accessToken;
+}
+
+// ══════════════════════════════════════════
+// LOADING UI
+// ══════════════════════════════════════════
+function showLoading(txt) {
+  document.getElementById('loadingText').textContent = txt || 'Yuklanmoqda...';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function setLoadingText(txt) { document.getElementById('loadingText').textContent = txt; }
+function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+// ══════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════
+async function loadData() {
+  showLoading("Moliya ma'lumotlari yuklanmoqda...");
   try {
-    const res = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
-    return res.accessToken;
+    const token = await getToken();
+    setLoadingText("SharePoint ulanmoqda...");
+    const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`,
+      { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
+    const site = await siteRes.json();
+    const siteId = site.id;
+    const driveRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drive`,
+      { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
+    const drive = await driveRes.json();
+    const driveId = drive.id;
+
+    setLoadingText("P&L yuklanmoqda (Fin Model)...");
+    let plBuffer = null;
+    try { plBuffer = await fetchExcel(token, driveId, "Fin Model - Fact Only"); } catch(e){ console.warn("PL:",e); }
+
+    setLoadingText("Cashier yuklanmoqda...");
+    let cashBuffer = null;
+    try { cashBuffer = await fetchExcel(token, driveId, "Cashier"); } catch(e){ console.warn("Cashier:",e); }
+
+    setLoadingText("Ma'lumotlar tahlil qilinmoqda...");
+    finData.pl = plBuffer ? parsePL(plBuffer) : null;
+    finData.cashier = cashBuffer ? parseCashier(cashBuffer) : null;
+
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
+    hideLoading();
+    renderAll();
   } catch(e) {
-    const res = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
-    return res.accessToken;
+    hideLoading();
+    alert("Xato: " + e.message);
+    console.error(e);
   }
 }
 
-async function getDriveId(token) {
-  if (driveId) return driveId;
-  const sr = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`,
-    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
-  const site = await sr.json();
-  const dr = await fetch(`https://graph.microsoft.com/v1.0/sites/${site.id}/drive`,
-    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
-  const drive = await dr.json();
-  driveId = drive.id;
-  return driveId;
-}
-
-async function downloadFile(token, did, fileName) {
-  const baseFileName = fileName.replace(/\.(xlsx|xlsb)$/i, '');
-  
+async function fetchExcel(token, driveId, baseName) {
   async function searchFolder(folderId) {
     const res = await fetch(
-      `https://graph.microsoft.com/v1.0/drives/${did}/items/${folderId}/children?$top=100`,
-      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
-    );
+      `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children?$top=100`,
+      { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
     const data = await res.json();
-    const items = (data.value || []);
-    const found = items.find(i => i.name === fileName ||
-      i.name === baseFileName + '.xlsb' || i.name === baseFileName + '.xlsx');
-    if (found) {
-      found._sortKey = found.lastModifiedDateTime;
-      return found;
+    const items = data.value || [];
+    const match = items.find(i =>
+      i.name === baseName + '.xlsx' ||
+      i.name === baseName + '.xlsb' ||
+      i.name.startsWith(baseName)
+    );
+    if (match) {
+      console.log(`✅ ${match.name}`);
+      return match.id;
     }
     for (const item of items) {
       if (item.folder) {
@@ -218,324 +639,530 @@ async function downloadFile(token, did, fileName) {
     }
     return null;
   }
-
-  const rootRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${did}/root`,
-    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+  const rootRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${driveId}/root`,
+    { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
   const root = await rootRes.json();
-  const found = await searchFolder(root.id);
-  if (!found) throw new Error(fileName + ' topilmadi');
-
-  console.log('Downloading:', found.name, found.lastModifiedDateTime);
-  const ts = Date.now();
+  const itemId = await searchFolder(root.id);
+  if (!itemId) throw new Error(`${baseName} topilmadi`);
   const fileRes = await fetch(
-    `https://graph.microsoft.com/v1.0/drives/${did}/items/${found.id}/content?ts=${ts}`,
-    { headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache, no-store' }, cache: 'no-store' }
-  );
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?ts=${Date.now()}`,
+    { headers:{ Authorization:`Bearer ${token}`, 'Cache-Control':'no-cache' }, cache:'no-store' });
   return await fileRes.arrayBuffer();
 }
 
-function excelDateToJS(serial) {
-  return new Date(Math.round((serial - 25569) * 86400 * 1000));
-}
+// ══════════════════════════════════════════
+// EXCEL PARSERS
+// ══════════════════════════════════════════
+function parsePL(buffer) {
+  const wb = XLSX.read(buffer, { type:'array', cellDates:true });
+  // SPL sheet — P&L
+  const splSheet = wb.SheetNames.find(s => s === 'SPL' || s.toUpperCase().includes('SPL') || s.toUpperCase().includes('P&L') || s.toUpperCase().includes('INCOME'));
+  // SFP sheet — Balance Sheet
+  const sfpSheet = wb.SheetNames.find(s => s === 'SFP' || s.toUpperCase().includes('SFP') || s.toUpperCase().includes('BALANCE'));
+  // SCF sheet — Cash Flow
+  const scfSheet = wb.SheetNames.find(s => s === 'SCF' || s.toUpperCase().includes('SCF') || s.toUpperCase().includes('CASH'));
 
-function parseFinModel(buffer) {
-  const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', raw: true });
-  const ws = wb.Sheets['SPL SFP SCF'];
-  if (!ws) return;
-  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  console.log('Sheets:', wb.SheetNames, '| SPL:', splSheet, '| SCF:', scfSheet);
 
-  // Find month columns from row 0
-  const monthRow = rows[0] || [];
-  const months = [];
-  for (let c = 0; c < monthRow.length; c++) {
-    const v = monthRow[c];
-    if (v && typeof v === 'number' && v > 40000 && v < 60000) {
-      const dt = excelDateToJS(v);
-      months.push({ col: c, date: dt, year: dt.getFullYear(), month: dt.getMonth() });
-    }
+  let pl = [], cf = [];
+
+  if (splSheet) {
+    const ws = wb.Sheets[splSheet];
+    pl = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
   }
-  finData.months = months;
+  if (scfSheet) {
+    const ws = wb.Sheets[scfSheet];
+    cf = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
+  }
 
-  // P&L row mapping
-  const rowMap = {
-    'Revenue': 'revenue',
-    'Full course': 'rev_fc',
-    'Revision': 'rev_rev',
-    'Video lesson': 'rev_vl',
-    'Marginal cost of sales': 'cogs',
-    'Marginal profit': 'marginal',
-    'Production costs': 'prod_costs',
-    'Gross profit': 'gross',
-    'Admin expenses': 'admin',
-    'Selling costs': 'selling',
-    'EBITDA': 'ebitda',
-    'EBIT': 'ebit',
-    'Tax': 'tax',
-    'Net profit': 'net'
-  };
-
-  const cfMap = {
-    'OPENING BALANCE': 'opening',
-    'OPERATING ACTIVITIES': 'operating',
-    'INVESTING ACTIVITIES': 'investing',
-    'FINANCING ACTIVITIES': 'financing',
-    'CLOSING BALANCE': 'closing'
-  };
-
-  finData.pl = {};
-  finData.cashflow = {};
-  months.forEach(m => {
-    finData.pl[m.col] = {};
-    finData.cashflow[m.col] = {};
-  });
-
-  rows.forEach(row => {
-    const label = (row[3] || '').toString().trim();
-    const plKey = rowMap[label];
-    const cfKey = cfMap[label.toUpperCase()];
-    if (!plKey && !cfKey) return;
-    months.forEach(m => {
-      const val = parseFloat(row[m.col]) || 0;
-      if (plKey) finData.pl[m.col][plKey] = val;
-      if (cfKey) finData.cashflow[m.col][cfKey] = val;
-    });
-  });
+  return { pl, cf, sheetNames: wb.SheetNames };
 }
 
 function parseCashier(buffer) {
-  const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', raw: true });
-  const ws = wb.Sheets['Cash Data'];
-  if (!ws) return;
-  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
-  finData.daily = [];
-  rows.slice(4).forEach(row => {
-    const dv = row[1];
-    if (!dv || typeof dv !== 'number') return;
-    const dt = excelDateToJS(dv);
-    if (isNaN(dt.getTime())) return;
-    const inflow = parseFloat(row[12]) || 0;
-    const outflow = Math.abs(parseFloat(row[13]) || 0);
-    const balance = parseFloat(row[21]) || 0;
-    if (inflow === 0 && outflow === 0) return;
-    finData.daily.push({
-      date: dt,
-      inflow,
-      outflow,
-      balance,
-      activity: (row[20] || '').toString(),
-      category: (row[22] || '').toString()
+  const wb = XLSX.read(buffer, { type:'array', cellDates:true });
+  const cashSheet = wb.SheetNames.find(s =>
+    s === 'Cash Data' || s.toLowerCase().includes('cash') || s.toLowerCase().includes('kunlik')
+  ) || wb.SheetNames[0];
+  console.log('Cashier sheet:', cashSheet);
+  const ws = wb.Sheets[cashSheet];
+  const rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:false, defval:null });
+  return { rows, sheetName: cashSheet };
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderAll() {
+  const year = parseInt(document.getElementById('fin-year-sel').value);
+  const monthVal = document.getElementById('fin-month-sel').value;
+  const month = monthVal === 'all' ? null : parseInt(monthVal);
+
+  if (finData.pl) {
+    renderPL(finData.pl, year, month);
+    renderCF(finData.pl, year, month);
+  } else {
+    ['plTableWrap','cfTableWrap'].forEach(id => {
+      document.getElementById(id).innerHTML = '<div style="color:var(--red);font-size:12px;padding:16px;">⚠️ Fin Model fayli yuklanmadi</div>';
     });
-  });
-}
-
-function setLoad(txt) {
-  document.getElementById('loadText').textContent = txt;
-}
-
-async function loadAll() {
-  document.getElementById('loadingDiv').style.display = 'flex';
-  document.getElementById('content').style.display = 'none';
-
-  try {
-    const token = await getToken();
-    const did = await getDriveId(token);
-
-    setLoad('Fin Model yuklanmoqda...');
-    const finBuf = await downloadFile(token, did, 'Fin Model - Fact Only.xlsb');
-    parseFinModel(finBuf);
-
-    setLoad('Cashier yuklanmoqda...');
-    const cashBuf = await downloadFile(token, did, 'Cashier.xlsb');
-    parseCashier(cashBuf);
-
-    // Populate selects
-    populateSelects();
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
-    document.getElementById('loadingDiv').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
-    renderAll();
-  } catch(e) {
-    document.getElementById('loadText').innerHTML =
-      '<div class="error-box">Xato: ' + e.message + '</div>';
-    console.error(e);
+  }
+  if (finData.cashier) {
+    renderCashier(finData.cashier, year, month);
+  } else {
+    document.getElementById('cashierTableWrap').innerHTML = '<div style="color:var(--red);font-size:12px;padding:16px;">⚠️ Cashier fayli yuklanmadi</div>';
   }
 }
 
-function populateSelects() {
-  const years = [...new Set(finData.months.map(m => m.year))].sort();
-  const ySel = document.getElementById('yearSel');
-  ySel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-  ySel.value = years[years.length - 1];
-
-  const mSel = document.getElementById('monthSel');
-  const monthNames = ['Yanvar','Fevral','Mart','Aprel','May','Iyun',
-                      'Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
-  mSel.innerHTML = monthNames.map((n, i) => `<option value="${i}">${n}</option>`).join('');
-
-  // Select latest month
-  const last = finData.months[finData.months.length - 1];
-  if (last) mSel.value = last.month;
-}
-
-function getSelectedMonth() {
-  const year = parseInt(document.getElementById('yearSel').value);
-  const month = parseInt(document.getElementById('monthSel').value);
-  return finData.months.find(m => m.year === year && m.month === month);
-}
-
-function fmt(v) {
-  if (v === null || v === undefined) return '—';
-  const m = v / 1e6;
-  return (m >= 0 ? '' : '') + m.toFixed(1) + 'M';
-}
-
-function fmtColor(v) {
-  if (v === null || v === undefined) return '<span style="color:#666">—</span>';
-  const m = v / 1e6;
-  const c = v >= 0 ? '#2EC47E' : '#E83A3A';
-  return `<span style="color:${c};font-weight:600">${m.toFixed(1)}M</span>`;
-}
-
-function renderAll() {
-  const sel = getSelectedMonth();
-  if (!sel) return;
-  const pl = finData.pl[sel.col] || {};
-  const cf = finData.cashflow[sel.col] || {};
-
-  // KPI Cards
-  const kpis = [
-    { label: 'Revenue', key: 'revenue', color: '#88AAFF' },
-    { label: 'Marginal Profit', key: 'marginal', color: '#2EC47E' },
-    { label: 'Gross Profit', key: 'gross', color: '#2EC47E' },
-    { label: 'Net Profit', key: 'net', color: pl.net >= 0 ? '#2EC47E' : '#E83A3A' }
-  ];
-  document.getElementById('kpiCards').innerHTML = kpis.map(k => {
-    const v = pl[k.key];
-    const pct = pl.revenue ? Math.round((v / pl.revenue) * 100) : 0;
-    return `<div class="card" style="border-color:${k.color}33">
-      <div class="card-title">${k.label}</div>
-      <div class="card-val" style="color:${k.color}">${fmt(v)} so'm</div>
-      <div class="card-sub">${k.key !== 'revenue' ? 'Revenue dan ' + pct + '%' : 'Jami tushum'}</div>
-    </div>`;
-  }).join('');
-
-  // P&L Table - all months
-  const plRows = [
-    { key: 'revenue', label: 'Revenue', bold: true, class: '' },
-    { key: 'rev_fc', label: 'Full course', class: 'indent' },
-    { key: 'rev_rev', label: 'Revision', class: 'indent' },
-    { key: 'rev_vl', label: 'Video lesson', class: 'indent' },
-    { key: 'cogs', label: "Tutor's salary (COGS)", class: '' },
-    { key: 'marginal', label: 'Marginal Profit', bold: true, class: '' },
-    { key: 'prod_costs', label: 'Production costs', class: '' },
-    { key: 'gross', label: 'Gross Profit', bold: true, highlight: true },
-    { key: 'admin', label: 'Admin expenses', class: '' },
-    { key: 'selling', label: 'Selling costs', class: '' },
-    { key: 'ebitda', label: 'EBITDA', bold: true, class: '' },
-    { key: 'ebit', label: 'EBIT', bold: true, class: '' },
-    { key: 'tax', label: 'Tax', class: '' },
-    { key: 'net', label: 'Net Profit', bold: true, highlight: true }
-  ];
-
-  const monthNames = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
-  const visMonths = finData.months.filter(m =>
-    m.year === parseInt(document.getElementById('yearSel').value)
-  );
-
-  let tbl = `<table><thead><tr><th style="min-width:160px">Ko'rsatkich</th>`;
-  visMonths.forEach(m => {
-    tbl += `<th style="text-align:right">${monthNames[m.month]}</th>`;
-  });
-  tbl += '</tr></thead><tbody>';
-
-  plRows.forEach(r => {
-    const cls = r.highlight ? 'highlight-row' : '';
-    tbl += `<tr class="${cls}">`;
-    tbl += `<td class="${r.class || ''}" style="${r.bold ? 'font-weight:700' : ''}">${r.label}</td>`;
-    visMonths.forEach(m => {
-      const v = (finData.pl[m.col] || {})[r.key];
-      tbl += `<td style="text-align:right">${fmtColor(v)}</td>`;
-    });
-    tbl += '</tr>';
-  });
-  tbl += '</tbody></table>';
-  document.getElementById('plTable').innerHTML = tbl;
-
-  // Revenue breakdown
-  const rev = pl.revenue || 1;
-  const revItems = [
-    { label: 'Full course', key: 'rev_fc', color: '#2EC47E' },
-    { label: 'Revision', key: 'rev_rev', color: '#F5A623' },
-    { label: 'Video lesson', key: 'rev_vl', color: '#88AAFF' }
-  ];
-  document.getElementById('revBreakdown').innerHTML = revItems.map(r => {
-    const v = pl[r.key] || 0;
-    const pct = Math.max(0, Math.round(v / rev * 100));
-    return `<div style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-        <span style="font-size:11px">${r.label}</span>
-        <span style="font-size:11px;font-weight:600;color:${r.color}">${fmt(v)} so'm (${pct}%)</span>
-      </div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${r.color}"></div></div>
-    </div>`;
-  }).join('');
-
-  // Cash Flow
-  const cfItems = [
-    { key: 'opening', label: 'Opening Balance' },
-    { key: 'operating', label: 'Operating Activities' },
-    { key: 'investing', label: 'Investing Activities' },
-    { key: 'financing', label: 'Financing Activities' },
-    { key: 'closing', label: 'Closing Balance', bold: true }
-  ];
-  document.getElementById('cashFlow').innerHTML = cfItems.map(r => {
-    const v = cf[r.key];
-    const c = !v ? '#666' : v >= 0 ? '#2EC47E' : '#E83A3A';
-    return `<div class="cf-row">
-      <span class="cf-label" style="${r.bold ? 'font-weight:700;color:#E0E0E0' : ''}">${r.label}</span>
-      <span class="cf-val" style="color:${c}">${v !== undefined ? fmt(v) + " so'm" : '—'}</span>
-    </div>`;
-  }).join('');
-
-  // Daily balance
-  const year = parseInt(document.getElementById('yearSel').value);
-  const month = parseInt(document.getElementById('monthSel').value);
-  const daily = finData.daily.filter(d =>
-    d.date.getFullYear() === year && d.date.getMonth() === month
-  );
-
-  const tbody = document.getElementById('dailyBody');
-  if (!daily.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;padding:20px">Bu oy uchun ma\'lumot topilmadi</td></tr>';
+// ── P&L RENDERER ──
+function renderPL(data, year, month) {
+  const { pl } = data;
+  if (!pl || pl.length < 3) {
+    document.getElementById('plTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot mavjud emas</div>';
     return;
   }
-  tbody.innerHTML = daily.map((d, i) => {
-    const bc = d.balance >= 0 ? '#2EC47E' : '#E83A3A';
-    return `<tr>
-      <td>${d.date.toLocaleDateString('ru')}</td>
-      <td class="pos">${d.inflow > 0 ? '+' + (d.inflow/1000).toFixed(0) + 'K' : '—'}</td>
-      <td class="neg">${d.outflow > 0 ? '-' + (d.outflow/1000).toFixed(0) + 'K' : '—'}</td>
-      <td style="font-weight:600;color:${bc}">${(d.balance/1e6).toFixed(2)}M</td>
-      <td style="color:#666;font-size:10px">${d.activity}</td>
-      <td style="color:#666;font-size:10px">${d.category}</td>
-    </tr>`;
-  }).join('');
+
+  // Header qatorni topamiz (oylar yozilgan qator)
+  // Odatda: col 0 = row label, col 1..N = oylar / yillar
+  const headerRow = pl[0] || [];
+  const rows = pl.slice(1);
+
+  // Ustun indekslarini topamiz (yil/oy asosida)
+  // Header da "Jan", "Feb" yoki "2026-01" kabi formatlar bo'lishi mumkin
+  // Eng sodda: barcha raqamli ustunlarni olamiz
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec',
+                      'Yan','Fev','Mar','Apr','May','Iyu','Iyu','Avg','Sen','Okt','Noy','Dek'];
+
+  // Ustunlarni aniqlash
+  const colMeta = []; // {idx, label, year, month}
+  headerRow.forEach((cell, i) => {
+    if (i === 0) return;
+    if (!cell) return;
+    const s = String(cell).trim();
+    colMeta.push({ idx: i, label: s });
+  });
+
+  // Filter: year & month
+  let cols = colMeta;
+  if (cols.length === 0) {
+    // Raqamli ustunlar bo'yicha topamiz
+    headerRow.forEach((cell, i) => {
+      if (i > 0) cols.push({ idx: i, label: cell || `Col${i}` });
+    });
+  }
+
+  // Agar oy tanlangan bo'lsa va ustunlar oy nomlarini o'z ichiga olsa — filter
+  // Aks holda barcha ustunlarni ko'rsatamiz
+  const MONTHS_UZ = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+  const selectedLabel = month !== null ? MONTHS_UZ[month] : null;
+
+  // Build table
+  let html = '<table>';
+  html += '<thead><tr><th style="width:38%">Ko\'rsatkich</th>';
+  cols.forEach(c => {
+    const isSelected = selectedLabel && String(c.label).toLowerCase().includes(selectedLabel.toLowerCase().substring(0,3));
+    html += `<th class="num" ${isSelected ? 'style="color:var(--blue)"' : ''}>${c.label}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  // Key metrics to highlight
+  const keyMetrics = {
+    revenue: ['revenue','daromad','выручка','total revenue'],
+    marginal: ['marginal','gross margin'],
+    gross: ['gross profit','yalpi foyda'],
+    ebitda: ['ebitda'],
+    ebit: ['ebit'],
+    net: ['net profit','sof foyda','чистая прибыль']
+  };
+
+  let kpiValues = { revenue:0, marginal:0, gross:0, ebitda:0, ebit:0, net:0 };
+
+  rows.forEach((row, ri) => {
+    if (!row || row.every(c => c === null || c === '')) return;
+    const label = String(row[0] || '').trim();
+    if (!label) return;
+
+    const isSection = label.startsWith('=') || label.startsWith('—') || label.toUpperCase() === label && label.length > 3;
+    const isTotal = label.toLowerCase().includes('total') || label.toLowerCase().includes('jami') || label.toLowerCase().includes('итого');
+    const isIndented = label.startsWith(' ') || label.startsWith('\t') || label.startsWith('  ');
+
+    let rowClass = '';
+    if (isSection) rowClass = 'pl-row-section';
+    else if (isTotal) rowClass = 'pl-row-total';
+    else if (isIndented) rowClass = 'pl-indent';
+
+    html += `<tr class="${rowClass}">`;
+    html += `<td>${label.replace(/^[-=\s]+/, '')}</td>`;
+
+    cols.forEach((c, ci) => {
+      const val = row[c.idx];
+      const num = parseFloat(String(val || '').replace(/\s/g,'').replace(/,/g,'.'));
+      if (isNaN(num) || val === null || val === '') {
+        html += `<td class="num neu">—</td>`;
+      } else {
+        const fmt = fmtNum(num);
+        const cls = num > 0 ? 'pos' : num < 0 ? 'neg' : 'neu';
+        html += `<td class="num ${cls}">${fmt}</td>`;
+        // KPI extraction (oxirgi ustun yoki tanlangan ustun)
+        if (ci === cols.length - 1 || (selectedLabel && String(c.label).toLowerCase().includes(selectedLabel.toLowerCase().substring(0,3)))) {
+          const lbl = label.toLowerCase();
+          if (keyMetrics.revenue.some(k => lbl.includes(k))) kpiValues.revenue = num;
+          if (keyMetrics.marginal.some(k => lbl.includes(k))) kpiValues.marginal = num;
+          if (keyMetrics.gross.some(k => lbl.includes(k))) kpiValues.gross = num;
+          if (keyMetrics.ebitda.some(k => lbl.includes(k))) kpiValues.ebitda = num;
+          if (keyMetrics.ebit.some(k => lbl.includes(k)) && !lbl.includes('ebitda')) kpiValues.ebit = num;
+          if (keyMetrics.net.some(k => lbl.includes(k))) kpiValues.net = num;
+        }
+      }
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('plTableWrap').innerHTML = html;
+
+  // Update KPI cards
+  ['revenue','marginal','gross','ebitda','ebit','net'].forEach(k => {
+    const el = document.getElementById(`kv-${k}`);
+    const sub = document.getElementById(`ks-${k}`);
+    if (el) {
+      const v = kpiValues[k];
+      el.textContent = fmtNum(v);
+      el.className = 'kv ' + (v > 0 ? '' : v < 0 ? '' : '');
+      if (sub) sub.textContent = v >= 1e9 ? 'mlrd so\'m' : v >= 1e6 ? 'mln so\'m' : 'so\'m';
+    }
+    // Swap card color based on positive/negative
+    const card = document.querySelector(`#kv-${k}`)?.closest('.kpi');
+    if (card && kpiValues[k] < 0) {
+      card.className = card.className.replace(/\b(gr|bl|am|re|pu|te)\b/, 're');
+    }
+  });
+
+  // Revenue chart — oylik
+  const revChartData = buildMonthlyChartData(rows, cols, keyMetrics.revenue);
+  renderLineChart('revenueChart', revChartData.labels, [
+    { label:'Revenue', data: revChartData.data, color: '#2eca8a' }
+  ]);
+
+  // Profit chart
+  const grossData = buildMonthlyChartData(rows, cols, keyMetrics.gross);
+  const ebitdaData = buildMonthlyChartData(rows, cols, keyMetrics.ebitda);
+  const netData = buildMonthlyChartData(rows, cols, keyMetrics.net);
+  renderLineChart('profitChart', revChartData.labels, [
+    { label:'Gross Profit', data: grossData.data, color: '#5b8dee' },
+    { label:'EBITDA', data: ebitdaData.data, color: '#f5a623' },
+    { label:'Net Profit', data: netData.data, color: '#e85b5b' },
+  ]);
+
+  // Revenue breakdown pie (simple — first few line items under revenue)
+  const revRows = rows.filter(r => {
+    const l = String(r[0]||'').toLowerCase();
+    return l.includes('daromad') || l.includes('revenue') || l.includes('income') || l.includes('sotuv');
+  }).slice(0,6);
+  const lastColIdx = cols.length > 0 ? cols[cols.length-1].idx : 1;
+  const revBreakLabels = revRows.map(r => String(r[0]||'').trim());
+  const revBreakData = revRows.map(r => Math.abs(parseFloat(String(r[lastColIdx]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0));
+  renderPieChart('revBreakChart', revBreakLabels, revBreakData, [
+    '#2eca8a','#5b8dee','#f5a623','#9b7fe8','#2ec4b6','#e85b5b'
+  ]);
+
+  // Cost breakdown
+  const costRows = rows.filter(r => {
+    const l = String(r[0]||'').toLowerCase();
+    return l.includes('xarajat') || l.includes('cost') || l.includes('expense') || l.includes('расход');
+  }).slice(0,6);
+  const costLabels = costRows.map(r => String(r[0]||'').trim());
+  const costData = costRows.map(r => Math.abs(parseFloat(String(r[lastColIdx]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0));
+  renderPieChart('costBreakChart', costLabels, costData, [
+    '#e85b5b','#f5a623','#9b7fe8','#5b8dee','#2ec4b6','#2eca8a'
+  ]);
 }
 
-// Check if already logged in
-(async function() {
-  try {
-    await initMsal();
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      document.getElementById('loginView').style.display = 'none';
-      document.getElementById('mainView').style.display = 'block';
-      await loadAll();
-    }
-  } catch(e) {
-    console.log('Auto-login failed:', e.message);
+// ── CF RENDERER ──
+function renderCF(data, year, month) {
+  const { cf } = data;
+  if (!cf || cf.length < 2) {
+    document.getElementById('cfTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot mavjud emas (SCF sheet topilmadi)</div>';
+    ['ocf','icf','fcf'].forEach(k => document.getElementById(`kv-${k}`).textContent = '—');
+    return;
   }
-})();
+
+  const headerRow = cf[0] || [];
+  const rows = cf.slice(1);
+  const cols = [];
+  headerRow.forEach((cell, i) => { if (i > 0 && cell) cols.push({ idx:i, label: String(cell).trim() }); });
+
+  // Build table
+  let html = '<table><thead><tr><th style="width:38%">Ko\'rsatkich</th>';
+  cols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  const kpiCF = { ocf:0, icf:0, fcf:0 };
+
+  rows.forEach(row => {
+    if (!row || row.every(c => c === null || c === '')) return;
+    const label = String(row[0]||'').trim();
+    if (!label) return;
+    const lbl = label.toLowerCase();
+    html += '<tr>';
+    html += `<td>${label}</td>`;
+    cols.forEach((c, ci) => {
+      const val = row[c.idx];
+      const num = parseFloat(String(val||'').replace(/\s/g,'').replace(/,/g,'.'));
+      if (isNaN(num) || val === null || val === '') { html += `<td class="num neu">—</td>`; return; }
+      const cls = num > 0 ? 'pos' : num < 0 ? 'neg' : 'neu';
+      html += `<td class="num ${cls}">${fmtNum(num)}</td>`;
+      if (ci === cols.length - 1) {
+        if (lbl.includes('operat') || lbl.includes('asosiy') || lbl.includes('основн')) kpiCF.ocf = num;
+        if (lbl.includes('invest') || lbl.includes('капитал')) kpiCF.icf = num;
+        if (lbl.includes('financ') || lbl.includes('молия') || lbl.includes('finans')) kpiCF.fcf = num;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('cfTableWrap').innerHTML = html;
+
+  // KPIs
+  ['ocf','icf','fcf'].forEach(k => {
+    const el = document.getElementById(`kv-${k}`);
+    if (el) el.textContent = fmtNum(kpiCF[k]);
+  });
+
+  // CF Chart
+  const labels = cols.map(c => c.label);
+  const cfRows_op = rows.filter(r => String(r[0]||'').toLowerCase().includes('operat') || String(r[0]||'').toLowerCase().includes('asosiy'));
+  const cfRows_inv = rows.filter(r => String(r[0]||'').toLowerCase().includes('invest'));
+  const cfRows_fin = rows.filter(r => String(r[0]||'').toLowerCase().includes('financ') || String(r[0]||'').toLowerCase().includes('finans'));
+
+  const getColData = (rowArr) => cols.map(c => {
+    const row = rowArr[0];
+    if (!row) return 0;
+    const v = parseFloat(String(row[c.idx]||'0').replace(/\s/g,'').replace(/,/g,'.'));
+    return isNaN(v) ? 0 : v;
+  });
+
+  renderBarChart('cfChart', labels, [
+    { label:'Operating CF', data: getColData(cfRows_op), color:'#2eca8a' },
+    { label:'Investing CF', data: getColData(cfRows_inv), color:'#5b8dee' },
+    { label:'Financing CF', data: getColData(cfRows_fin), color:'#f5a623' },
+  ]);
+}
+
+// ── CASHIER RENDERER ──
+function renderCashier(data, year, month) {
+  const { rows } = data;
+  if (!rows || rows.length < 2) {
+    document.getElementById('cashierTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot yo\'q</div>';
+    return;
+  }
+
+  // Sarlavha qatorni topamiz
+  const headerRow = rows[0] || [];
+  const dataRows = rows.slice(1).filter(r => r && r.some(c => c !== null && c !== ''));
+
+  // Ustunlarni aniqlaymiz
+  // Cashier.xlsb "Cash Data" sheet strukturasi: Sana | Kirim | Chiqim | Balans (yoki shunga o'xshash)
+  const colMap = {};
+  headerRow.forEach((cell, i) => {
+    const s = String(cell||'').toLowerCase().trim();
+    if (s.includes('sana') || s.includes('дата') || s.includes('date')) colMap.date = i;
+    if (s.includes('kirim') || s.includes('приход') || s.includes('receipt') || s.includes('income')) colMap.income = i;
+    if (s.includes('chiqim') || s.includes('расход') || s.includes('expense') || s.includes('payment')) colMap.expense = i;
+    if (s.includes('balans') || s.includes('остаток') || s.includes('balance')) colMap.balance = i;
+    if (s.includes('izoh') || s.includes('комментарий') || s.includes('description') || s.includes('note')) colMap.note = i;
+  });
+
+  // Agar ustunlar topilmasa — standart tartib
+  if (colMap.date === undefined) colMap.date = 0;
+  if (colMap.income === undefined) colMap.income = 1;
+  if (colMap.expense === undefined) colMap.expense = 2;
+  if (colMap.balance === undefined) colMap.balance = 3;
+
+  // Filterlash
+  let filtered = dataRows.filter(r => {
+    const dateVal = r[colMap.date];
+    if (!dateVal) return false;
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return true; // sana bo'lmasa ham ko'rsatamiz
+    if (d.getFullYear() !== year) return false;
+    if (month !== null && d.getMonth() !== month) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) filtered = dataRows.slice(0, 60); // fallback
+
+  // KPIs
+  let totalIn = 0, totalOut = 0, lastBal = 0;
+  filtered.forEach(r => {
+    const inc = parseFloat(String(r[colMap.income]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+    const exp = parseFloat(String(r[colMap.expense]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+    const bal = parseFloat(String(r[colMap.balance]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+    totalIn += inc;
+    totalOut += exp;
+    if (bal) lastBal = bal;
+  });
+  document.getElementById('kv-lastbal').textContent = fmtNum(lastBal);
+  document.getElementById('kv-totalin').textContent = fmtNum(totalIn);
+  document.getElementById('kv-totalout').textContent = fmtNum(totalOut);
+
+  // Balance chart
+  const balLabels = filtered.slice(-30).map(r => {
+    const d = new Date(r[colMap.date]);
+    return isNaN(d.getTime()) ? String(r[colMap.date]||'') : `${d.getDate()}-${d.getMonth()+1}`;
+  });
+  const balData = filtered.slice(-30).map(r =>
+    parseFloat(String(r[colMap.balance]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0
+  );
+  renderAreaChart('balanceChart', balLabels, balData);
+
+  // Table
+  let html = '<table><thead><tr>';
+  html += `<th>Sana</th>`;
+  html += `<th class="num" style="color:var(--green)">Kirim</th>`;
+  html += `<th class="num" style="color:var(--red)">Chiqim</th>`;
+  html += `<th class="num">Balans</th>`;
+  if (colMap.note !== undefined) html += `<th>Izoh</th>`;
+  html += '</tr></thead><tbody>';
+
+  filtered.slice().reverse().forEach(r => {
+    const dateVal = r[colMap.date];
+    const d = new Date(dateVal);
+    const dateStr = isNaN(d.getTime()) ? String(dateVal||'') : d.toLocaleDateString('uz-UZ', {day:'2-digit',month:'short',year:'numeric'});
+    const inc = parseFloat(String(r[colMap.income]||'').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+    const exp = parseFloat(String(r[colMap.expense]||'').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+    const bal = parseFloat(String(r[colMap.balance]||'').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+
+    html += '<tr>';
+    html += `<td style="font-family:'DM Mono',monospace;font-size:10px;">${dateStr}</td>`;
+    html += `<td class="num cashier-pos">${inc ? fmtNum(inc) : '—'}</td>`;
+    html += `<td class="num cashier-neg">${exp ? fmtNum(exp) : '—'}</td>`;
+    html += `<td class="num cashier-bal ${bal >= 0 ? 'pos':'neg'}">${fmtNum(bal)}</td>`;
+    if (colMap.note !== undefined) html += `<td style="color:var(--muted);font-size:10px;">${r[colMap.note]||''}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('cashierTableWrap').innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+// CHART HELPERS
+// ══════════════════════════════════════════
+function buildMonthlyChartData(rows, cols, keywords) {
+  const matchRow = rows.find(r => {
+    const l = String(r[0]||'').toLowerCase();
+    return keywords.some(k => l.includes(k));
+  });
+  const labels = cols.map(c => c.label);
+  const data = cols.map(c => {
+    if (!matchRow) return 0;
+    const v = parseFloat(String(matchRow[c.idx]||'0').replace(/\s/g,'').replace(/,/g,'.'));
+    return isNaN(v) ? 0 : v;
+  });
+  return { labels, data };
+}
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function chartDefaults() {
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:'#8888aa', font:{ size:10, family:'DM Sans' } } } },
+    scales:{
+      x:{ ticks:{ color:'#8888aa', font:{size:9} }, grid:{ color:'rgba(255,255,255,0.04)' } },
+      y:{ ticks:{ color:'#8888aa', font:{size:9}, callback: v => fmtNum(v,true) }, grid:{ color:'rgba(255,255,255,0.04)' } }
+    }
+  };
+}
+
+function renderLineChart(canvasId, labels, datasets) {
+  destroyChart(canvasId);
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return;
+  charts[canvasId] = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets: datasets.map(ds => ({
+        label: ds.label, data: ds.data,
+        borderColor: ds.color, backgroundColor: ds.color+'22',
+        fill:true, tension:0.4, pointRadius:3, borderWidth:2
+      }))
+    },
+    options: chartDefaults()
+  });
+}
+
+function renderBarChart(canvasId, labels, datasets) {
+  destroyChart(canvasId);
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return;
+  charts[canvasId] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets: datasets.map(ds => ({
+        label: ds.label, data: ds.data,
+        backgroundColor: ds.color+'99', borderColor: ds.color, borderWidth:1, borderRadius:4
+      }))
+    },
+    options: { ...chartDefaults(), scales:{ x:{ ticks:{ color:'#8888aa', font:{size:9} }, grid:{color:'rgba(255,255,255,0.04)'} }, y:{ ticks:{ color:'#8888aa', font:{size:9}, callback: v=>fmtNum(v,true) }, grid:{color:'rgba(255,255,255,0.04)'} } } }
+  });
+}
+
+function renderAreaChart(canvasId, labels, data) {
+  destroyChart(canvasId);
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return;
+  charts[canvasId] = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{ label:'Balans', data, borderColor:'#2eca8a', backgroundColor:'rgba(46,202,138,0.1)', fill:true, tension:0.3, pointRadius:2, borderWidth:2 }]
+    },
+    options: chartDefaults()
+  });
+}
+
+function renderPieChart(canvasId, labels, data, colors) {
+  destroyChart(canvasId);
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return;
+  if (!labels.length || data.every(d=>d===0)) {
+    ctx.canvas.parentElement.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:20px;text-align:center;">Ma\'lumot topilmadi</div>';
+    return;
+  }
+  charts[canvasId] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor: colors, borderColor:'#12121a', borderWidth:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ color:'#8888aa', font:{size:10}, boxWidth:10 } } } }
+  });
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function fmtNum(n, short=false) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (short) {
+    if (Math.abs(n) >= 1e12) return (n/1e12).toFixed(1)+'T';
+    if (Math.abs(n) >= 1e9) return (n/1e9).toFixed(1)+'B';
+    if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1)+'M';
+    if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(0)+'K';
+    return n.toFixed(0);
+  }
+  return n.toLocaleString('ru-RU', { minimumFractionDigits:0, maximumFractionDigits:0 });
+}
+
+async function refreshData() {
+  await loadData();
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener("load", init);
 </script>
 </body>
 </html>
