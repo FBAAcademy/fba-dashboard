@@ -420,6 +420,10 @@ async function init() {
       }
     } catch(e) {}
   }
+  // Redirect dan qaytgan bo'lsa — natijani tekshiramiz
+  const redirected = await handleRedirectResult();
+  if (redirected) return;
+
   // MS login ekranini ko'rsatamiz
   document.getElementById('screen-ms').classList.remove('hidden');
 }
@@ -429,21 +433,40 @@ async function handleMsLogin() {
   const loadEl = document.getElementById('msLoading');
   errEl.textContent = '';
   loadEl.textContent = 'Kirish...';
+  // interaction_in_progress xatosini oldini olish
   try {
-    const result = await msalInstance.loginPopup(loginRequest);
-    msalInstance.setActiveAccount(result.account);
-    loadEl.textContent = '';
-    // PIN ekraniga o'tamiz
-    document.getElementById('pinUserName').textContent =
-      `✅ ${result.account.name || result.account.username} — endi maxfiy kodni kiriting.`;
-    document.getElementById('screen-ms').classList.add('hidden');
-    document.getElementById('screen-pin').classList.remove('hidden');
-    document.getElementById('userName').textContent = result.account.name || result.account.username;
-    initPinPad();
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.includes('msal') && (key.includes('interaction') || key.includes('request'))) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  } catch(_) {}
+  try {
+    await msalInstance.loginRedirect(loginRequest);
+    // loginRedirect sahifani qayta yuklaydi — keyin handleRedirect() ishlaydi
   } catch(e) {
     errEl.textContent = "Kirish muvaffaqiyatsiz: " + (e.message || e);
     loadEl.textContent = '';
   }
+}
+
+async function handleRedirectResult() {
+  try {
+    const result = await msalInstance.handleRedirectPromise();
+    if (result && result.account) {
+      msalInstance.setActiveAccount(result.account);
+      document.getElementById('pinUserName').textContent =
+        `✅ ${result.account.name || result.account.username} — endi maxfiy kodni kiriting.`;
+      document.getElementById('screen-ms').classList.add('hidden');
+      document.getElementById('screen-pin').classList.remove('hidden');
+      document.getElementById('userName').textContent = result.account.name || result.account.username;
+      initPinPad();
+      return true;
+    }
+  } catch(e) {
+    console.warn('Redirect result:', e);
+  }
+  return false;
 }
 
 function backToMs() {
@@ -455,7 +478,7 @@ function backToMs() {
 
 function fullSignOut() {
   sessionStorage.removeItem(PIN_STORAGE_KEY);
-  msalInstance.logoutPopup().catch(()=>{});
+  msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin + '/finance.html' }).catch(()=>{});
   document.getElementById('mainContent').style.display = 'none';
   currentPin = '';
   document.getElementById('screen-ms').classList.remove('hidden');
