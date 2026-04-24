@@ -488,63 +488,6 @@ function handleLogin() {
   </div>
 </div>
 
-
-    <div style="display:flex;gap:8px;align-items:center">
-      <select id="fin-year-sel" onchange="renderFinance()" style="background:var(--card);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:6px;font-size:11px;">
-        <option value="2026">2026</option>
-      </select>
-      <select id="fin-month-sel" onchange="renderFinance()" style="background:var(--card);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:6px;font-size:11px;">
-        <option value="0">Yanvar</option>
-        <option value="1">Fevral</option>
-        <option value="2">Mart</option>
-        <option value="3">Aprel</option>
-        <option value="4">May</option>
-        <option value="5">Iyun</option>
-        <option value="6">Iyul</option>
-        <option value="7">Avgust</option>
-        <option value="8">Sentabr</option>
-        <option value="9">Oktabr</option>
-        <option value="10">Noyabr</option>
-        <option value="11">Dekabr</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- P/L KPI Cards -->
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px" id="fin-kpi-cards">
-    <div class="kc" id="fkc-revenue"><div class="kl">Revenue</div><div class="kv" id="fkv-revenue">—</div></div>
-    <div class="kc" id="fkc-marginal"><div class="kl">Marginal Profit</div><div class="kv" id="fkv-marginal">—</div></div>
-    <div class="kc" id="fkc-gross"><div class="kl">Gross Profit</div><div class="kv" id="fkv-gross">—</div></div>
-    <div class="kc" id="fkc-ebitda"><div class="kl">EBITDA</div><div class="kv" id="fkv-ebitda">—</div></div>
-    <div class="kc" id="fkc-ebit"><div class="kl">EBIT</div><div class="kv" id="fkv-ebit">—</div></div>
-    <div class="kc" id="fkc-net"><div class="kl">Net Profit</div><div class="kv" id="fkv-net">—</div></div>
-  </div>
-
-  <!-- P/L Table -->
-  <div class="g3" style="margin-bottom:16px">
-    <div class="sh"><div class="st">P&L Statement</div></div>
-    <div id="fin-pl-table" style="overflow-x:auto"></div>
-  </div>
-
-  <!-- Revenue breakdown + Cash Flow -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-    <div class="g3">
-      <div class="sh"><div class="st">Revenue tarkibi</div></div>
-      <div id="fin-rev-breakdown"></div>
-    </div>
-    <div class="g3">
-      <div class="sh"><div class="st">Cash Flow (oylik)</div></div>
-      <div id="fin-cashflow"></div>
-    </div>
-  </div>
-
-  <!-- Kunlik balans -->
-  <div class="g3">
-    <div class="sh"><div class="st">Kunlik Balans (Cashier)</div></div>
-    <div id="fin-daily-balance" style="overflow-x:auto;max-height:400px;overflow-y:auto"></div>
-  </div>
-</div>
-
 </div><!-- /mainContent -->
 
 <script>
