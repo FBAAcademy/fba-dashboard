@@ -1760,14 +1760,14 @@ function renderRating() {
     const pb_=cPb(t.pass_rate, mainSubject),eb_=cEb(t.exam_entry),b1=pb_+eb_,rb_=cRb(t.retention),b2=rb_,total=b1+b2;
     const y24r=t.by_year?.['2024']?.retention,y25r=t.by_year?.['2025']?.retention;
     const tr=y24r&&y25r?(y25r-y24r>2?'<span style="color:var(--green)">+</span>':y25r-y24r<-2?'<span style="color:var(--red)">-</span>':'<span style="color:var(--muted)">~</span>'):'<span style="color:var(--muted)">-</span>';
-    return{...t,pb_,eb_,b1,rb_,b2,total,tr};
+    return{...t,mainSubject,pb_,eb_,b1,rb_,b2,total,tr};
   }).sort((a,b)=>b.total-a.total);
   const tbody=document.getElementById('rBody'); tbody.innerHTML='';
   rated.forEach((t,i)=>{
     tbody.innerHTML+=`<tr>
       <td style="color:var(--muted);font-family:'DM Mono',monospace;">${i+1}</td>
       <td style="font-size:11px;font-weight:500;">${t.Oqituvchi}</td>
-      <td style="text-align:center;" title="Kriteriya: ${getPassCriteria(mainSubject).A}%">${rb(t.pb_,25)}</td>
+      <td style="text-align:center;" title="Kriteriya: ${getPassCriteria(t.mainSubject).A}%">${rb(t.pb_,25)}</td>
       <td style="text-align:center;">${rb(t.eb_,8)}</td>
       <td style="text-align:center;font-weight:600;">${rb(t.b1,33)}</td>
       <td style="text-align:center;">${rb(t.rb_,15)}</td>
