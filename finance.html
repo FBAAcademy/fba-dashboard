@@ -359,29 +359,111 @@ const msalConfig = {
   auth: {
     clientId: "57ded34f-3662-4c62-bfc2-da717ef8db46",
     authority: "https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c",
-    redirectUri: window.location.origin,
+    redirectUri: window.location.href.split('#')[0].split('?')[0], // finance.html
+    navigateToLoginRequestUrl: false,
   },
-  cache: { cacheLocation: "sessionStorage" }
+  cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: true }
 };
 const loginRequest = {
   scopes: ["https://graph.microsoft.com/Sites.Read.All","https://graph.microsoft.com/Files.Read.All"]
 };
 const SITE_HOSTNAME = "fbaacademy.sharepoint.com";
 const SITE_PATH = "/sites/FBATeam";
-
-// ── PIN CONFIG ──
-// SHA-256 hash of the PIN (PIN o'zgartirish uchun: yangi PIN hashini bu yerga yozing)
-// Hozirgi PIN: "FBA2025" → quyidagi hash
-const PIN_HASH = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"; // PLACEHOLDER - pastda hashPIN() bilan o'zgartiriladi
 const PIN_STORAGE_KEY = "fba_fin_auth";
 const PIN_EXPIRY_DAYS = 7;
 
-// ── STATE ──
-let msalInstance = null; // init() ichida yaratiladi
+let msalInstance = null;
 let currentPin = '';
 const PIN_LENGTH = 6;
 let finData = { pl: null, cf: null, cashier: null };
 let charts = {};
+
+// ══════════════════════════════════════════
+// AUTH FLOW — loginRedirect usuli
+// ══════════════════════════════════════════
+async function init() {
+  msalInstance = new msal.PublicClientApplication(msalConfig);
+  await msalInstance.initialize();
+
+  // 1. Redirect dan qaytgan bo'lsa — AVVAL shu tekshiriladi
+  let redirectResult = null;
+  try {
+    redirectResult = await msalInstance.handleRedirectPromise();
+  } catch(e) {
+    console.error("Redirect xato:", e);
+    document.getElementById('msErr').textContent = "Kirish xatosi: " + (e.message || e);
+    document.getElementById('screen-ms').classList.remove('hidden');
+    return;
+  }
+
+  if (redirectResult && redirectResult.account) {
+    // Microsoft login muvaffaqiyatli — PIN ekraniga o'tamiz
+    msalInstance.setActiveAccount(redirectResult.account);
+    document.getElementById('userName').textContent = redirectResult.account.name || redirectResult.account.username;
+    document.getElementById('pinUserName').textContent =
+      "✅ " + (redirectResult.account.name || redirectResult.account.username) + " — endi maxfiy kodni kiriting.";
+    document.getElementById('screen-ms').classList.add('hidden');
+    document.getElementById('screen-pin').classList.remove('hidden');
+    initPinPad();
+    return;
+  }
+
+  // 2. PIN session tekshiramiz (avval login qilinganmi)
+  const stored = sessionStorage.getItem(PIN_STORAGE_KEY);
+  if (stored) {
+    try {
+      const obj = JSON.parse(stored);
+      if (obj.verified && Date.now() < obj.expiry) {
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+          msalInstance.setActiveAccount(accounts[0]);
+          document.getElementById('userName').textContent = accounts[0].name || accounts[0].username;
+          showMain();
+          await loadData();
+          return;
+        }
+      }
+    } catch(e) {}
+    sessionStorage.removeItem(PIN_STORAGE_KEY);
+  }
+
+  // 3. Login ekranini ko'rsatamiz
+  document.getElementById('screen-ms').classList.remove('hidden');
+}
+
+async function handleMsLogin() {
+  const errEl = document.getElementById('msErr');
+  const loadEl = document.getElementById('msLoading');
+  errEl.textContent = '';
+  loadEl.textContent = 'Microsoft ga yo'naltirilmoqda...';
+  try {
+    // Eski interaction state ni tozalaymiz
+    Object.keys(sessionStorage).filter(k => k.startsWith('msal.')).forEach(k => sessionStorage.removeItem(k));
+    await msalInstance.loginRedirect(loginRequest);
+    // Bu qator ishlamaydi — sahifa redirect bo'ladi
+  } catch(e) {
+    errEl.textContent = "Kirish muvaffaqiyatsiz: " + (e.message || e);
+    loadEl.textContent = '';
+  }
+}
+
+function backToMs() {
+  currentPin = '';
+  document.getElementById('screen-pin').classList.add('hidden');
+  document.getElementById('screen-ms').classList.remove('hidden');
+  updatePinDots();
+}
+
+function fullSignOut() {
+  sessionStorage.removeItem(PIN_STORAGE_KEY);
+  document.getElementById('mainContent').style.display = 'none';
+  currentPin = '';
+  try {
+    msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.href.split('#')[0].split('?')[0] });
+  } catch(e) {
+    document.getElementById('screen-ms').classList.remove('hidden');
+  }
+}
 
 // ══════════════════════════════════════════
 // PIN HASHING (SHA-256, browser native)
@@ -397,92 +479,6 @@ async function hashPin(pin) {
 // ══════════════════════════════════════════
 // AUTH FLOW
 // ══════════════════════════════════════════
-async function init() {
-  // msal bu yerda yaratiladi (kutubxona yuklangandan keyin)
-  msalInstance = new msal.PublicClientApplication(msalConfig);
-  await msalInstance.initialize();
-
-  // PIN allaqachon tekshirilganmi?
-  const stored = sessionStorage.getItem(PIN_STORAGE_KEY);
-  if (stored) {
-    try {
-      const obj = JSON.parse(stored);
-      if (obj.verified && Date.now() < obj.expiry) {
-        // MS account ham tekshiramiz
-        const accounts = msalInstance.getAllAccounts();
-        if (accounts.length > 0) {
-          msalInstance.setActiveAccount(accounts[0]);
-          document.getElementById('userName').textContent = accounts[0].name || accounts[0].username;
-          showMain();
-          await loadData();
-          return;
-        }
-      }
-    } catch(e) {}
-  }
-  // Redirect dan qaytgan bo'lsa — natijani tekshiramiz
-  const redirected = await handleRedirectResult();
-  if (redirected) return;
-
-  // MS login ekranini ko'rsatamiz
-  document.getElementById('screen-ms').classList.remove('hidden');
-}
-
-async function handleMsLogin() {
-  const errEl = document.getElementById('msErr');
-  const loadEl = document.getElementById('msLoading');
-  errEl.textContent = '';
-  loadEl.textContent = 'Kirish...';
-  // interaction_in_progress xatosini oldini olish
-  try {
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.includes('msal') && (key.includes('interaction') || key.includes('request'))) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  } catch(_) {}
-  try {
-    await msalInstance.loginRedirect(loginRequest);
-    // loginRedirect sahifani qayta yuklaydi — keyin handleRedirect() ishlaydi
-  } catch(e) {
-    errEl.textContent = "Kirish muvaffaqiyatsiz: " + (e.message || e);
-    loadEl.textContent = '';
-  }
-}
-
-async function handleRedirectResult() {
-  try {
-    const result = await msalInstance.handleRedirectPromise();
-    if (result && result.account) {
-      msalInstance.setActiveAccount(result.account);
-      document.getElementById('pinUserName').textContent =
-        `✅ ${result.account.name || result.account.username} — endi maxfiy kodni kiriting.`;
-      document.getElementById('screen-ms').classList.add('hidden');
-      document.getElementById('screen-pin').classList.remove('hidden');
-      document.getElementById('userName').textContent = result.account.name || result.account.username;
-      initPinPad();
-      return true;
-    }
-  } catch(e) {
-    console.warn('Redirect result:', e);
-  }
-  return false;
-}
-
-function backToMs() {
-  currentPin = '';
-  document.getElementById('screen-pin').classList.add('hidden');
-  document.getElementById('screen-ms').classList.remove('hidden');
-  updatePinDots();
-}
-
-function fullSignOut() {
-  sessionStorage.removeItem(PIN_STORAGE_KEY);
-  msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin + '/finance.html' }).catch(()=>{});
-  document.getElementById('mainContent').style.display = 'none';
-  currentPin = '';
-  document.getElementById('screen-ms').classList.remove('hidden');
-}
 
 // ══════════════════════════════════════════
 // PIN PAD
