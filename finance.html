@@ -435,7 +435,7 @@ async function handleMsLogin() {
   const errEl = document.getElementById('msErr');
   const loadEl = document.getElementById('msLoading');
   errEl.textContent = '';
-  loadEl.textContent = 'Microsoft ga yo'naltirilmoqda...';
+  loadEl.textContent = "Microsoft ga yo'naltirilmoqda...";
   try {
     // Eski interaction state ni tozalaymiz
     Object.keys(sessionStorage).filter(k => k.startsWith('msal.')).forEach(k => sessionStorage.removeItem(k));
