@@ -359,7 +359,7 @@ const msalConfig = {
   auth: {
     clientId: "57ded34f-3662-4c62-bfc2-da717ef8db46",
     authority: "https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c",
-    redirectUri: window.location.origin + '/finance.html',
+    redirectUri: window.location.origin,
   },
   cache: { cacheLocation: "sessionStorage" }
 };
@@ -370,8 +370,8 @@ const SITE_HOSTNAME = "fbaacademy.sharepoint.com";
 const SITE_PATH = "/sites/FBATeam";
 
 // ── PIN CONFIG ──
-// SHA-256 hash of the PIN (PIN o'zgartirish uchun:133607)
-// Hozirgi PIN: "133607" → quyidagi hash
+// SHA-256 hash of the PIN (PIN o'zgartirish uchun: yangi PIN hashini bu yerga yozing)
+// Hozirgi PIN: "FBA2025" → quyidagi hash
 const PIN_HASH = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"; // PLACEHOLDER - pastda hashPIN() bilan o'zgartiriladi
 const PIN_STORAGE_KEY = "fba_fin_auth";
 const PIN_EXPIRY_DAYS = 7;
@@ -515,7 +515,7 @@ async function verifyPin() {
 
   // ⚠️ PAROL BU YERDA O'ZGARTIRILADI
   // Yangi parol o'rnatish uchun: console.log(await hashPin('YANGI_PAROL')) → natijani PIN_CORRECT_HASH ga qo'ying
-  const PIN_CORRECT_HASH = await hashPin("FBA2025"); // ← PAROLNI BU YERDA O'ZGARTIRING
+  const PIN_CORRECT_HASH = await hashPin("133607"); // ← PAROLNI BU YERDA O'ZGARTIRING
 
   if (inputHash === PIN_CORRECT_HASH) {
     // Success
