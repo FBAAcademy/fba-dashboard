@@ -116,15 +116,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 .pdf-btn{background:var(--gdim);border:1px solid rgba(46,202,138,0.3);color:var(--green);cursor:pointer;padding:6px 14px;border-radius:6px;font-size:11px;font-family:inherit;margin-top:10px;}
 .cost-note{font-size:10px;color:var(--muted);margin-top:8px;}
 </style>
-<script>
-function handleLogin() {
-  if (typeof signIn === "function") {
-    signIn();
-  } else {
-    setTimeout(handleLogin, 100);
-  }
-}
-</script>
 </head>
 <body>
 
@@ -704,58 +695,155 @@ function handleLogin() {
 
 <script>
 // ── MSAL CONFIG ──
-const msalConfig = {
-  auth: {
-    clientId: "57ded34f-3662-4c62-bfc2-da717ef8db46",
-    authority: "https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c",
-    redirectUri: window.location.origin,
-  },
-  cache: { cacheLocation: "sessionStorage" }
-};
-
-const loginRequest = {
-  scopes: ["https://graph.microsoft.com/Sites.Read.All", "https://graph.microsoft.com/Files.Read.All"]
-};
-
-const msalInstance = new msal.PublicClientApplication(msalConfig);
+// ── MSAL CONFIG ──
+const MSAL_CLIENT_ID  = "57ded34f-3662-4c62-bfc2-da717ef8db46";
+const MSAL_AUTHORITY  = "https://login.microsoftonline.com/cd2db117-10fa-4185-b44b-4736a093b89c";
+const MSAL_REDIRECT   = window.location.origin;
+const MSAL_SCOPES     = ["https://graph.microsoft.com/Sites.Read.All","https://graph.microsoft.com/Files.Read.All"];
 
 // SharePoint config
 const SITE_HOSTNAME = "fbaacademy.sharepoint.com";
-const SITE_PATH = "/sites/FBATeam";
+const SITE_PATH     = "/sites/FBATeam";
 
-let snap = null;
-let smData = { sales: {}, marketing: {} };
-let charts = {};
+// ── STATE ──
+let msalInstance = null;   // window.onload da yaratiladi — msal.js yuklanib bo'lgandan keyin
+let snap    = null;
+let smData  = { sales: {}, marketing: {} };
+let charts  = {};
 let yF = 'all', tF = 'all', tY = 'all', sY = 'all', dY = 'all', dD = 'all';
+let curPage = 'overview';
 
 // ── AUTH ──
-async function signIn() {
+// handleLogin — login-btn onclick="handleLogin()" tomonidan chaqiriladi
+async function handleLogin() {
+  const errEl   = document.getElementById('loginErr');
+  const loadEl  = document.getElementById('loginLoading');
+  if (errEl)  errEl.textContent  = '';
+  if (loadEl) loadEl.textContent = 'Kirish...';
+
+  if (!msalInstance) {
+    if (errEl) errEl.textContent = "MSAL kutubxonasi yuklanmagan. Sahifani yangilang.";
+    if (loadEl) loadEl.textContent = '';
+    return;
+  }
+
+  // Eski interaction state ni tozalaymiz — "interaction_in_progress" xatosi oldini olish
   try {
-    document.getElementById('loginLoading').textContent = "Kirish...";
-    const result = await msalInstance.loginPopup(loginRequest);
+    Object.keys(sessionStorage)
+      .filter(k => k.startsWith('msal.') && (k.includes('interaction') || k.includes('request') || k.includes('temporary')))
+      .forEach(k => sessionStorage.removeItem(k));
+  } catch(_) {}
+
+  try {
+    const result = await msalInstance.loginPopup({
+      scopes: MSAL_SCOPES,
+      prompt: 'select_account'
+    });
+    if (!result || !result.account) throw new Error("Hisob ma'lumotlari olinmadi");
     msalInstance.setActiveAccount(result.account);
-    document.getElementById('userName').textContent = result.account.name || result.account.username;
+    const nameEl = document.getElementById('userName');
+    if (nameEl) nameEl.textContent = result.account.name || result.account.username;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
+    if (loadEl) loadEl.textContent = '';
     await loadData();
   } catch(e) {
-    document.getElementById('loginErr').textContent = "Kirish muvaffaqiyatsiz: " + e.message;
-    document.getElementById('loginLoading').textContent = "";
+    const msg = e.message || String(e);
+    // interaction_in_progress bo'lsa — foydalanuvchiga tushunarli xabar
+    if (msg.includes('interaction_in_progress')) {
+      if (errEl) errEl.textContent = "Popup allaqachon ochiq. Iltimos, avvalgi popup oynasini yoping va qayta urinib ko'ring.";
+    } else if (msg.includes('user_cancelled') || msg.includes('access_denied')) {
+      if (errEl) errEl.textContent = "Kirish bekor qilindi.";
+    } else {
+      if (errEl) errEl.textContent = "Kirish muvaffaqiyatsiz: " + msg;
+    }
+    if (loadEl) loadEl.textContent = '';
+    console.error("Login error:", e);
   }
 }
 
 function signOut() {
-  msalInstance.logoutPopup();
+  try {
+    if (msalInstance) {
+      msalInstance.logoutPopup().catch(() => {});
+    }
+  } catch(_) {}
+  sessionStorage.clear();
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('mainContent').style.display = 'none';
+  snap = null;
 }
 
 async function getToken() {
+  if (!msalInstance) throw new Error("MSAL tayyor emas");
   const account = msalInstance.getActiveAccount();
   if (!account) throw new Error("Login qilinmagan");
-  const result = await msalInstance.acquireTokenSilent({ ...loginRequest, account });
-  return result.accessToken;
+  try {
+    const result = await msalInstance.acquireTokenSilent({ scopes: MSAL_SCOPES, account });
+    return result.accessToken;
+  } catch(e) {
+    // Silent muvaffaqiyatsiz bo'lsa — popup orqali
+    const result = await msalInstance.acquireTokenPopup({ scopes: MSAL_SCOPES, account });
+    return result.accessToken;
+  }
 }
+
+// ── MSAL INIT — window.onload da chaqiriladi ──
+async function initMsal() {
+  try {
+    msalInstance = new msal.PublicClientApplication({
+      auth: {
+        clientId:    MSAL_CLIENT_ID,
+        authority:   MSAL_AUTHORITY,
+        redirectUri: MSAL_REDIRECT,
+        navigateToLoginRequestUrl: false,
+      },
+      cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
+    });
+    await msalInstance.initialize();
+
+    // Redirect dan qaytgan bo'lsa tekshiramiz
+    let redirectResult = null;
+    try {
+      redirectResult = await msalInstance.handleRedirectPromise();
+    } catch(e) {
+      console.warn("handleRedirectPromise:", e);
+    }
+    if (redirectResult?.account) {
+      msalInstance.setActiveAccount(redirectResult.account);
+    }
+
+    // Allaqachon login qilinganmi?
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      msalInstance.setActiveAccount(accounts[0]);
+      const nameEl = document.getElementById('userName');
+      if (nameEl) nameEl.textContent = accounts[0].name || accounts[0].username;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      await loadData();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+  } catch(e) {
+    console.error("MSAL init error:", e);
+    const errEl = document.getElementById('loginErr');
+    if (errEl) errEl.textContent = "Tizim xatosi: " + (e.message || e) + ". Sahifani yangilang.";
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+}
+
+// Sahifa to'liq yuklanganida initMsal chaqiriladi
+window.addEventListener('load', function() {
+  // msal-browser.min.js yuklanganini tekshiramiz
+  if (typeof msal === 'undefined') {
+    const errEl = document.getElementById('loginErr');
+    if (errEl) errEl.textContent = "Internet aloqasi yo'q yoki kutubxona yuklanmadi. Sahifani yangilang.";
+    document.getElementById('loginScreen').style.display = 'flex';
+    return;
+  }
+  initMsal();
+});
 
 // ── DATA LOADING ──
 async function loadData() {
@@ -2888,19 +2976,7 @@ document.getElementById('aiModal')?.addEventListener('click', function(e) {
   if (e.target === this) closeAiModal();
 });
 
-// ── INIT: Check if already logged in ──
-async function init() {
-  await msalInstance.initialize();
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
-    msalInstance.setActiveAccount(accounts[0]);
-    document.getElementById('userName').textContent = accounts[0].name || accounts[0].username;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-    await loadData();
-  }
-}
-init();
+// Auth initMsal() window.onload orqali chaqiriladi (yuqorida)
 </script>
 </body>
 </html>
