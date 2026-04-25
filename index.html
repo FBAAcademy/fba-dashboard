@@ -127,7 +127,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <div class="login-logo">FA</div>
     <div class="login-title">FBA Academy Analytics</div>
     <div class="login-sub">Real-time dashboard. Kirish uchun Microsoft 365 accountingizdan foydalaning.</div>
-    <button class="login-btn" onclick="handleLogin()">
+    <button class="login-btn" id="loginBtn" disabled>
       <svg viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>
       Microsoft 365 bilan kirish
     </button>
@@ -841,6 +841,17 @@ window.addEventListener('load', function() {
     if (errEl) errEl.textContent = "Internet aloqasi yo'q yoki kutubxona yuklanmadi. Sahifani yangilang.";
     document.getElementById('loginScreen').style.display = 'flex';
     return;
+  }
+  // Login tugmasini yoqamiz va click handler o'rnatamiz
+  // Bu window.onload ichida — handleLogin funksiyasi allaqachon mavjud
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.disabled = false;
+    loginBtn.addEventListener('click', function() {
+      if (typeof handleLogin === 'function') {
+        handleLogin();
+      }
+    });
   }
   initMsal();
 });
@@ -1848,7 +1859,7 @@ function renderOv() {
     });
     fHtml += '</div><div style="display:flex;gap:16px;font-size:10px;color:var(--muted);padding:4px 0;">'+
       '<span>✓ Passed</span><span>✗ Stopped</span><span>— No Exam</span><span>⏳ In Progress</span>'+
-      '<span style="margin-left:auto;">→ Keyingi kursga o'tish %</span></div>';
+      "<span style=\"margin-left:auto;\">→ Keyingi kursga o'tish %</span></div>";
     funnelViz.innerHTML = fHtml;
   }
 
@@ -1870,7 +1881,7 @@ function renderOv() {
   // ── COHORT TABLE ──
   const cohortTbl = document.getElementById('cohortTable');
   if (cohortTbl && cohorts.length > 0) {
-    let ch = '<table><thead><tr><th>Oy</th><th style="text-align:center">Kirdi</th><th style="text-align:center">Chiqdi</th><th style="text-align:center">O'qiyapti</th><th style="text-align:center">Passed</th><th>Retention</th><th>Stop %</th></tr></thead><tbody>';
+    let ch = `<table><thead><tr><th>Oy</th><th style='text-align:center'>Kirdi</th><th style='text-align:center'>Chiqdi</th><th style='text-align:center'>O'qiyapti</th><th style='text-align:center'>Passed</th><th>Retention</th><th>Stop %</th></tr></thead><tbody>`;
     [...cohorts].reverse().forEach(c => {
       ch += `<tr>
         <td style="font-family:'DM Mono',monospace;font-size:10px;">${c.oy}</td>
@@ -2280,7 +2291,7 @@ function renderSubjects() {
     const matFans = [...new Set(rawM.map(function(r){ return r.Product; }).filter(Boolean))].sort();
     const matTs = [...new Set(rawM.map(function(r){ return r.Oqituvchi; }).filter(Boolean))].sort().slice(0,10);
     if (matFans.length > 0 && matTs.length > 0) {
-      let mHtml = '<div style="overflow-x:auto;"><table style="font-size:10px;width:100%;"><thead><tr><th style="min-width:100px;padding:4px 6px;">O'qituvchi</th>';
+      let mHtml = '<div style="overflow-x:auto;"><table style="font-size:10px;width:100%;"><thead><tr><th style="min-width:100px;padding:4px 6px;">O&amp;#39;qituvchi</th>';
       matFans.forEach(function(f){ mHtml += '<th style="text-align:center;min-width:55px;padding:4px 3px;">' + f + '</th>'; });
       mHtml += '</tr></thead><tbody>';
       matTs.forEach(function(t) {
@@ -2299,7 +2310,7 @@ function renderSubjects() {
       mHtml += '</tbody></table></div>';
       sMatrix.innerHTML = mHtml;
     } else {
-      sMatrix.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">Filtr natijalari bo'sh</div>';
+      sMatrix.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">Filtr natijalari bo\'sh</div>';
     }
   }
 }
@@ -2544,7 +2555,7 @@ function renderDropout() {
           '<td style="font-size:9px;color:var(--muted);" title="' + topR + '">' + rS + '</td>' +
           '</tr>';
       });
-    if (!dTeacherBody.innerHTML) dTeacherBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px;">Ma'lumot yetarli emas</td></tr>';
+    if (!dTeacherBody.innerHTML) dTeacherBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px;">Ma&#39;lumot yetarli emas</td></tr>';
   }
 
   // YANGI: Oylik dropout chart
@@ -2733,7 +2744,7 @@ function renderMarketing() {
 }
 
 // ── PAGE ──
-let curPage = 'overview';
+// curPage — yuqorida e'lon qilingan
 function renderCurrentPage() {
   if(curPage==='overview') renderOv();
   else if(curPage==='teachers') renderTeachers();
