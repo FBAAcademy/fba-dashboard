@@ -190,18 +190,33 @@ function handleLogin() {
 
 <!-- OVERVIEW -->
 <div id="page-overview" class="page active">
-  <div class="fbar">
+  <!-- GLOBAL FILTER BAR -->
+  <div class="fbar" id="global-fbar">
+    <span class="flabel" style="color:var(--green);font-weight:600;">GLOBAL:</span>
     <span class="flabel">Yil:</span>
-    <button class="fyb active" id="fy-all" onclick="setYF('all',this)">Barchasi</button>
-    <button class="fyb" id="fy-2024" onclick="setYF('2024',this)">2024</button>
-    <button class="fyb" id="fy-2025" onclick="setYF('2025',this)">2025</button>
-    <button class="fyb" id="fy-2026" onclick="setYF('2026',this)">2026</button>
+    <button class="fyb active" id="gfy-all"  onclick="setGY('all',this)">Barchasi</button>
+    <button class="fyb" id="gfy-2024" onclick="setGY('2024',this)">2024</button>
+    <button class="fyb" id="gfy-2025" onclick="setGY('2025',this)">2025</button>
+    <button class="fyb" id="gfy-2026" onclick="setGY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">Oy:</span>
+    <select class="fselect" id="gfm-sel" onchange="setGM(this.value)">
+      <option value="all">Barcha oylar</option>
+      <option value="01">Yanvar</option><option value="02">Fevral</option>
+      <option value="03">Mart</option><option value="04">Aprel</option>
+      <option value="05">May</option><option value="06">Iyun</option>
+      <option value="07">Iyul</option><option value="08">Avgust</option>
+      <option value="09">Sentabr</option><option value="10">Oktabr</option>
+      <option value="11">Noyabr</option><option value="12">Dekabr</option>
+    </select>
     <div class="fsep"></div>
     <span class="flabel">Product:</span>
     <button class="fyb active" id="fp-all" onclick="setTF('all',this)">Barchasi</button>
     <button class="fyb" id="fp-fc" onclick="setTF('Full course',this)">Full course</button>
     <button class="fyb" id="fp-rv" onclick="setTF('Revision',this)">Revision</button>
     <button class="fyb" id="fp-vl" onclick="setTF('Video Lesson',this)">Video Lesson</button>
+    <div class="fsep"></div>
+    <span style="font-size:10px;color:var(--muted);" id="gf-label">Barchasi</span>
   </div>
 
   <div class="sh"><div class="st" id="ov-title">Asosiy ko'rsatkichlar</div><div class="sl"></div></div>
@@ -241,6 +256,30 @@ function handleLogin() {
       <div style="position:relative;height:200px;"><canvas id="monthlyChart"></canvas></div>
     </div>
   </div>
+  <!-- HAFTALIK PULS -->
+  <div class="g3" style="margin-top:4px;" id="pulse-section"></div>
+
+  <!-- KURS O'TISH FUNNEL -->
+  <div class="sh" style="margin-top:8px;"><div class="st">Kursdan kursga o'tish funnel</div><div class="sl"></div></div>
+  <div class="card" id="funnel-card">
+    <div class="ct">FA → FR → MA → FM → PM — haqiqiy konversiya zanjiri</div>
+    <div class="cs">Har bir bosqichda necha % o'quvchi keyingi kursga o'tdi</div>
+    <div id="funnel-viz" style="overflow-x:auto;"></div>
+  </div>
+
+  <!-- COHORT TAHLILI -->
+  <div class="sh"><div class="st">Cohort tahlili — oyma-oy</div><div class="sl"></div></div>
+  <div class="card">
+    <div class="ct">Har oy boshlaganlardan qancha qoldi, qancha chiqib ketdi</div>
+    <div class="cs">So'nggi 18 oy · Retention %, Pass %, Stopped %</div>
+    <div style="position:relative;height:240px;"><canvas id="cohortChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">Cohort jadvali — to'liq</div>
+    <div class="cs">Har oy kesimida barcha ko'rsatkichlar</div>
+    <div style="overflow-x:auto;max-height:320px;overflow-y:auto;" id="cohortTable"></div>
+  </div>
+
   <div class="sh"><div class="st">AI tahlil</div><div class="sl"></div></div>
   <div id="ov-insights"></div>
 </div>
@@ -251,10 +290,13 @@ function handleLogin() {
     <span class="flabel">Fan:</span>
     <select class="fselect" id="t-fan-filter" onchange="renderTeachers()"><option value="all">Barcha fanlar</option></select>
     <div class="fsep"></div>
-    <span class="flabel">Yil:</span>
-    <button class="fyb active" id="ty-all" onclick="setTY('all',this)">Barchasi</button>
-    <button class="fyb" id="ty-2024" onclick="setTY('2024',this)">2024</button>
-    <button class="fyb" id="ty-2025" onclick="setTY('2025',this)">2025</button>
+    <span class="flabel">O'qituvchi:</span>
+    <select class="fselect" id="t-teacher-filter" onchange="renderTeachers()"><option value="all">Barchasi</option></select>
+    <div class="fsep"></div>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer;">
+      <input type="checkbox" id="t-excl-preclass" onchange="renderTeachers()" style="cursor:pointer;">
+      <span>1-darsgacha chiqganlarni olib tashlash</span>
+    </label>
   </div>
   <div class="sh"><div class="st">O'qituvchilar tahlili</div><div class="sl"></div></div>
   <div class="g2">
@@ -264,12 +306,19 @@ function handleLogin() {
   <div class="card">
     <div class="ct">O'qituvchilar — to'liq jadval</div><div class="cs">Retention bo'yicha kamayish tartibida</div>
     <table><thead><tr>
-      <th style="width:3%">#</th><th style="width:20%">O'qituvchi</th>
-      <th style="text-align:center;width:8%">Enrolled</th><th style="text-align:center;width:8%">Finished</th>
-      <th style="text-align:center;width:8%">Stopped</th><th style="text-align:center;width:8%">In Prog.</th>
-      <th style="text-align:center;width:8%">Passed</th><th style="text-align:center;width:8%">Failed</th>
-      <th style="text-align:center;width:8%">No Exam</th><th style="width:11%">Retention</th><th style="width:10%">Pass rate</th>
+      <th style="width:3%">#</th><th style="width:18%">O'qituvchi</th>
+      <th style="text-align:center;width:7%">Enrolled</th>
+      <th style="text-align:center;width:7%">1-dars*</th>
+      <th style="text-align:center;width:7%">Stopped</th>
+      <th style="text-align:center;width:6%">In Prog.</th>
+      <th style="text-align:center;width:6%">Passed</th>
+      <th style="text-align:center;width:6%">No Exam</th>
+      <th style="text-align:center;width:7%">No Exam%</th>
+      <th style="width:10%">Retention</th>
+      <th style="width:10%">Pass rate</th>
+      <th style="width:10%">Trend</th>
     </tr></thead><tbody id="tTableBody"></tbody></table>
+    <div style="font-size:9px;color:var(--muted);margin-top:6px;">* 1-darsgacha chiqqanlar — o'qituvchiga bog'liq emas</div>
   </div>
   <div class="card">
     <div class="ct">2024 vs 2025 taqqoslash</div><div class="cs">Trend ko'rsatkichlari</div>
@@ -281,6 +330,31 @@ function handleLogin() {
       <th style="text-align:center;width:9%">2024 n</th><th style="text-align:center;width:9%">2025 n</th>
     </tr></thead><tbody id="tYearBody"></tbody></table>
   </div>
+  <!-- Yangi: O'qituvchi bo'yicha fan kesimi jadvali -->
+  <div class="card" id="t-subject-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div><div class="ct">O'qituvchi bo'yicha fan kesimi</div><div class="cs" id="t-subj-sub">Tanlangan o'qituvchi uchun har bir fandagi natijalar</div></div>
+    </div>
+    <table><thead><tr>
+      <th style="width:12%">Fan</th>
+      <th style="text-align:center;width:9%">Enrolled</th>
+      <th style="text-align:center;width:9%">Stopped</th>
+      <th style="text-align:center;width:9%">Passed</th>
+      <th style="text-align:center;width:9%">No Exam</th>
+      <th style="text-align:center;width:9%">In Prog.</th>
+      <th style="width:12%">Retention</th>
+      <th style="width:12%">Pass rate</th>
+      <th style="width:12%">Exam entry</th>
+    </tr></thead><tbody id="tSubjectBody"></tbody></table>
+  </div>
+
+  <!-- Yangi: Oylik dinamika chart -->
+  <div class="card">
+    <div class="ct">Kurs boshlanish oyma-oy (o'qituvchi kesimida)</div>
+    <div class="cs">Tanlangan filtr bo'yicha yangi o'quvchilar oqimi</div>
+    <div style="position:relative;height:200px;"><canvas id="tMonthlyChart"></canvas></div>
+  </div>
+
   <div class="sh"><div class="st">AI tahlil</div><div class="sl"></div></div>
   <div id="t-insights"></div>
 </div>
@@ -288,11 +362,19 @@ function handleLogin() {
 <!-- SUBJECTS -->
 <div id="page-subjects" class="page">
   <div class="fbar">
-    <span class="flabel">Yil filtri:</span>
+    <span class="flabel">Yil:</span>
     <button class="fyb active" id="sy-all" onclick="setSY('all',this)">Barchasi</button>
     <button class="fyb" id="sy-2024" onclick="setSY('2024',this)">2024</button>
     <button class="fyb" id="sy-2025" onclick="setSY('2025',this)">2025</button>
     <button class="fyb" id="sy-2026" onclick="setSY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">O'qituvchi:</span>
+    <select class="fselect" id="s-teacher-filter" onchange="renderSubjects()"><option value="all">Barchasi</option></select>
+    <div class="fsep"></div>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer;">
+      <input type="checkbox" id="s-excl-preclass" onchange="renderSubjects()" style="cursor:pointer;">
+      <span>1-darsgacha olib tashlash</span>
+    </label>
   </div>
   <div class="sh"><div class="st">Fanlar bo'yicha tahlil</div><div class="sl"></div></div>
   <div class="g2">
@@ -348,6 +430,20 @@ function handleLogin() {
       <th style="text-align:center;width:10%" id="sY2nH">2025 n</th>
     </tr></thead><tbody id="sYearBody"></tbody></table>
   </div>
+  <!-- Yangi: Fan kesimida oylik oqim -->
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Fan bo'yicha No Exam tahlili</div>
+      <div class="cs">Bitirganlardan imtihon topshirmaganlar foizi</div>
+      <div style="position:relative;height:220px;"><canvas id="sNoExamChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Fan × O'qituvchi matritsasi</div>
+      <div class="cs">Tanlangan fan bo'yicha har o'qituvchining natijasi</div>
+      <div id="sTeacherMatrix" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+
   <div class="sh"><div class="st">AI tahlil</div><div class="sl"></div></div>
   <div id="s-insights"></div>
 </div>
@@ -358,10 +454,8 @@ function handleLogin() {
     <span class="flabel">Fan:</span>
     <select class="fselect" id="d-fan-filter" onchange="renderDropout()"><option value="all">Barcha fanlar</option></select>
     <div class="fsep"></div>
-    <span class="flabel">Yil:</span>
-    <button class="fyb active" id="dy-all" onclick="setDY('all',this)">Barchasi</button>
-    <button class="fyb" id="dy-2024" onclick="setDY('2024',this)">2024</button>
-    <button class="fyb" id="dy-2025" onclick="setDY('2025',this)">2025</button>
+    <span class="flabel">O'qituvchi:</span>
+    <select class="fselect" id="d-teacher-filter" onchange="renderDropout()"><option value="all">Barchasi</option></select>
     <div class="fsep"></div>
     <span class="flabel">Davr:</span>
     <button class="fyb active" id="dd-all" onclick="setDD('all',this)">Barchasi</button>
@@ -376,12 +470,61 @@ function handleLogin() {
     <div class="card"><div class="ct">Chiqish sabablari (top 10)</div><div class="cs">Sabab bo'yicha taqsimot</div><div style="position:relative;height:220px;"><canvas id="dReasonChart"></canvas></div></div>
   </div>
   <div class="card"><div class="ct">Operator kesimi</div><div class="cs">Dropout foizi bo'yicha</div><div id="opSection" style="margin-top:8px;"></div></div>
+
+  <!-- Yangi: O'qituvchi bo'yicha dropout jadvali -->
+  <div class="card">
+    <div class="ct">O'qituvchi × Dropout matritsasi</div>
+    <div class="cs" id="d-teacher-sub">Har bir o'qituvchining dropout ko'rsatkichlari (1-darsgacha chiqganlar alohida)</div>
+    <table><thead><tr>
+      <th style="width:20%">O'qituvchi</th>
+      <th style="text-align:center;width:9%">Jami</th>
+      <th style="text-align:center;width:9%">1-darsgacha</th>
+      <th style="text-align:center;width:9%">3-darsgacha</th>
+      <th style="text-align:center;width:9%">1-oyda</th>
+      <th style="text-align:center;width:9%">2-oyda</th>
+      <th style="text-align:center;width:9%">Jami chiqgan</th>
+      <th style="width:16%">Dropout %</th>
+      <th style="width:10%">Sabab (top)</th>
+    </tr></thead><tbody id="dTeacherBody"></tbody></table>
+  </div>
+
+  <!-- Yangi: Dropout Heatmap -->
+  <div class="card">
+    <div class="ct">Dropout Heatmap — Oy × Fan</div>
+    <div class="cs">Qaysi oy, qaysi fanda dropout ko'p (%). Qizil = xavfli, yashil = yaxshi</div>
+    <div id="dHeatmap" style="overflow-x:auto;margin-top:8px;"></div>
+  </div>
+
+  <!-- Yangi: Sabab × Fan kesimi -->
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Dropout sababi × Fan</div>
+      <div class="cs">Qaysi fanda qaysi sabab ko'p</div>
+      <div id="dReasonFanSection" style="overflow-x:auto;"></div>
+    </div>
+    <div class="card">
+      <div class="ct">Oylik dropout dinamikasi</div>
+      <div class="cs">Dropout foizi oyma-oy o'zgarishi</div>
+      <div style="position:relative;height:220px;"><canvas id="dMonthlyChart"></canvas></div>
+    </div>
+  </div>
+
   <div class="sh"><div class="st">AI tahlil</div><div class="sl"></div></div>
   <div id="d-insights"></div>
 </div>
 
 <!-- RATING -->
 <div id="page-rating" class="page">
+  <div class="fbar">
+    <span class="flabel">Fan:</span>
+    <select class="fselect" id="r-fan-filter" onchange="renderRating()"><option value="all">Barcha fanlar</option></select>
+    <div class="fsep"></div>
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="ry-all" onclick="setRY('all',this)">Barchasi</button>
+    <button class="fyb" id="ry-2024" onclick="setRY('2024',this)">2024</button>
+    <button class="fyb" id="ry-2025" onclick="setRY('2025',this)">2025</button>
+    <button class="fyb" id="ry-2026" onclick="setRY('2026',this)">2026</button>
+  </div>
   <div class="sh"><div class="st">Tutor rating tizimi</div><div class="sl"></div></div>
   <div class="g3">
     <div class="kpi bl"><div class="kl">Block 1 — Exam natijasi</div><div class="kv" style="font-size:18px;">45 ball</div><div class="ks">Pass rate (25) + Exam entry (8) + Reserved (12)</div></div>
@@ -402,6 +545,24 @@ function handleLogin() {
 
 <!-- SALES -->
 <div id="page-sales" class="page">
+  <div class="fbar">
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="saly-all"  onclick="setSalesY('all',this)">Barchasi</button>
+    <button class="fyb" id="saly-2024" onclick="setSalesY('2024',this)">2024</button>
+    <button class="fyb" id="saly-2025" onclick="setSalesY('2025',this)">2025</button>
+    <button class="fyb" id="saly-2026" onclick="setSalesY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">Oy:</span>
+    <select class="fselect" id="salm-sel" onchange="renderSales()">
+      <option value="all">Barcha oylar</option>
+      <option value="01">Yanvar</option><option value="02">Fevral</option>
+      <option value="03">Mart</option><option value="04">Aprel</option>
+      <option value="05">May</option><option value="06">Iyun</option>
+      <option value="07">Iyul</option><option value="08">Avgust</option>
+      <option value="09">Sentabr</option><option value="10">Oktabr</option>
+      <option value="11">Noyabr</option><option value="12">Dekabr</option>
+    </select>
+  </div>
   <div class="sh"><div class="st">Sales bo'limi tahlili</div><div class="sl"></div></div>
   <div class="g3">
     <div class="kpi bl"><div class="kl">Jami lidlar</div><div class="kv" id="s-jami">-</div><div class="ks">barcha vaqt</div></div>
@@ -420,10 +581,61 @@ function handleLogin() {
       <table><thead><tr><th style="width:28%">Manba</th><th style="text-align:center;width:18%">Jami</th><th style="text-align:center;width:18%">Muvaffaq.</th><th style="text-align:center;width:18%">Konversiya</th></tr></thead><tbody id="salesManbaBody"></tbody></table>
     </div>
   </div>
+  <!-- Sales Funnel: Lid → Student → Active -->
+  <div class="card" style="margin-top:14px;">
+    <div class="ct">Sales Funnel — Lid dan o'quvchiga</div>
+    <div class="cs">Konversiya zanjiri: Jami lid → Muvaffaqiyatli → O'qiyapti → Yakunlagan</div>
+    <div id="salesFunnelViz" style="overflow-x:auto;padding:8px 0;"></div>
+  </div>
+  <!-- Operator KPI -->
+  <div class="card">
+    <div class="ct">Operator KPI jadvali</div>
+    <div class="cs">Har bir operatorning oylik samaradorligi</div>
+    <table><thead><tr>
+      <th style="width:18%">Operator</th>
+      <th style="text-align:center;width:10%">Jami lid</th>
+      <th style="text-align:center;width:10%">Muvaffaq.</th>
+      <th style="text-align:center;width:10%">Konversiya</th>
+      <th style="text-align:center;width:10%">Eng yaxshi oy</th>
+      <th style="text-align:center;width:10%">Eng yomon oy</th>
+      <th style="width:15%">Konv. trend</th>
+    </tr></thead><tbody id="salesOpKpiBody"></tbody></table>
+  </div>
+  <!-- Manba ROI -->
+  <div class="card">
+    <div class="ct">Manba samaradorlik tahlili</div>
+    <div class="cs">Qaysi manba sifatliroq va samaraliroq lid beradi</div>
+    <table><thead><tr>
+      <th style="width:18%">Manba</th>
+      <th style="text-align:center;width:10%">Jami lid</th>
+      <th style="text-align:center;width:10%">Muvaffaq.</th>
+      <th style="text-align:center;width:12%">Konversiya %</th>
+      <th style="width:20%">Sifat reytingi</th>
+      <th style="text-align:center;width:12%">Ulush %</th>
+    </tr></thead><tbody id="salesManbaKpiBody"></tbody></table>
+  </div>
 </div>
 
 <!-- MARKETING -->
 <div id="page-marketing" class="page">
+  <div class="fbar">
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="mkty-all"  onclick="setMktY('all',this)">Barchasi</button>
+    <button class="fyb" id="mkty-2024" onclick="setMktY('2024',this)">2024</button>
+    <button class="fyb" id="mkty-2025" onclick="setMktY('2025',this)">2025</button>
+    <button class="fyb" id="mkty-2026" onclick="setMktY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">Oy:</span>
+    <select class="fselect" id="mktm-sel" onchange="renderMarketing()">
+      <option value="all">Barcha oylar</option>
+      <option value="01">Yanvar</option><option value="02">Fevral</option>
+      <option value="03">Mart</option><option value="04">Aprel</option>
+      <option value="05">May</option><option value="06">Iyun</option>
+      <option value="07">Iyul</option><option value="08">Avgust</option>
+      <option value="09">Sentabr</option><option value="10">Oktabr</option>
+      <option value="11">Noyabr</option><option value="12">Dekabr</option>
+    </select>
+  </div>
   <div class="sh"><div class="st">Marketing bo'limi tahlili</div><div class="sl"></div></div>
   <div class="g3">
     <div class="kpi re"><div class="kl">Jami xarajat</div><div class="kv" id="m-xarajat">-</div><div class="ks">USD</div></div>
@@ -752,7 +964,8 @@ const ANALYTICS = {
     // 2024 dan keyingi ma'lumotlar
     const df24 = data.filter(r => r.Year >= 2024);
 
-    return {
+    const result = {
+      rawData: df24,
       summary: this.calcSummary(df24, new Date().toISOString().split('T')[0]),
       product_types: this.calcByProductType(df24),
       yearly: this.calcYearly(df24),
@@ -762,6 +975,35 @@ const ANALYTICS = {
       dropout_period: this.calcDropoutPeriod(df24),
       operator_stats: this.calcOperatorStats(df24),
       monthly: this.calcMonthly(df24),
+      cohorts: this.calcCohorts(df24),
+      funnel: this.calcConversionFunnel(df24),
+      heatmap: this.calcDropoutHeatmap(df24),
+      pulse: this.calcWeeklyPulse(df24),
+      reasonByFan: this.calcReasonByFan(df24),
+    };
+    return result;
+  },
+
+  // Global filter qo'llanilganda qayta hisoblash
+  reCalcFromFiltered(filtered) {
+    if (!filtered || filtered.length === 0) return null;
+    const sana = new Date().toISOString().split('T')[0];
+    return {
+      rawData: filtered,
+      summary: this.calcSummary(filtered, sana),
+      product_types: this.calcByProductType(filtered),
+      yearly: this.calcYearly(filtered),
+      teachers: this.calcTeachers(filtered),
+      subjects: this.calcSubjects(filtered),
+      dropout_reasons: this.calcDropoutReasons(filtered),
+      dropout_period: this.calcDropoutPeriod(filtered),
+      operator_stats: this.calcOperatorStats(filtered),
+      monthly: this.calcMonthly(filtered),
+      cohorts: this.calcCohorts(filtered),
+      funnel: this.calcConversionFunnel(filtered),
+      heatmap: this.calcDropoutHeatmap(filtered),
+      pulse: this.calcWeeklyPulse(filtered),
+      reasonByFan: this.calcReasonByFan(filtered),
     };
   },
 
@@ -975,6 +1217,120 @@ const ANALYTICS = {
         stopped: rows.filter(r => r.Final_status === 'Stopped').length,
         dropout_pct: Math.round(rows.filter(r => r.Final_status === 'Stopped').length / rows.length * 1000) / 10
       }));
+  },
+
+  // COHORT TAHLILI — har oy boshlaganlardan qancha qoldi
+  calcCohorts(data) {
+    const cohorts = {};
+    data.forEach(r => {
+      if (!r.Month || r.boshqaGuruh) return;
+      if (!cohorts[r.Month]) cohorts[r.Month] = [];
+      cohorts[r.Month].push(r);
+    });
+    return Object.entries(cohorts)
+      .sort((a,b) => a[0].localeCompare(b[0]))
+      .slice(-18)
+      .map(([oy, rows]) => {
+        const total = rows.length;
+        const retained = rows.filter(r => r.Final_status !== 'Stopped').length;
+        const passed = rows.filter(r => r.Final_status === 'Passed').length;
+        const stopped = rows.filter(r => r.Final_status === 'Stopped').length;
+        const inProg = rows.filter(r => r.Final_status === 'In Progress').length;
+        return {
+          oy,
+          total,
+          retained,
+          passed,
+          stopped,
+          inProg,
+          retention_pct: total > 0 ? Math.round(retained/total*100) : 0,
+          pass_pct: total > 0 ? Math.round(passed/total*100) : 0,
+          stop_pct: total > 0 ? Math.round(stopped/total*100) : 0,
+        };
+      });
+  },
+
+  // KURS O'TISH FUNNEL — FA->FR->MA->FM->PM
+  calcConversionFunnel(data) {
+    const fanOrder = ['FA','FR','MA','FM','PM','DipIFR'];
+    const fanData = {};
+    fanOrder.forEach(f => {
+      const rows = data.filter(r => r.Product === f && !r.boshqaGuruh);
+      fanData[f] = {
+        enrolled: rows.length,
+        passed: rows.filter(r => r.Final_status === 'Passed').length,
+        stopped: rows.filter(r => r.Final_status === 'Stopped').length,
+        no_exam: rows.filter(r => r.Final_status === 'No Exam').length,
+        in_prog: rows.filter(r => r.Final_status === 'In Progress').length,
+      };
+    });
+
+    // Haqiqiy konversiya: FA Passed dan nechta FR ga ham kirgan
+    const idByFan = {};
+    data.forEach(r => {
+      if (!r.boshqaGuruh) {
+        if (!idByFan[r.ID]) idByFan[r.ID] = new Set();
+        idByFan[r.ID].add(r.Product);
+      }
+    });
+    const conversions = {};
+    for (let i = 0; i < fanOrder.length - 1; i++) {
+      const from = fanOrder[i];
+      const to = fanOrder[i+1];
+      const fromIds = new Set(data.filter(r => r.Product === from && !r.boshqaGuruh).map(r => r.ID));
+      const bothIds = [...fromIds].filter(id => idByFan[id]?.has(to)).length;
+      conversions[`${from}->${to}`] = {
+        from_enrolled: fanData[from].enrolled,
+        converted: bothIds,
+        conversion_pct: fanData[from].enrolled > 0 ? Math.round(bothIds/fanData[from].enrolled*100) : 0,
+      };
+    }
+
+    return { fanData, conversions, fanOrder };
+  },
+
+  // DROPOUT HEATMAP — oy × fan
+  calcDropoutHeatmap(data) {
+    const fans = ['FA','FR','MA','FM','PM','DipIFR'];
+    const months = [...new Set(data.map(r => r.Month).filter(Boolean))].sort().slice(-12);
+    const heatmap = {};
+    months.forEach(m => {
+      heatmap[m] = {};
+      fans.forEach(f => {
+        const rows = data.filter(r => r.Month === m && r.Product === f && !r.boshqaGuruh);
+        const stopped = rows.filter(r => r.Final_status === 'Stopped').length;
+        heatmap[m][f] = {
+          total: rows.length,
+          stopped,
+          pct: rows.length > 0 ? Math.round(stopped/rows.length*100) : 0,
+        };
+      });
+    });
+    return { months, fans, heatmap };
+  },
+
+  // WEEKLY PULSE — oxirgi 7 kun
+  calcWeeklyPulse(data) {
+    const now = new Date();
+    const week = new Date(now - 7*24*60*60*1000);
+    const recentJoined = data.filter(r => r.Boshlangan && r.Boshlangan >= week).length;
+    const recentStopped = data.filter(r => r.Final_status === 'Stopped' && r.Boshlangan && r.Boshlangan >= week).length;
+    return { recentJoined, recentStopped, net: recentJoined - recentStopped };
+  },
+
+  // SABAB x FAN matritsasi
+  calcReasonByFan(data) {
+    const fans = ['FA','FR','MA','FM','PM'];
+    const stopped = data.filter(r => r.Final_status === 'Stopped' && r.Sabab && !r.boshqaGuruh);
+    const reasons = [...new Set(stopped.map(r => r.Sabab))].slice(0,8);
+    const matrix = {};
+    reasons.forEach(reason => {
+      matrix[reason] = {};
+      fans.forEach(f => {
+        matrix[reason][f] = stopped.filter(r => r.Sabab === reason && r.Product === f).length;
+      });
+    });
+    return { reasons, fans, matrix };
   },
 
   // ── SALES TAHLILI ──
@@ -1225,9 +1581,67 @@ function getS() {
   return norm(s);
 }
 
-function setYF(y, btn) { yF=y; document.querySelectorAll('#page-overview .fyb').forEach(b=>{ if(['Barchasi','2024','2025','2026'].includes(b.textContent)) b.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
+// ── GLOBAL FILTER STATE ──
+let gYear = 'all'; // Global yil filtri
+let gMonth = 'all'; // Global oy filtri
+
+function setGY(y, btn) {
+  gYear = y;
+  ['gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  btn.classList.add('active');
+  updateGFLabel();
+  renderCurrentPage();
+}
+function setGM(val) {
+  gMonth = val;
+  updateGFLabel();
+  renderCurrentPage();
+}
+function updateGFLabel() {
+  const lbl = document.getElementById('gf-label');
+  if (!lbl) return;
+  const MONTHS = {'01':'Yanvar','02':'Fevral','03':'Mart','04':'Aprel','05':'May','06':'Iyun','07':'Iyul','08':'Avgust','09':'Sentabr','10':'Oktabr','11':'Noyabr','12':'Dekabr'};
+  const yLabel = gYear === 'all' ? '' : gYear;
+  const mLabel = gMonth === 'all' ? '' : MONTHS[gMonth]||gMonth;
+  lbl.textContent = [yLabel, mLabel].filter(Boolean).join(' — ') || 'Barchasi';
+}
+
+// Global filterni snapshot ga qo'llash
+function applyGlobalFilter(data) {
+  if (!data) return data;
+  let filtered = data;
+  if (gYear !== 'all') filtered = filtered.filter(r => r.Year == gYear);
+  if (gMonth !== 'all') filtered = filtered.filter(r => r.Month && r.Month.endsWith('-' + gMonth));
+  return filtered;
+}
+
+// Hozirgi sahifani qayta render qilish
+function renderCurrentPage() {
+  if (!snap) return;
+  const p = curPage || 'overview';
+  if (p==='overview') renderOv();
+  else if (p==='teachers') { populateTeacherFilters(); renderTeachers(); }
+  else if (p==='subjects') { populateSubjectTeacherFilter(); renderSubjects(); }
+  else if (p==='dropout') { populateDropoutFilters(); renderDropout(); }
+  else if (p==='rating') renderRating();
+  else if (p==='sales') renderSales();
+  else if (p==='marketing') renderMarketing();
+}
+
+// ── SNAPSHOT GLOBAL FILTER WRAPPER ──
+// snap.rawData — barcha ma'lumotlar, global filter qo'llanadi
+function getGlobalSnap() {
+  if (!snap || !snap.rawData) return snap;
+  const filteredData = applyGlobalFilter(snap.rawData);
+  return ANALYTICS.reCalcFromFiltered(filteredData);
+}
+
+function setYF(y, btn) { yF=y; ['fp-all','fp-fc','fp-rv','fp-vl','gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el && ['Barchasi','2024','2025','2026'].some(t=>el.textContent.includes(t))) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTF(t, btn) { tF=t; ['fp-all','fp-fc','fp-rv','fp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
+function setRY(y, btn) { ['ry-all','ry-2024','ry-2025','ry-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderRating(); }
+function setSalesY(y, btn) { ['saly-all','saly-2024','saly-2025','saly-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderSales(); }
+function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderMarketing(); }
 
 // ── OVERVIEW ──
 function renderOv() {
@@ -1305,6 +1719,85 @@ function renderOv() {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:14}}}}
   });
 
+  // ── PULSE ──
+  const pulse = snap.pulse || {};
+  const pulseSec = document.getElementById('pulse-section');
+  if (pulseSec) {
+    pulseSec.innerHTML = `
+      <div class="kpi te"><div class="kl">Oxirgi 7 kunda qo'shildi</div><div class="kv" style="color:var(--teal)">${n(pulse.recentJoined||0)}</div><div class="ks">yangi o'quvchi</div></div>
+      <div class="kpi re"><div class="kl">Oxirgi 7 kunda chiqdi</div><div class="kv" style="color:var(--red)">${n(pulse.recentStopped||0)}</div><div class="ks">dropout</div></div>
+      <div class="kpi ${(pulse.net||0)>=0?'gr':'re'}"><div class="kl">Net o'sish (7 kun)</div><div class="kv">${(pulse.net||0)>=0?'+':''}${n(pulse.net||0)}</div><div class="ks">qo'shildi − chiqdi</div></div>
+    `;
+  }
+
+  // ── FUNNEL ──
+  const funnel = snap.funnel || {};
+  const funnelViz = document.getElementById('funnel-viz');
+  if (funnelViz && funnel.fanOrder) {
+    const fd = funnel.fanData || {};
+    const conv = funnel.conversions || {};
+    const maxEnrolled = Math.max(...funnel.fanOrder.map(f => fd[f]?.enrolled||0), 1);
+    let fHtml = '<div style="display:flex;align-items:flex-end;gap:0;padding:16px 0;">';
+    funnel.fanOrder.forEach((fan, i) => {
+      const d = fd[fan] || {};
+      const w = Math.max(Math.round((d.enrolled||0)/maxEnrolled*100), 8);
+      const nextFan = funnel.fanOrder[i+1];
+      const convKey = nextFan ? fan+'->'+nextFan : null;
+      const convData = convKey ? conv[convKey] : null;
+      fHtml += `<div style="flex:1;text-align:center;">
+        <div style="background:var(--blue);opacity:${0.5+i*0.1};border-radius:6px 6px 0 0;margin:0 2px;height:${Math.max(w*1.5,20)}px;display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:48px;">
+          <div style="font-size:13px;font-weight:700;color:#fff;">${fan}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.8);">${n(d.enrolled||0)}</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);padding:8px 4px;margin:0 2px;font-size:10px;">
+          <div style="color:var(--green);">✓ ${n(d.passed||0)}</div>
+          <div style="color:var(--red);">✗ ${n(d.stopped||0)}</div>
+          <div style="color:var(--amber);">— ${n(d.no_exam||0)}</div>
+          <div style="color:var(--blue);">⏳ ${n(d.in_prog||0)}</div>
+        </div>
+        ${convData ? `<div style="padding:6px 2px;font-size:11px;font-weight:600;color:${convData.conversion_pct>=20?'var(--green)':convData.conversion_pct>=10?'var(--amber)':'var(--red)'};">→ ${convData.conversion_pct}%</div>` : '<div style="height:28px;"></div>'}
+      </div>`;
+    });
+    fHtml += '</div><div style="display:flex;gap:16px;font-size:10px;color:var(--muted);padding:4px 0;">'+
+      '<span>✓ Passed</span><span>✗ Stopped</span><span>— No Exam</span><span>⏳ In Progress</span>'+
+      '<span style="margin-left:auto;">→ Keyingi kursga o'tish %</span></div>';
+    funnelViz.innerHTML = fHtml;
+  }
+
+  // ── COHORT CHART ──
+  dc('cohort');
+  const cohorts = snap.cohorts || [];
+  if (cohorts.length > 0) {
+    const cLabels = cohorts.map(c => c.oy.substring(0,7));
+    charts['cohort'] = new Chart(document.getElementById('cohortChart'), {
+      data:{labels:cLabels,datasets:[
+        {type:'bar',label:'Retained %',data:cohorts.map(c=>c.retention_pct),backgroundColor:'rgba(46,202,138,0.5)',yAxisID:'y'},
+        {type:'bar',label:'Stopped %',data:cohorts.map(c=>c.stop_pct),backgroundColor:'rgba(232,91,91,0.5)',yAxisID:'y'},
+        {type:'line',label:'Pass %',data:cohorts.map(c=>c.pass_pct),borderColor:'#5b8dee',backgroundColor:'transparent',pointRadius:2,tension:0.3,yAxisID:'y'}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{max:100,stacked:false,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:12}}}}
+    });
+  }
+
+  // ── COHORT TABLE ──
+  const cohortTbl = document.getElementById('cohortTable');
+  if (cohortTbl && cohorts.length > 0) {
+    let ch = '<table><thead><tr><th>Oy</th><th style="text-align:center">Kirdi</th><th style="text-align:center">Chiqdi</th><th style="text-align:center">O'qiyapti</th><th style="text-align:center">Passed</th><th>Retention</th><th>Stop %</th></tr></thead><tbody>';
+    [...cohorts].reverse().forEach(c => {
+      ch += `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:10px;">${c.oy}</td>
+        <td style="text-align:center;">${n(c.total)}</td>
+        <td style="text-align:center;color:var(--red);">${n(c.stopped)}</td>
+        <td style="text-align:center;color:var(--blue);">${n(c.inProg)}</td>
+        <td style="text-align:center;color:var(--green);">${n(c.passed)}</td>
+        <td>${mbar(c.retention_pct,retC(c.retention_pct))}</td>
+        <td>${mbar(c.stop_pct,c.stop_pct>50?'#e85b5b':c.stop_pct>30?'#f5a623':'#2eca8a')}</td>
+      </tr>`;
+    });
+    ch += '</tbody></table>';
+    cohortTbl.innerHTML = ch;
+  }
+
   // Insights
   const r24=yr['2024']?.retention||0, r25=yr['2025']?.retention||0;
   const nePct=s.yakunlagan>0?Math.round((noexam/s.yakunlagan)*100):0;
@@ -1321,10 +1814,90 @@ function renderOv() {
 }
 
 // ── TEACHERS ──
+
+function populateTeacherFilters() {
+  if (!snap) return;
+  // Fan filtri
+  const fanSel = document.getElementById('t-fan-filter');
+  const curFan = fanSel?.value || 'all';
+  if (fanSel && fanSel.options.length <= 1) {
+    const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
+    fans.forEach(f => { const opt=document.createElement('option'); opt.value=f; opt.textContent=f; fanSel.appendChild(opt); });
+    fanSel.value = curFan;
+  }
+  // O'qituvchi filtri
+  const tSel = document.getElementById('t-teacher-filter');
+  const curT = tSel?.value || 'all';
+  if (tSel && tSel.options.length <= 1) {
+    const teachers = [...new Set((snap.rawData||[]).map(r=>r.Oqituvchi).filter(Boolean))].sort();
+    teachers.forEach(t => { const opt=document.createElement('option'); opt.value=t; opt.textContent=t.split(' ').slice(0,2).join(' '); tSel.appendChild(opt); });
+    tSel.value = curT;
+  }
+}
+
+function populateSubjectTeacherFilter() {
+  if (!snap) return;
+  const tSel = document.getElementById('s-teacher-filter');
+  const curT = tSel?.value || 'all';
+  if (tSel && tSel.options.length <= 1) {
+    const teachers = [...new Set((snap.rawData||[]).map(r=>r.Oqituvchi).filter(Boolean))].sort();
+    teachers.forEach(t => { const opt=document.createElement('option'); opt.value=t; opt.textContent=t.split(' ').slice(0,2).join(' '); tSel.appendChild(opt); });
+    tSel.value = curT;
+  }
+}
+
+function populateDropoutFilters() {
+  if (!snap) return;
+  // Fan filtri
+  const fanSel = document.getElementById('d-fan-filter');
+  const curFan = fanSel?.value || 'all';
+  if (fanSel && fanSel.options.length <= 1) {
+    const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
+    fans.forEach(f => { const opt=document.createElement('option'); opt.value=f; opt.textContent=f; fanSel.appendChild(opt); });
+    fanSel.value = curFan;
+  }
+  // O'qituvchi filtri
+  const tSel = document.getElementById('d-teacher-filter');
+  const curT = tSel?.value || 'all';
+  if (tSel && tSel.options.length <= 1) {
+    const teachers = [...new Set((snap.rawData||[]).map(r=>r.Oqituvchi).filter(Boolean))].sort();
+    teachers.forEach(t => { const opt=document.createElement('option'); opt.value=t; opt.textContent=t.split(' ').slice(0,2).join(' '); tSel.appendChild(opt); });
+    tSel.value = curT;
+  }
+  // Rating fan filtri
+  const rFanSel = document.getElementById('r-fan-filter');
+  if (rFanSel && rFanSel.options.length <= 1) {
+    const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
+    fans.forEach(f => { const opt=document.createElement('option'); opt.value=f; opt.textContent=f; rFanSel.appendChild(opt); });
+  }
+}
+
+function getGlobalFilteredData() {
+  if (!snap || !snap.rawData) return [];
+  let data = snap.rawData;
+  if (gYear !== 'all') data = data.filter(r => r.Year == gYear);
+  if (gMonth !== 'all') data = data.filter(r => r.Month && r.Month.endsWith('-' + gMonth));
+  return data;
+}
+
 function getFilteredTeachers() {
   if (!snap) return [];
   const fan = document.getElementById('t-fan-filter')?.value || 'all';
-  let ts = JSON.parse(JSON.stringify(snap.teachers || []));
+  const teacherF = document.getElementById('t-teacher-filter')?.value || 'all';
+  const exclPreclass = document.getElementById('t-excl-preclass')?.checked || false;
+
+  // Global filter + preclass filter qo'llash
+  let rawD = getGlobalFilteredData();
+  if (exclPreclass) rawD = rawD.filter(r => r.Status !== '1-darsgacha chiqqanlar');
+
+  // Recalculate teachers from filtered raw data
+  const recalcSnap = ANALYTICS.reCalcFromFiltered(rawD);
+  let ts = JSON.parse(JSON.stringify(recalcSnap?.teachers || []));
+
+  // Teacher filter
+  if (teacherF !== 'all') {
+    ts = ts.filter(t => t.Oqituvchi === teacherF);
+  }
 
   // Fan filtri
   if (fan !== 'all') {
@@ -1381,20 +1954,34 @@ function renderTeachers() {
   });
   const tbody = document.getElementById('tTableBody');
   tbody.innerHTML = '';
+  // 1-darsgacha chiqganlarni hisoblash
+  const preclassMap = {};
+  (snap.rawData||[]).forEach(function(r) {
+    if ((r.Status||'').includes('1-darsgacha')) {
+      preclassMap[r.Oqituvchi] = (preclassMap[r.Oqituvchi]||0)+1;
+    }
+  });
   ts.sort((a,b)=>b.retention-a.retention).forEach((t,i) => {
-    tbody.innerHTML += `<tr>
-      <td style="color:var(--muted);font-family:'DM Mono',monospace;">${i+1}</td>
-      <td style="font-weight:500;font-size:11px;">${t.Oqituvchi}</td>
-      <td style="text-align:center;">${n(t.jami)}</td>
-      <td style="text-align:center;color:var(--green);">${n(t.yakunlagan)}</td>
-      <td style="text-align:center;color:var(--red);">${n(t.stopped)}</td>
-      <td style="text-align:center;color:var(--blue);">${n(t.in_progress||0)}</td>
-      <td style="text-align:center;color:var(--green);">${n(t.passed)}</td>
-      <td style="text-align:center;color:var(--amber);">${n(t.failed)}</td>
-      <td style="text-align:center;color:var(--muted);">${n(t.no_exam)}</td>
-      <td>${mbar(t.retention,retC(t.retention))}</td>
-      <td>${pb(t.pass_rate)}</td>
-    </tr>`;
+    const preCnt = preclassMap[t.Oqituvchi] || 0;
+    const noExamPct = t.yakunlagan > 0 ? Math.round(t.no_exam/t.yakunlagan*100) : 0;
+    const noExCol = noExamPct > 60 ? 'var(--red)' : noExamPct > 40 ? 'var(--amber)' : 'var(--muted)';
+    const r24v = t.by_year?.['2024']?.retention;
+    const r25v = t.by_year?.['2025']?.retention;
+    const trendCell = (r24v && r25v) ? trendH(r24v,r25v) : '<span style="color:var(--muted)">—</span>';
+    tbody.innerHTML += '<tr>' +
+      '<td style="color:var(--muted);font-family:DM Mono,monospace;">' + (i+1) + '</td>' +
+      '<td style="font-weight:500;font-size:11px;">' + t.Oqituvchi + '</td>' +
+      '<td style="text-align:center;">' + n(t.jami) + '</td>' +
+      '<td style="text-align:center;color:var(--amber);font-size:10px;">' + (preCnt||'—') + '</td>' +
+      '<td style="text-align:center;color:var(--red);">' + n(t.stopped) + '</td>' +
+      '<td style="text-align:center;color:var(--blue);">' + n(t.in_progress||0) + '</td>' +
+      '<td style="text-align:center;color:var(--green);">' + n(t.passed) + '</td>' +
+      '<td style="text-align:center;color:var(--muted);">' + n(t.no_exam) + '</td>' +
+      '<td style="text-align:center;color:' + noExCol + ';font-weight:600;">' + noExamPct + '%</td>' +
+      '<td>' + mbar(t.retention,retC(t.retention)) + '</td>' +
+      '<td>' + pb(t.pass_rate) + '</td>' +
+      '<td style="text-align:center;">' + trendCell + '</td>' +
+      '</tr>';
   });
   const yb = document.getElementById('tYearBody');
   yb.innerHTML = '';
@@ -1411,6 +1998,62 @@ function renderTeachers() {
       <td style="text-align:center;color:var(--muted);">${y25?.jami||'-'}</td>
     </tr>`;
   });
+  // ── YANGI: O'qituvchi bo'yicha fan kesimi ──
+  const teacherF = document.getElementById('t-teacher-filter')?.value || 'all';
+  const tSubBody = document.getElementById('tSubjectBody');
+  const tSubCard = document.getElementById('t-subject-card');
+  if (tSubBody && ts.length > 0) {
+    const tForSubj = teacherF !== 'all' ? ts.find(t=>t.Oqituvchi===teacherF) : (ts.length===1?ts[0]:null);
+    if (tForSubj && tForSubj.by_subject && Object.keys(tForSubj.by_subject).length > 0) {
+      tSubCard && (tSubCard.style.display='block');
+      const subEl = document.getElementById('t-subj-sub');
+      if(subEl) subEl.textContent = tForSubj.Oqituvchi + ' — fan kesimida natijalar';
+      tSubBody.innerHTML = '';
+      const subOrder = ['FA','FR','MA','FM','PM','DipIFR','BT','LW','TX','PM'];
+      const subjKeys = [...new Set([...subOrder, ...Object.keys(tForSubj.by_subject)])];
+      subjKeys.forEach(sub => {
+        const d = tForSubj.by_subject[sub];
+        if (!d || d.jami < 2) return;
+        tSubBody.innerHTML += `<tr>
+          <td style="font-weight:600;">${sub}</td>
+          <td style="text-align:center;">${n(d.jami)}</td>
+          <td style="text-align:center;color:var(--red);">${n(d.stopped)}</td>
+          <td style="text-align:center;color:var(--green);">${n(d.passed)}</td>
+          <td style="text-align:center;color:var(--muted);">${n(d.no_exam)}</td>
+          <td style="text-align:center;color:var(--blue);">${n(d.in_progress||0)}</td>
+          <td>${mbar(d.retention,retC(d.retention))}</td>
+          <td>${pb(d.pass_rate)}</td>
+          <td>${pb(d.exam_entry)}</td>
+        </tr>`;
+      });
+    } else {
+      tSubCard && (tSubCard.style.display = ts.length===1 ? 'block' : 'none');
+      if (tSubBody) tSubBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px;">O\'qituvchi tanlang yoki yetarli ma\'lumot yo\'q</td></tr>';
+    }
+  }
+
+  // ── YANGI: Oylik dinamika chart ──
+  const rawD2 = getGlobalFilteredData();
+  const filteredForChart = teacherF !== 'all' ? rawD2.filter(r=>r.Oqituvchi===teacherF) : rawD2;
+  const fanF2 = document.getElementById('t-fan-filter')?.value || 'all';
+  const chartData = (fanF2!=='all') ? filteredForChart.filter(r=>r.Product===fanF2) : filteredForChart;
+  dc('tMonthly');
+  const mGroups = {};
+  chartData.forEach(r => { if(r.Month) { if(!mGroups[r.Month]) mGroups[r.Month]=[]; mGroups[r.Month].push(r); } });
+  const mKeys = Object.keys(mGroups).sort().slice(-18);
+  const mData = mKeys.map(k=>mGroups[k].length);
+  const mDrp = mKeys.map(k=>{ const rows=mGroups[k]; return Math.round(rows.filter(r=>r.Final_status==='Stopped').length/rows.length*100); });
+  const tmCtx = document.getElementById('tMonthlyChart');
+  if(tmCtx) {
+    charts['tMonthly'] = new Chart(tmCtx, {
+      data:{labels:mKeys.map(m=>m.length>=7?m.substring(0,7):''),datasets:[
+        {type:'bar',label:'Yangi o\'quvchilar',data:mData,backgroundColor:'rgba(91,141,238,0.4)',yAxisID:'y'},
+        {type:'line',label:'Dropout%',data:mDrp,borderColor:'#e85b5b',backgroundColor:'transparent',pointRadius:2,tension:0.3,yAxisID:'y2',borderDash:[3,2]}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:8}}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:12}}}}
+    });
+  }
+
   const sorted=[...ts].sort((a,b)=>b.retention-a.retention);
   const top=sorted[0], bot=sorted[sorted.length-1];
   const avgR=Math.round(ts.reduce((s,t)=>s+t.retention,0)/Math.max(ts.length,1));
@@ -1522,6 +2165,55 @@ function renderSubjects() {
   else html+=ins('i-b','Umumiy',`${subs.length} ta fan. O'rtacha retention: ${Math.round(subs.reduce((s,t)=>s+t.retention,0)/subs.length)}%.`);
   html+='</div>';
   document.getElementById('s-insights').innerHTML=html;
+
+  // No Exam by subject chart
+  dc('sNoExam');
+  const sNoExamCtx = document.getElementById('sNoExamChart');
+  if (sNoExamCtx && subs && subs.length > 0) {
+    charts['sNoExam'] = new Chart(sNoExamCtx, {
+      type:'bar',
+      data:{labels:subs.map(s=>s.Product),datasets:[
+        {label:'No Exam %',data:subs.map(s=>s.yakunlagan>0?Math.round(s.no_exam/s.yakunlagan*100):0),backgroundColor:'rgba(245,166,35,0.7)',borderRadius:4,borderSkipped:false},
+        {label:'Pass rate %',data:subs.map(s=>s.pass_rate||0),backgroundColor:'rgba(46,202,138,0.7)',borderRadius:4,borderSkipped:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:function(v){return v+'%';}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+    });
+  }
+
+  // Fan x Oqituvchi matritsasi
+  const sMatrix = document.getElementById('sTeacherMatrix');
+  if (sMatrix && snap && snap.rawData) {
+    let rawM = getGlobalFilteredData();
+    const sExclM = document.getElementById('s-excl-preclass') && document.getElementById('s-excl-preclass').checked;
+    if (sExclM) rawM = rawM.filter(function(r){ return r.Status !== '1-darsgacha chiqqanlar'; });
+    const sTF = (document.getElementById('s-teacher-filter') && document.getElementById('s-teacher-filter').value) || 'all';
+    if (sTF !== 'all') rawM = rawM.filter(function(r){ return r.Oqituvchi === sTF; });
+    if (sY !== 'all') rawM = rawM.filter(function(r){ return r.Year == sY; });
+    const matFans = [...new Set(rawM.map(function(r){ return r.Product; }).filter(Boolean))].sort();
+    const matTs = [...new Set(rawM.map(function(r){ return r.Oqituvchi; }).filter(Boolean))].sort().slice(0,10);
+    if (matFans.length > 0 && matTs.length > 0) {
+      let mHtml = '<div style="overflow-x:auto;"><table style="font-size:10px;width:100%;"><thead><tr><th style="min-width:100px;padding:4px 6px;">O'qituvchi</th>';
+      matFans.forEach(function(f){ mHtml += '<th style="text-align:center;min-width:55px;padding:4px 3px;">' + f + '</th>'; });
+      mHtml += '</tr></thead><tbody>';
+      matTs.forEach(function(t) {
+        mHtml += '<tr><td style="font-weight:500;font-size:10px;padding:5px 6px;">' + t.split(' ').slice(0,2).join(' ') + '</td>';
+        matFans.forEach(function(f) {
+          const rows = rawM.filter(function(r){ return r.Oqituvchi===t && r.Product===f; });
+          if (rows.length < 2) { mHtml += '<td style="text-align:center;color:var(--muted);padding:5px;">—</td>'; return; }
+          const passed = rows.filter(function(r){ return r.Final_status==='Passed'; }).length;
+          const fin = rows.filter(function(r){ return r.Final_status!=='In Progress'; }).length;
+          const pr = fin>0?Math.round(passed/fin*100):0;
+          const col = pr>=50?'var(--green)':pr>=20?'var(--amber)':'var(--red)';
+          mHtml += '<td style="text-align:center;color:' + col + ';font-weight:600;font-size:10px;padding:5px;">' + pr + '%<br><span style="font-size:8px;color:var(--muted);">' + rows.length + '</span></td>';
+        });
+        mHtml += '</tr>';
+      });
+      mHtml += '</tbody></table></div>';
+      sMatrix.innerHTML = mHtml;
+    } else {
+      sMatrix.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">Filtr natijalari bo'sh</div>';
+    }
+  }
 }
 
 // ── DROPOUT ──
@@ -1546,6 +2238,60 @@ function renderDropout() {
   const dp = allData.dropout_period || {};
   const dr = allData.dropout_reasons || {};
   
+  // ── HEATMAP ──
+  const heatmapData = snap.heatmap || null;
+  const heatmapEl = document.getElementById('dHeatmap');
+  if (heatmapEl && heatmapData && heatmapData.months && heatmapData.months.length > 0) {
+    const HCOL = function(pct) {
+      if (pct===0) return '#1a2a1a';
+      if (pct<20) return 'rgba(46,202,138,0.5)';
+      if (pct<35) return 'rgba(245,166,35,0.5)';
+      if (pct<50) return 'rgba(232,91,91,0.5)';
+      return 'rgba(232,91,91,0.9)';
+    };
+    let hmHtml = '<table style="font-size:10px;border-collapse:separate;border-spacing:2px;"><thead><tr><th style="padding:4px 8px;">Oy</th>';
+    heatmapData.fans.forEach(function(f){ hmHtml += '<th style="text-align:center;padding:4px 6px;">'+f+'</th>'; });
+    hmHtml += '</tr></thead><tbody>';
+    heatmapData.months.slice().reverse().forEach(function(m) {
+      hmHtml += '<tr><td style="font-family:DM Mono,monospace;font-size:9px;padding:3px 8px;color:var(--muted);">'+m+'</td>';
+      heatmapData.fans.forEach(function(f) {
+        const d = (heatmapData.heatmap[m]||{})[f] || {total:0,stopped:0,pct:0};
+        const bg = HCOL(d.pct);
+        hmHtml += '<td style="text-align:center;background:'+bg+';border-radius:4px;padding:4px 6px;min-width:48px;" title="'+f+' '+m+': '+d.stopped+'/'+d.total+' ('+d.pct+'%)">' +
+          (d.total>0 ? '<span style="font-weight:600;color:#fff;">'+d.pct+'%</span><br><span style="font-size:8px;color:rgba(255,255,255,0.6);">'+d.total+'</span>' : '<span style="color:var(--muted)">—</span>') +
+          '</td>';
+      });
+      hmHtml += '</tr>';
+    });
+    hmHtml += '</tbody></table>';
+    hmHtml += '<div style="display:flex;gap:12px;margin-top:8px;font-size:9px;color:var(--muted);">' +
+      '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(46,202,138,0.5);display:inline-block;"></span>&lt;20%</span>' +
+      '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(245,166,35,0.5);display:inline-block;"></span>20-35%</span>' +
+      '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(232,91,91,0.9);display:inline-block;"></span>&gt;50% KRITIK</span>' +
+      '</div>';
+    heatmapEl.innerHTML = hmHtml;
+  }
+
+  // ── SABAB × FAN matritsasi ──
+  const reasonFanEl = document.getElementById('dReasonFanSection');
+  const rbf = snap.reasonByFan || null;
+  if (reasonFanEl && rbf && rbf.reasons && rbf.reasons.length > 0) {
+    let rfHtml = '<table style="font-size:10px;"><thead><tr><th style="min-width:160px;padding:4px 6px;">Sabab</th>';
+    rbf.fans.forEach(function(f){ rfHtml += '<th style="text-align:center;padding:4px 6px;">'+f+'</th>'; });
+    rfHtml += '<th style="text-align:center;padding:4px 6px;">Jami</th></tr></thead><tbody>';
+    rbf.reasons.forEach(function(reason) {
+      const jami = rbf.fans.reduce(function(s,f){ return s+((rbf.matrix[reason]||{})[f]||0); }, 0);
+      rfHtml += '<tr><td style="padding:5px 6px;color:var(--text);">' + (reason.length>25?reason.substring(0,25)+'…':reason) + '</td>';
+      rbf.fans.forEach(function(f) {
+        const cnt = (rbf.matrix[reason]||{})[f] || 0;
+        rfHtml += '<td style="text-align:center;padding:5px 6px;color:'+(cnt>0?'var(--red)':'var(--muted)')+';">'+(cnt||'—')+'</td>';
+      });
+      rfHtml += '<td style="text-align:center;font-weight:600;color:var(--amber);">'+jami+'</td></tr>';
+    });
+    rfHtml += '</tbody></table>';
+    reasonFanEl.innerHTML = rfHtml;
+  }
+
   dc('dPeriod');
   const periodKeys = ['1-darsgacha chiqqanlar','3-darsgacha chiqqanlar','1-oyda chiqqanlar','2-oyda chiqqanlar','3-oyda chiqqanlar'];
   const periodVals = periodKeys.map(k => {
@@ -1671,6 +2417,66 @@ function renderDropout() {
   if(bestOp.operator) html2 += ins('i-g','Operator taqqoslash',`${bestOp.operator} eng past dropout ${bestOp.dropout_pct}%. ${worstOp?.operator||''} bilan ${((worstOp?.dropout_pct||0)-(bestOp.dropout_pct||0)).toFixed(1)}% farq.`);
   html2 += '</div>';
   document.getElementById('d-insights').innerHTML = html2;
+
+  // YANGI: Dropout teacher matrix
+  const dTeacherBody = document.getElementById('dTeacherBody');
+  if (dTeacherBody && snap?.rawData) {
+    let rawForD = getGlobalFilteredData();
+    const dFanV = document.getElementById('d-fan-filter')?.value || 'all';
+    const dTeacherV = document.getElementById('d-teacher-filter')?.value || 'all';
+    if (dFanV !== 'all') rawForD = rawForD.filter(r=>r.Product===dFanV);
+    if (dTeacherV !== 'all') rawForD = rawForD.filter(r=>r.Oqituvchi===dTeacherV);
+    if (dD !== 'all') rawForD = rawForD.filter(r=>(r.Status||'').includes(dD));
+    const tGrps = {};
+    rawForD.forEach(r=>{ const t=r.Oqituvchi||'?'; if(!tGrps[t])tGrps[t]=[]; tGrps[t].push(r); });
+    dTeacherBody.innerHTML = '';
+    Object.entries(tGrps)
+      .filter(([_,rows])=>rows.length>=3)
+      .sort((a,b)=>{ const aD=a[1].filter(r=>r.Final_status==='Stopped').length/Math.max(a[1].length,1); const bD=b[1].filter(r=>r.Final_status==='Stopped').length/Math.max(b[1].length,1); return bD-aD; })
+      .forEach(([teacher, rows]) => {
+        const stopped = rows.filter(r=>r.Final_status==='Stopped');
+        const pre1 = stopped.filter(r=>(r.Status||'').includes('1-darsgacha')).length;
+        const pre3 = stopped.filter(r=>(r.Status||'').includes('3-darsgacha')).length;
+        const in1m = stopped.filter(r=>(r.Status||'').includes('1-oyda')).length;
+        const in2m = stopped.filter(r=>(r.Status||'').includes('2-oyda')).length;
+        const drpPct = rows.length>0?Math.round(stopped.length/rows.length*100):0;
+        const rc = {};
+        stopped.forEach(r=>{ if(r.Sabab) rc[r.Sabab]=(rc[r.Sabab]||0)+1; });
+        const topR = Object.entries(rc).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+        const rS = topR.length>18?topR.substring(0,18)+'...':topR;
+        dTeacherBody.innerHTML += '<tr>' +
+          '<td style="font-weight:500;font-size:11px;">' + teacher.split(' ').slice(0,2).join(' ') + '</td>' +
+          '<td style="text-align:center;">' + n(rows.length) + '</td>' +
+          '<td style="text-align:center;color:var(--amber);">' + (pre1||'—') + '</td>' +
+          '<td style="text-align:center;color:var(--amber);">' + (pre3||'—') + '</td>' +
+          '<td style="text-align:center;color:var(--red);">' + (in1m||'—') + '</td>' +
+          '<td style="text-align:center;color:var(--red);">' + (in2m||'—') + '</td>' +
+          '<td style="text-align:center;color:var(--red);font-weight:600;">' + stopped.length + '</td>' +
+          '<td>' + mbar(drpPct,drpPct>50?'#e85b5b':drpPct>30?'#f5a623':'#2eca8a') + '</td>' +
+          '<td style="font-size:9px;color:var(--muted);" title="' + topR + '">' + rS + '</td>' +
+          '</tr>';
+      });
+    if (!dTeacherBody.innerHTML) dTeacherBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px;">Ma'lumot yetarli emas</td></tr>';
+  }
+
+  // YANGI: Oylik dropout chart
+  dc('dMonthly');
+  const dMonthCtx = document.getElementById('dMonthlyChart');
+  if (dMonthCtx && snap?.rawData) {
+    let rawM = getGlobalFilteredData();
+    const dFanM2 = document.getElementById('d-fan-filter')?.value || 'all';
+    if (dFanM2 !== 'all') rawM = rawM.filter(r=>r.Product===dFanM2);
+    const mGrp = {};
+    rawM.forEach(r=>{ if(r.Month){if(!mGrp[r.Month])mGrp[r.Month]=[];mGrp[r.Month].push(r);} });
+    const mK = Object.keys(mGrp).sort().slice(-18);
+    charts['dMonthly'] = new Chart(dMonthCtx, {
+      data:{labels:mK.map(m=>m.substring(0,7)),datasets:[
+        {type:'bar',label:'Jami',data:mK.map(k=>mGrp[k].length),backgroundColor:'rgba(91,141,238,0.3)',yAxisID:'y'},
+        {type:'line',label:'Dropout%',data:mK.map(k=>{ const rr=mGrp[k]; return Math.round(rr.filter(r=>r.Final_status==='Stopped').length/Math.max(rr.length,1)*100); }),borderColor:'#e85b5b',backgroundColor:'transparent',pointRadius:2,tension:0.3,yAxisID:'y2'}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:8}}},scales:{y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'}},y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:function(v){return v+'%';}}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:12}}}}
+    });
+  }
 }
 
 
@@ -1723,6 +2529,82 @@ function renderRating() {
 }
 
 // ── SALES ──
+function renderSalesExtras(salesD) {
+  // Sales Funnel
+  const sfViz = document.getElementById('salesFunnelViz');
+  if (sfViz) {
+    const sum = salesD?.summary || {};
+    const enrolled = snap?.summary?.jami || 0;
+    const stopped = snap?.summary?.stopped || 0;
+    const inProg = snap?.summary?.in_progress || 0;
+    const steps = [
+      { label:'Jami lid', val:sum.jami_lidlar||0, color:'#9b7fe8' },
+      { label:'Muvaffaqiyatli lid', val:sum.muvaffaqiyatli||0, color:'#5b8dee' },
+      { label:"Enrolled (O'quvchi)", val:enrolled, color:'#2ec4b6' },
+      { label:"Hozir o'qiyapti", val:inProg, color:'#2eca8a' },
+    ];
+    const maxV = Math.max(...steps.map(s=>s.val), 1);
+    let sfHtml = '<div style="display:flex;align-items:flex-end;gap:4px;padding:8px 0;">';
+    steps.forEach(function(s, i) {
+      const h = Math.max(Math.round(s.val/maxV*120), 24);
+      const pct = i>0 ? Math.round(s.val/Math.max(steps[i-1].val,1)*100) : 100;
+      sfHtml += '<div style="flex:1;text-align:center;">' +
+        '<div style="background:'+s.color+';border-radius:6px 6px 0 0;height:'+h+'px;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0.85;">' +
+        '<div style="font-size:14px;font-weight:700;color:#fff;">'+n(s.val)+'</div>' +
+        '</div>' +
+        '<div style="padding:6px 4px;background:var(--bg3);border:1px solid var(--border);margin-top:2px;border-radius:0 0 6px 6px;">' +
+        '<div style="font-size:10px;font-weight:500;color:var(--text);">'+s.label+'</div>' +
+        (i>0 ? '<div style="font-size:11px;color:'+s.color+';font-weight:600;">'+pct+'%</div>' : '') +
+        '</div></div>';
+      if (i < steps.length-1) sfHtml += '<div style="align-self:center;font-size:20px;color:var(--muted);padding-bottom:40px;">→</div>';
+    });
+    sfHtml += '</div>';
+    sfViz.innerHTML = sfHtml;
+  }
+
+  // Operator KPI
+  const opKpiBody = document.getElementById('salesOpKpiBody');
+  if (opKpiBody && salesD?.operators) {
+    opKpiBody.innerHTML = '';
+    salesD.operators.forEach(function(op) {
+      const monthly = (salesD.monthly||[]).filter(function(m){ return true; });
+      // Oylik max/min konversiya topish (simplification)
+      const konvPct = op.konversiya || 0;
+      const konvBar = Math.round(konvPct);
+      const barC = konvPct>=30?'#2eca8a':konvPct>=15?'#f5a623':'#e85b5b';
+      opKpiBody.innerHTML += '<tr>' +
+        '<td style="font-weight:500;font-size:11px;">'+op.operator.split(' ').slice(0,2).join(' ')+'</td>' +
+        '<td style="text-align:center;">'+n(op.jami)+'</td>' +
+        '<td style="text-align:center;color:var(--green);">'+n(op.muvaffaqiyatli)+'</td>' +
+        '<td style="text-align:center;">'+mbar(konvBar, barC)+'</td>' +
+        '<td style="text-align:center;color:var(--muted);font-size:10px;">—</td>' +
+        '<td style="text-align:center;color:var(--muted);font-size:10px;">—</td>' +
+        '<td>'+mbar(konvBar,barC)+'</td>' +
+        '</tr>';
+    });
+  }
+
+  // Manba KPI
+  const manbaKpiBody = document.getElementById('salesManbaKpiBody');
+  if (manbaKpiBody && salesD?.manba) {
+    manbaKpiBody.innerHTML = '';
+    const totalLeads = salesD.summary?.jami_lidlar || 1;
+    salesD.manba.forEach(function(m) {
+      const konvPct = m.konversiya || 0;
+      const ulush = Math.round(m.jami/totalLeads*100);
+      const sifat = konvPct>=30?'<span class="badge bg">A'+'+ Sifatli</span>':konvPct>=20?'<span class="badge bb">B Yaxshi</span>':'<span class="badge" style="background:var(--rdim);color:var(--red);">C Zaif</span>';
+      manbaKpiBody.innerHTML += '<tr>' +
+        '<td style="font-weight:500;font-size:11px;">'+(m.manba.length>20?m.manba.substring(0,20)+'…':m.manba)+'</td>' +
+        '<td style="text-align:center;">'+n(m.jami)+'</td>' +
+        '<td style="text-align:center;color:var(--green);">'+n(m.muvaffaqiyatli)+'</td>' +
+        '<td>'+mbar(Math.round(konvPct),'#5b8dee')+'</td>' +
+        '<td>'+sifat+'</td>' +
+        '<td style="text-align:center;color:var(--muted);">'+ulush+'%</td>' +
+        '</tr>';
+    });
+  }
+}
+
 function renderSales() {
   const s=smData.sales||{}, sum=s.summary||{};
   document.getElementById('s-jami').textContent=n(sum.jami_lidlar);
@@ -1738,6 +2620,8 @@ function renderSales() {
   (s.operators||[]).forEach(op=>{const c=op.konversiya>=12?'var(--green)':op.konversiya>=8?'var(--amber)':'var(--red)';ob.innerHTML+=`<tr><td style="font-weight:500;">${op.operator}</td><td style="text-align:center;">${n(op.jami)}</td><td style="text-align:center;color:var(--green);">${n(op.muvaffaqiyatli)}</td><td style="text-align:center;"><span style="color:${c};font-family:'DM Mono',monospace;">${op.konversiya}%</span></td></tr>`;});
   const mb=document.getElementById('salesManbaBody'); mb.innerHTML='';
   (s.manba||[]).forEach(m=>{const c=m.konversiya>=30?'var(--green)':m.konversiya>=10?'var(--blue)':'var(--muted)';mb.innerHTML+=`<tr><td style="font-weight:500;">${m.manba}</td><td style="text-align:center;">${n(m.jami)}</td><td style="text-align:center;color:var(--green);">${n(m.muvaffaqiyatli)}</td><td style="text-align:center;"><span style="color:${c};font-family:'DM Mono',monospace;">${m.konversiya}%</span></td></tr>`;});
+  // Qo'shimcha jadvallar
+  if (smData?.sales) renderSalesExtras(smData.sales);
 }
 
 // ── MARKETING ──
@@ -1773,6 +2657,11 @@ function renderCurrentPage() {
 }
 
 function showPage(id, btn) {
+  if (snap?.rawData) {
+    if (id==='teachers') { populateTeacherFilters(); }
+    if (id==='subjects') { populateSubjectTeacherFilter(); }
+    if (id==='dropout') { populateDropoutFilters(); }
+  }
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
