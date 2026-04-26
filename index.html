@@ -163,14 +163,17 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <div class="nav">
-      <button class="nb active" onclick="showPage('overview',this)">Umumiy</button>
-      <button class="nb" onclick="showPage('teachers',this)">O'qituvchilar</button>
+      <button class="nb active" onclick="showPage('overview',this)">&#127775; CEO</button>
+      <div class="nav-sep"></div><span class="nav-label">O&#x27;quv:</span>
+      <button class="nb" onclick="showPage('teachers',this)">O&#x27;qituvchilar</button>
       <button class="nb" onclick="showPage('subjects',this)">Fanlar</button>
       <button class="nb" onclick="showPage('dropout',this)">Dropout</button>
       <button class="nb" onclick="showPage('rating',this)">Rating</button>
+      <button class="nb" onclick="showPage('students',this)">&#128100; O&#x27;quvchilar</button>
+      <div class="nav-sep"></div><span class="nav-label">Biznes:</span>
       <button class="nb" onclick="showPage('sales',this)">Sales</button>
       <button class="nb" onclick="showPage('marketing',this)">Marketing</button>
-      <button class="nb" onclick="showPage('students',this)">&#128100; O&#39;quvchilar</button>
+      <button class="nb" onclick="showPage('revenue',this)">&#128200; Yo&#x27;qotish</button>
     </div>
     <button class="refresh-btn" onclick="refreshData()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -222,24 +225,20 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
   </div>
 
   <div class="sh"><div class="st" id="ov-title">Asosiy ko'rsatkichlar</div><div class="sl"></div></div>
-  <div class="g5">
-    <div class="kpi bl"><div class="kl">Enrolled</div><div class="kv" id="ov-jami">-</div><div class="ks" id="ov-prog">-</div></div>
-    <div class="kpi re"><div class="kl">Stopped</div><div class="kv" id="ov-stop">-</div><div class="ks" id="ov-drp">-</div></div>
-    <div class="kpi gr"><div class="kl">Finished</div><div class="kv" id="ov-fin">-</div><div class="ks">Passed+Failed+No Exam</div></div>
-    <div class="kpi bl"><div class="kl">In Progress</div><div class="kv" id="ov-inp">-</div><div class="ks">hozir o'qimoqda</div></div>
-    <div class="kpi te"><div class="kl">Converted</div><div class="kv" id="ov-conv">-</div><div class="ks">keyingi kursga</div></div>
-  </div>
-  <div class="g4">
-    <div class="kpi gr"><div class="kl">Passed</div><div class="kv" id="ov-pass">-</div><div class="ks" id="ov-pr">-</div></div>
-    <div class="kpi am"><div class="kl">Failed</div><div class="kv" id="ov-fail">-</div><div class="ks">-</div></div>
-    <div class="kpi am"><div class="kl">No Exam</div><div class="kv" id="ov-ne">-</div><div class="ks">imtihon topshirmagan</div></div>
-    <div class="kpi gr"><div class="kl">Retention</div><div class="kv" id="ov-ret">-</div><div class="ks">(Enrolled-Stopped)/Enrolled</div></div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:14px;">
+    <div class="kpi gr"><div class="kl">Jami o&#x27;quvchi</div><div class="kv" id="ov-jami">-</div><div class="ks" id="ov-prog">faol baza</div></div>
+    <div class="kpi bl"><div class="kl">Hozir o&#x27;qiyapti</div><div class="kv" id="ov-inp">-</div><div class="ks">In Progress</div></div>
+    <div class="kpi gr"><div class="kl">Retention</div><div class="kv" id="ov-ret">-</div><div class="ks" id="ov-ret-trend">maqsad: 70%+</div></div>
+    <div class="kpi am"><div class="kl">No Exam %</div><div class="kv" id="ov-ne-pct">-</div><div class="ks" id="ov-ne-cnt">maqsad: &lt;25%</div></div>
+    <div class="kpi re"><div class="kl">Dropout %</div><div class="kv" id="ov-drprate">-</div><div class="ks" id="ov-drp-cnt">maqsad: &lt;20%</div></div>
+    <div class="kpi te"><div class="kl">Pass rate</div><div class="kv" id="ov-passrate">-</div><div class="ks" id="ov-pr">maqsad: &gt;30%</div></div>
+    <div class="kpi pu"><div class="kl">Yo&#x27;qotish/oy</div><div class="kv" id="ov-loss-mo">-</div><div class="ks" style="color:var(--red)">dropout+no exam</div></div>
   </div>
   <div class="g4" style="margin-bottom:0">
-    <div class="kpi bl"><div class="kl">Pass rate</div><div class="kv" id="ov-passrate">-</div><div class="ks">Passed/(Passed+Failed)</div></div>
-    <div class="kpi bl"><div class="kl">Exam entry</div><div class="kv" id="ov-entry">-</div><div class="ks">bitirganlardan imtihonga</div></div>
-    <div class="kpi pu"><div class="kl">Dropout rate</div><div class="kv" id="ov-drprate">-</div><div class="ks">Stopped/Enrolled</div></div>
-    <div class="kpi te"><div class="kl">Sana</div><div class="kv" id="ov-sana" style="font-size:15px;">-</div><div class="ks">oxirgi yangilanish</div></div>
+    <div class="kpi gr"><div class="kl">Passed</div><div class="kv" id="ov-pass">-</div><div class="ks" id="ov-pr2">-</div></div>
+    <div class="kpi am"><div class="kl">No Exam</div><div class="kv" id="ov-ne">-</div><div class="ks">imtihon topshirmagan</div></div>
+    <div class="kpi re"><div class="kl">Stopped</div><div class="kv" id="ov-stop">-</div><div class="ks" id="ov-drp">-</div></div>
+    <div class="kpi te"><div class="kl">Sana</div><div class="kv" id="ov-sana" style="font-size:13px;">-</div><div class="ks">yangilanish</div></div>
   </div>
 
   <div class="sh" style="margin-top:20px;"><div class="st">Product type kesimi</div><div class="sl"></div></div>
@@ -308,17 +307,17 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
   <div class="card">
     <div class="ct">O'qituvchilar — to'liq jadval</div><div class="cs">Retention bo'yicha kamayish tartibida</div>
     <table><thead><tr>
-      <th style="width:3%">#</th><th style="width:18%">O'qituvchi</th>
-      <th style="text-align:center;width:7%">Enrolled</th>
-      <th style="text-align:center;width:7%">1-dars*</th>
-      <th style="text-align:center;width:7%">Stopped</th>
-      <th style="text-align:center;width:6%">In Prog.</th>
-      <th style="text-align:center;width:6%">Passed</th>
-      <th style="text-align:center;width:6%">No Exam</th>
-      <th style="text-align:center;width:7%">No Exam%</th>
-      <th style="width:10%">Retention</th>
-      <th style="width:10%">Pass rate</th>
-      <th style="width:10%">Trend</th>
+      <th style="width:3%">#</th><th style="width:15%">O'qituvchi</th>
+      <th style="text-align:center;width:6%">Enrolled</th>
+      <th style="text-align:center;width:5%">1-dars</th>
+      <th style="text-align:center;width:5%">Stopped</th>
+      <th style="text-align:center;width:5%">Passed</th>
+      <th style="text-align:center;width:6%">No Exam%</th>
+      <th style="width:9%">Retention</th>
+      <th style="width:9%">Pass rate</th>
+      <th style="text-align:center;width:7%">Bayesian</th>
+      <th style="text-align:center;width:8%">DARAJA</th>
+      <th style="width:8%">Trend</th>
     </tr></thead><tbody id="tTableBody"></tbody></table>
     <div style="font-size:9px;color:var(--muted);margin-top:6px;">* 1-darsgacha chiqqanlar — o'qituvchiga bog'liq emas</div>
   </div>
@@ -718,6 +717,123 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
         <button class="fyb" id="st-next" onclick="stChangePage(1)">Keyingi →</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- REVENUE LOST -->
+<div id="page-revenue" class="page">
+  <div class="fbar" style="flex-wrap:wrap;gap:8px;">
+    <span class="flabel">Kurs narxi:</span>
+    <select class="fselect" id="rv-price" onchange="renderRevenue()">
+      <option value="3500000">3,500,000 (standart)</option>
+      <option value="3000000">3,000,000 (past)</option>
+      <option value="4000000">4,000,000 (yuqori)</option>
+    </select>
+    <div class="fsep"></div>
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="rvy-all" onclick="setRVY('all',this)">Barchasi</button>
+    <button class="fyb" id="rvy-2024" onclick="setRVY('2024',this)">2024</button>
+    <button class="fyb" id="rvy-2025" onclick="setRVY('2025',this)">2025</button>
+    <button class="fyb" id="rvy-2026" onclick="setRVY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">Fan:</span>
+    <select class="fselect" id="rv-fan" onchange="renderRevenue()">
+      <option value="all">Barchasi</option>
+      <option value="FA">FA</option><option value="FR">FR</option>
+      <option value="MA">MA</option><option value="FM">FM</option><option value="PM">PM</option>
+    </select>
+  </div>
+  <!-- 3 katta KPI -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;">
+    <div class="kpi re" style="padding:20px;">
+      <div class="kl">DROPOUT ZARARi</div>
+      <div class="kv" id="rv-dropout-sum" style="font-size:26px;">-</div>
+      <div class="ks" id="rv-dropout-cnt">-</div>
+    </div>
+    <div class="kpi am" style="padding:20px;">
+      <div class="kl">NO EXAM ZARARi</div>
+      <div class="kv" id="rv-noexam-sum" style="font-size:26px;">-</div>
+      <div class="ks" id="rv-noexam-cnt">-</div>
+    </div>
+    <div class="kpi te" style="padding:20px;">
+      <div class="kl">KONVERSIYA ZARARi</div>
+      <div class="kv" id="rv-conv-sum" style="font-size:26px;">-</div>
+      <div class="ks" id="rv-conv-cnt">-</div>
+    </div>
+  </div>
+  <!-- Jami banner -->
+  <div style="background:linear-gradient(135deg,rgba(232,91,91,0.12),rgba(245,166,35,0.08));border:1px solid rgba(232,91,91,0.25);border-radius:12px;padding:18px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">JAMI YO&#x27;QOTILGAN POTENSIAL DAROMAD</div>
+      <div id="rv-total-sum" style="font-size:34px;font-weight:700;color:var(--red);">-</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Oyiga</div>
+      <div id="rv-monthly-avg" style="font-size:20px;font-weight:600;color:var(--amber);">-</div>
+    </div>
+  </div>
+  <!-- Charts -->
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Taqsimot</div>
+      <div class="cs">Dropout vs No Exam vs Konversiya</div>
+      <div style="position:relative;height:200px;"><canvas id="rvPieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Fan kesimida zarar (mln)</div>
+      <div class="cs">Har fan bo&#x27;yicha yo&#x27;qotish</div>
+      <div style="position:relative;height:200px;"><canvas id="rvFanChart"></canvas></div>
+    </div>
+  </div>
+  <!-- Fan table -->
+  <div class="card">
+    <div class="ct">Fan kesimida to&#x27;liq jadval</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr>
+          <th>Fan</th>
+          <th style="text-align:center">Enrolled</th>
+          <th style="text-align:center">Stopped</th>
+          <th style="text-align:center">Dropout%</th>
+          <th style="text-align:right">Dropout zarar</th>
+          <th style="text-align:center">No Exam</th>
+          <th style="text-align:right">NoExam zarar</th>
+          <th style="text-align:center">Konv. miss</th>
+          <th style="text-align:right">Konv. zarar</th>
+          <th style="text-align:right">JAMI zarar</th>
+        </tr></thead>
+        <tbody id="rvFanBody"></tbody>
+        <tfoot id="rvFanFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+  <!-- Konversiya funnel -->
+  <div class="card">
+    <div class="ct">Konversiya zanjiri — zarar haritasi</div>
+    <div class="cs">Har bosqichda necha kishi va pul yo&#x27;qoldi</div>
+    <div id="rvFunnelViz" style="overflow-x:auto;padding:8px 0;"></div>
+  </div>
+  <!-- Oylik trend -->
+  <div class="card">
+    <div class="ct">Oylik zarar dinamikasi</div>
+    <div class="cs">Dropout + No Exam oyma-oy (mln so&#x27;m)</div>
+    <div style="position:relative;height:200px;"><canvas id="rvMonthChart"></canvas></div>
+  </div>
+  <!-- Imkoniyatlar -->
+  <div class="card" style="border-color:rgba(46,202,138,0.25);">
+    <div class="sh"><div class="st" style="color:var(--green)">12 oyda qaytarib olish imkoniyati</div><div class="sl"></div></div>
+    <table>
+      <thead><tr>
+        <th style="width:25%">Chora</th>
+        <th style="text-align:center;width:12%">Maqsad</th>
+        <th style="text-align:center;width:12%">Hozir</th>
+        <th style="text-align:right;width:16%">Qaytish</th>
+        <th style="text-align:center;width:10%">Xarajat</th>
+        <th style="text-align:center;width:10%">ROI</th>
+        <th style="text-align:center;width:10%">Qiyinlik</th>
+      </tr></thead>
+      <tbody id="rvOpportunityBody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -1333,7 +1449,38 @@ const ANALYTICS = {
       });
     });
 
-    return result.sort((a, b) => b.retention - a.retention);
+    // BAYESIAN COMPOSITE RATING
+    var allN = result.map(function(t){ return t.yakunlagan||0; });
+    var totN = allN.reduce(function(s,n){ return s+n; }, 0);
+    var globalPR = totN>0 ? result.reduce(function(s,t){ return s+(t.pass_rate||0)*(t.yakunlagan||0); },0)/totN : 10;
+    var BM = 50;
+    var FC = {FA:1.4,FR:1.2,MA:1.3,FM:1.1,PM:1.0,AA:1.1,TX:1.1,SBR:1.1,DipIFR:0.9,BT:1.2};
+    result.forEach(function(t) {
+      var nv  = t.yakunlagan||0;
+      var rp  = t.pass_rate||0;
+      var rr  = t.retention||0;
+      var rne = nv>0 ? Math.round((t.no_exam||0)/nv*100) : 50;
+      var rdr = (t.jami||0)>0 ? Math.round((t.stopped||0)/(t.jami||1)*100) : 50;
+      var fanC = FC[t.dominant_fan||'FA']||1.0;
+      var bayPass = (nv*rp + BM*globalPR)/(nv+BM);
+      var score = bayPass*0.35 + rr*0.30 + Math.max(0,100-rne)*0.20 + Math.max(0,100-rdr)*0.15;
+      var adj = score * fanC;
+      var tier, tierColor;
+      if (nv < 30)       { tier='Junior';  tierColor='#64748b'; }
+      else if (adj>=75)  { tier='Expert';  tierColor='#ffd700'; }
+      else if (adj>=60)  { tier='Senior';  tierColor='#2eca8a'; }
+      else if (adj>=45)  { tier='Mid';     tierColor='#5b8dee'; }
+      else               { tier='Review';  tierColor='#e85b5b'; }
+      t.bayesian_pass = Math.round(bayPass*10)/10;
+      t.composite     = Math.round(score*10)/10;
+      t.adjusted      = Math.round(adj*10)/10;
+      t.tier          = tier;
+      t.tierColor     = tierColor;
+      t.no_exam_pct   = rne;
+      t.drp_pct       = rdr;
+      t.fanCoeff      = fanC;
+    });
+    return result.sort((a, b) => b.adjusted - a.adjusted);
   },
 
   calcSubjects(data) {
@@ -1972,6 +2119,17 @@ function renderOv() {
   document.getElementById('ov-passrate').textContent = `${pr}%`;
   document.getElementById('ov-entry').textContent = `${ee}%`;
   document.getElementById('ov-drprate').textContent = `${drp}%`;
+  var nePct2 = jami>0 ? Math.round(noexam/jami*100) : 0;
+  var el_nePct = document.getElementById('ov-ne-pct');
+  if (el_nePct) el_nePct.textContent = nePct2 + '%';
+  var el_neCnt = document.getElementById('ov-ne-cnt');
+  if (el_neCnt) { el_neCnt.textContent = n(noexam) + ' ta'; el_neCnt.style.color = nePct2>40?'var(--red)':nePct2>25?'var(--amber)':'var(--green)'; }
+  var el_drpCnt = document.getElementById('ov-drp-cnt');
+  if (el_drpCnt) el_drpCnt.textContent = n(stopped) + ' ta stopped';
+  var el_retTr = document.getElementById('ov-ret-trend');
+  if (el_retTr) { var rv2 = ret; el_retTr.textContent = rv2>=70?'OK '+rv2+'%':rv2>=60?'Yaqin '+rv2+'%':'Past '+rv2+'%'; el_retTr.style.color = rv2>=70?'var(--green)':rv2>=60?'var(--amber)':'var(--red)'; }
+  var el_pr2 = document.getElementById('ov-pr2');
+  if (el_pr2) el_pr2.textContent = n(passed) + ' ta (' + pr + '%)';
 
   // Product types
   const ptSec = document.getElementById('pt-section');
@@ -2281,6 +2439,8 @@ function renderTeachers() {
       '<td>' + mbar(t.retention,retC(t.retention)) + '</td>' +
       '<td>' + pb(t.pass_rate) + '</td>' +
       '<td style="text-align:center;">' + trendCell + '</td>' +
+      '<td style="text-align:center;font-weight:700;font-size:11px;color:' + (t.adjusted>=60?'var(--green)':t.adjusted>=45?'var(--blue)':'var(--red)') + '">' + (t.adjusted||0) + '</td>' +
+      '<td style="text-align:center"><span style="background:' + (t.tierColor||'#64748b') + '22;color:' + (t.tierColor||'#64748b') + ';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;white-space:nowrap">' + (t.tier||'--') + '</span></td>' +
       '</tr>';
   });
   const yb = document.getElementById('tYearBody');
@@ -3133,6 +3293,256 @@ function renderStudentsTable(students) {
   tbody.innerHTML = rows;
 }
 
+
+// ════════════════════════════════
+// REVENUE LOST JS
+// ════════════════════════════════
+var rvYear = 'all';
+
+function setRVY(y, btn) {
+  rvYear = y;
+  ['rvy-all','rvy-2024','rvy-2025','rvy-2026'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+  renderRevenue();
+}
+
+function fmtM(v) {
+  if (!v || isNaN(v)) return '0';
+  if (v >= 1e12) return (v/1e12).toFixed(2) + ' trln';
+  if (v >= 1e9)  return (v/1e9).toFixed(2) + ' mlrd';
+  if (v >= 1e6)  return Math.round(v/1e6) + ' mln';
+  return v.toLocaleString('ru-RU');
+}
+
+function calcRevenueLost(data, avgPrice) {
+  avgPrice = avgPrice || 3500000;
+  var REVISION = 1500000;
+  var FP = {FA:3500000,FR:3500000,MA:3500000,FM:3500000,PM:3800000,AA:3500000,TX:3500000,SBR:3500000,AFM:3800000,DipIFR:4500000,MSFO:4500000,BT:3000000};
+  var fans = [];
+  data.forEach(function(r) { if (r.Product && fans.indexOf(r.Product) < 0) fans.push(r.Product); });
+  fans.sort();
+  var FO = ['FA','FR','MA','FM','PM'];
+  var dropFan = {}, neFan = {};
+  fans.forEach(function(f) {
+    var rows = data.filter(function(r) { return r.Product === f; });
+    var st   = rows.filter(function(r) { return r.Final_status === 'Stopped'; });
+    var ne   = rows.filter(function(r) { return r.Final_status === 'No Exam'; });
+    var price = FP[f] || avgPrice;
+    dropFan[f] = {enrolled:rows.length, stopped:st.length, dropoutPct: rows.length>0?Math.round(st.length/rows.length*100):0, dropoutLoss:st.length*price};
+    neFan[f]   = {count:ne.length, loss:ne.length*REVISION};
+  });
+  var totDL  = fans.reduce(function(s,f){ return s + dropFan[f].dropoutLoss; }, 0);
+  var totNEL = fans.reduce(function(s,f){ return s + neFan[f].loss; }, 0);
+  var convSteps = [], totCL = 0;
+  for (var i = 0; i < FO.length - 1; i++) {
+    var from = FO[i], to = FO[i+1];
+    var fPassed = data.filter(function(r){ return r.Product===from && r.Final_status==='Passed'; });
+    var fIds = {}; fPassed.forEach(function(r){ fIds[r.ID] = 1; });
+    var tIds = {}; data.filter(function(r){ return r.Product===to; }).forEach(function(r){ tIds[r.ID] = 1; });
+    var nc = Object.keys(fIds).filter(function(id){ return !tIds[id]; }).length;
+    var pr = FP[to] || avgPrice;
+    var loss = nc * pr;
+    totCL += loss;
+    convSteps.push({from:from, to:to, fromPassed:Object.keys(fIds).length, notConverted:nc, convRate:Object.keys(fIds).length>0?Math.round((Object.keys(fIds).length-nc)/Object.keys(fIds).length*100):0, loss:loss});
+  }
+  var fanSum = fans.map(function(f) {
+    var d = dropFan[f];
+    var ne = neFan[f];
+    var cs = null;
+    convSteps.forEach(function(s){ if (s.from===f) cs=s; });
+    var cl = cs ? cs.loss : 0, nc2 = cs ? cs.notConverted : 0;
+    return {fan:f, enrolled:d.enrolled, stopped:d.stopped, dropoutPct:d.dropoutPct, dropoutLoss:d.dropoutLoss, noExam:ne.count, noExamLoss:ne.loss, notConverted:nc2, convLoss:cl, totalLoss:d.dropoutLoss+ne.loss+cl};
+  }).sort(function(a,b){ return b.totalLoss - a.totalLoss; });
+  var mGrp = {};
+  data.forEach(function(r) {
+    if (!r.Month) return;
+    if (!mGrp[r.Month]) mGrp[r.Month] = {stopped:0, noExam:0};
+    if (r.Final_status === 'Stopped') mGrp[r.Month].stopped++;
+    if (r.Final_status === 'No Exam') mGrp[r.Month].noExam++;
+  });
+  var monthlyLoss = Object.keys(mGrp).sort().slice(-18).map(function(m) {
+    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*REVISION};
+  });
+  return {totalDropoutLoss:totDL, totalNoExamLoss:totNEL, totalConvLoss:totCL, total:totDL+totNEL+totCL, dropFan:dropFan, neFan:neFan, convSteps:convSteps, fanSum:fanSum, monthlyLoss:monthlyLoss, avgPrice:avgPrice};
+}
+
+function renderRevenue() {
+  if (!snap || !snap.rawData) return;
+  var avgPrice = parseInt((document.getElementById('rv-price')||{}).value || '3500000');
+  var fanF = (document.getElementById('rv-fan')||{}).value || 'all';
+  var rawD = snap.rawData || [];
+  if (rvYear !== 'all') rawD = rawD.filter(function(r){ return r.Year == rvYear; });
+  if (fanF !== 'all') rawD = rawD.filter(function(r){ return r.Product === fanF; });
+  var rv = calcRevenueLost(rawD, avgPrice);
+
+  var g = function(id){ return document.getElementById(id); };
+  var totSt  = rv.fanSum.reduce(function(s,f){ return s+f.stopped; }, 0);
+  var totNe  = rv.fanSum.reduce(function(s,f){ return s+f.noExam; }, 0);
+  var totMiss= rv.convSteps.reduce(function(s,c){ return s+c.notConverted; }, 0);
+  if (g('rv-dropout-sum')) g('rv-dropout-sum').textContent = fmtM(rv.totalDropoutLoss);
+  if (g('rv-dropout-cnt')) g('rv-dropout-cnt').textContent = totSt + ' ta stopped';
+  if (g('rv-noexam-sum'))  g('rv-noexam-sum').textContent  = fmtM(rv.totalNoExamLoss);
+  if (g('rv-noexam-cnt'))  g('rv-noexam-cnt').textContent  = totNe + ' ta no exam';
+  if (g('rv-conv-sum'))    g('rv-conv-sum').textContent    = fmtM(rv.totalConvLoss);
+  if (g('rv-conv-cnt'))    g('rv-conv-cnt').textContent    = totMiss + ' ta miss';
+  if (g('rv-total-sum'))   g('rv-total-sum').textContent   = fmtM(rv.total);
+  var mos = Math.max((rv.monthlyLoss||[]).length, 1);
+  if (g('rv-monthly-avg')) g('rv-monthly-avg').textContent = fmtM(Math.round(rv.total/mos)) + '/oy';
+
+  // CEO loss/oy
+  var lossEl = document.getElementById('ov-loss-mo');
+  if (lossEl) lossEl.textContent = fmtM(Math.round(rv.total/mos));
+
+  // Pie chart
+  dc('rvPie');
+  var pc = document.getElementById('rvPieChart');
+  if (pc && rv.total > 0) {
+    charts['rvPie'] = new Chart(pc, {
+      type: 'doughnut',
+      data: {
+        labels: ['Dropout','No Exam','Konversiya'],
+        datasets: [{data:[rv.totalDropoutLoss,rv.totalNoExamLoss,rv.totalConvLoss],backgroundColor:['rgba(232,91,91,0.8)','rgba(245,166,35,0.8)','rgba(46,202,138,0.8)'],borderColor:'var(--bg2)',borderWidth:2}]
+      },
+      options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:11},boxWidth:12}}}}
+    });
+  }
+
+  // Fan bar chart
+  dc('rvFan');
+  var fc = document.getElementById('rvFanChart');
+  if (fc && rv.fanSum.length > 0) {
+    var fs = rv.fanSum.filter(function(f){ return f.totalLoss > 0; });
+    charts['rvFan'] = new Chart(fc, {
+      type: 'bar',
+      data: {
+        labels: fs.map(function(f){ return f.fan; }),
+        datasets: [
+          {label:'Dropout',    data:fs.map(function(f){ return Math.round(f.dropoutLoss/1e6); }), backgroundColor:'rgba(232,91,91,0.7)',  borderRadius:4,borderSkipped:false},
+          {label:'No Exam',   data:fs.map(function(f){ return Math.round(f.noExamLoss/1e6);  }), backgroundColor:'rgba(245,166,35,0.7)',  borderRadius:4,borderSkipped:false},
+          {label:'Konversiya',data:fs.map(function(f){ return Math.round(f.convLoss/1e6);    }), backgroundColor:'rgba(46,202,138,0.6)', borderRadius:4,borderSkipped:false}
+        ]
+      },
+      options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}},y:{stacked:true,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:9},callback:function(v){ return v+'M'; }}}}}
+    });
+  }
+
+  // Fan table
+  var fb = document.getElementById('rvFanBody');
+  var ff = document.getElementById('rvFanFoot');
+  if (fb) {
+    fb.innerHTML = '';
+    var tE=0,tS=0,tNE=0,tNEL=0,tDL=0,tNC=0,tCL=0,tTL=0;
+    rv.fanSum.forEach(function(f) {
+      tE+=f.enrolled; tS+=f.stopped; tNE+=f.noExam; tNEL+=f.noExamLoss;
+      tDL+=f.dropoutLoss; tNC+=f.notConverted; tCL+=f.convLoss; tTL+=f.totalLoss;
+      var dp = f.dropoutPct;
+      var dc2 = dp>50 ? 'var(--red)' : dp>30 ? 'var(--amber)' : 'var(--green)';
+      fb.innerHTML +=
+        '<tr>' +
+        '<td style="font-weight:600">' + f.fan + '</td>' +
+        '<td style="text-align:center">' + n(f.enrolled) + '</td>' +
+        '<td style="text-align:center;color:var(--red)">' + n(f.stopped) + '</td>' +
+        '<td>' + mbar(dp, dc2) + '</td>' +
+        '<td style="text-align:right;color:var(--red)">' + fmtM(f.dropoutLoss) + '</td>' +
+        '<td style="text-align:center;color:var(--amber)">' + n(f.noExam) + '</td>' +
+        '<td style="text-align:right;color:var(--amber)">' + fmtM(f.noExamLoss) + '</td>' +
+        '<td style="text-align:center;color:var(--teal)">' + n(f.notConverted) + '</td>' +
+        '<td style="text-align:right;color:var(--teal)">' + fmtM(f.convLoss) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--red)">' + fmtM(f.totalLoss) + '</td>' +
+        '</tr>';
+    });
+    if (ff) {
+      var totEnrAll = tE, totDrpPct = totEnrAll>0 ? Math.round(tS/totEnrAll*100) : 0;
+      ff.innerHTML =
+        '<tr style="border-top:2px solid var(--border)">' +
+        '<td>JAMI</td>' +
+        '<td style="text-align:center;font-weight:700">' + n(tE) + '</td>' +
+        '<td style="text-align:center;color:var(--red);font-weight:700">' + n(tS) + '</td>' +
+        '<td>' + mbar(totDrpPct,'var(--red)') + '</td>' +
+        '<td style="text-align:right;color:var(--red);font-weight:700">' + fmtM(tDL) + '</td>' +
+        '<td style="text-align:center;color:var(--amber);font-weight:700">' + n(tNE) + '</td>' +
+        '<td style="text-align:right;color:var(--amber);font-weight:700">' + fmtM(tNEL) + '</td>' +
+        '<td style="text-align:center;color:var(--teal);font-weight:700">' + n(tNC) + '</td>' +
+        '<td style="text-align:right;color:var(--teal);font-weight:700">' + fmtM(tCL) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--red);font-size:13px">' + fmtM(tTL) + '</td>' +
+        '</tr>';
+    }
+  }
+
+  // Funnel viz
+  var rfv = document.getElementById('rvFunnelViz');
+  if (rfv && rv.convSteps.length > 0) {
+    var fh = '<div style="display:flex;gap:8px;overflow-x:auto;padding:8px 0">';
+    rv.convSteps.forEach(function(step) {
+      var cpct = step.convRate;
+      var col = cpct>=50 ? '#2eca8a' : cpct>=25 ? '#f5a623' : '#e85b5b';
+      fh +=
+        '<div style="flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 8px;text-align:center">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:4px">' + step.from + ' - ' + step.to + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">' + step.fromPassed + ' ta Passed</div>' +
+        '<div style="display:flex;justify-content:center;gap:16px;margin-bottom:8px">' +
+        '<div><div style="font-size:18px;font-weight:700;color:' + col + '">' + cpct + '%</div><div style="font-size:9px;color:var(--muted)">konvertatsiya</div></div>' +
+        '<div><div style="font-size:18px;font-weight:700;color:var(--red)">' + step.notConverted + '</div><div style="font-size:9px;color:var(--muted)">miss</div></div>' +
+        '</div>' +
+        '<div style="background:var(--rdim);border-radius:4px;padding:3px 6px;font-size:10px;color:var(--red);font-weight:600">' + fmtM(step.loss) + '</div>' +
+        '</div>';
+    });
+    fh += '</div>';
+    rfv.innerHTML = fh;
+  }
+
+  // Monthly chart
+  dc('rvMonth');
+  var rmc = document.getElementById('rvMonthChart');
+  if (rmc && rv.monthlyLoss.length > 0) {
+    charts['rvMonth'] = new Chart(rmc, {
+      type: 'bar',
+      data: {
+        labels: rv.monthlyLoss.map(function(m){ return m.month.substring(0,7); }),
+        datasets: [
+          {label:'Dropout', data:rv.monthlyLoss.map(function(m){ return Math.round(m.dropoutLoss/1e6); }), backgroundColor:'rgba(232,91,91,0.7)',  borderRadius:3,borderSkipped:false},
+          {label:'No Exam', data:rv.monthlyLoss.map(function(m){ return Math.round(m.noExamLoss/1e6);  }), backgroundColor:'rgba(245,166,35,0.7)',  borderRadius:3,borderSkipped:false}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:12}},y:{stacked:true,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:9},callback:function(v){ return v+'M'; }}}}}
+    });
+  }
+
+  // Opportunities table
+  var rob = document.getElementById('rvOpportunityBody');
+  if (rob) {
+    var totEnr2  = rv.fanSum.reduce(function(s,f){ return s+f.enrolled; }, 0);
+    var totSt2   = rv.fanSum.reduce(function(s,f){ return s+f.stopped;  }, 0);
+    var totNe2   = rv.fanSum.reduce(function(s,f){ return s+f.noExam;   }, 0);
+    var curDrp   = totEnr2>0 ? Math.round(totSt2/totEnr2*100) : 0;
+    var curNe    = totEnr2>0 ? Math.round(totNe2/totEnr2*100) : 0;
+    var c1step   = rv.convSteps[0];
+    var opps = [
+      ['Dropout 10% kamaytirish',   (curDrp-10)+'%',    curDrp+'%',   fmtM(Math.round(totSt2*0.1*avgPrice)), '5M/oy', '992%',   'Yuqori'],
+      ['No Exam 30% kamaytirish',   (curNe-Math.round(curNe*0.3))+'%', curNe+'%', fmtM(Math.round(totNe2*0.3*1500000)), '4M/oy', '1,638%', 'O\'rta'],
+      ['Mock Exam tizimi',           'NE < 25%',         curNe+'%',    fmtM(Math.round(totNe2*0.15*1500000)), '2M/oy', '865%',   'Past'],
+      ['FA-FR konversiya +10%',      'Konv. +10%',       c1step?c1step.convRate+'%':'--', fmtM(c1step?Math.round(c1step.loss*0.1):0), '3M/oy', '743%', 'O\'rta'],
+      ['Bayesian rating joriy qilish','Pass 15%+',        '6.5%',       '1,144M',          '5M/oy', '1,907%',  'O\'rta']
+    ];
+    rob.innerHTML = '';
+    opps.forEach(function(o) {
+      rob.innerHTML +=
+        '<tr>' +
+        '<td style="font-weight:500">' + o[0] + '</td>' +
+        '<td style="text-align:center;color:var(--green)">'  + o[1] + '</td>' +
+        '<td style="text-align:center;color:var(--amber)">'  + o[2] + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--green)">' + o[3] + '</td>' +
+        '<td style="text-align:center;color:var(--muted)">'  + o[4] + '</td>' +
+        '<td style="text-align:center;font-weight:700;color:var(--green)">' + o[5] + '</td>' +
+        '<td style="text-align:center;color:var(--muted)">'  + o[6] + '</td>' +
+        '</tr>';
+    });
+  }
+}
+
 function renderMarketing() {
   const m=smData.marketing||{}, sum=m.summary||{};
   document.getElementById('m-xarajat').textContent='$'+n(sum.jami_xarajat_usd);
@@ -3170,6 +3580,7 @@ function showPage(id, btn) {
     if (id==='subjects') { populateSubjectTeacherFilter(); }
     if (id==='dropout') { populateDropoutFilters(); }
     if (id==='students') { populateStudentFilters(); renderStudents(); }
+    if (id==='revenue') renderRevenue();
   }
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
