@@ -116,12 +116,14 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 .pdf-btn{background:var(--gdim);border:1px solid rgba(46,202,138,0.3);color:var(--green);cursor:pointer;padding:6px 14px;border-radius:6px;font-size:11px;font-family:inherit;margin-top:10px;}
 .cost-note{font-size:10px;color:var(--muted);margin-top:8px;}
 /* Students page */
-.st-pass{color:#2eca8a;} .st-fail{color:#e85b5b;}
-.st-noex{color:#f5a623;} .st-prog{color:#5b8dee;}
-.st-stop{color:#e85b5b;opacity:0.6;}
-#stTableWrap table th{position:sticky;top:0;background:var(--bg2);z-index:5;}
-#stTableWrap::-webkit-scrollbar{width:6px;height:6px;}
-#stTableWrap::-webkit-scrollbar-track{background:var(--bg2);}
+.st-row:hover td{background:var(--bg3)!important;}
+.st-cell{display:inline-flex;align-items:center;justify-content:center;
+  min-width:34px;height:22px;border-radius:4px;font-size:9px;font-weight:700;}
+.st-none{background:transparent;color:var(--muted);border:1px solid var(--border);}
+#stTableWrap table thead th{position:sticky;top:0;background:var(--bg2);z-index:5;
+  padding:8px 4px;font-size:10px;border-bottom:1px solid var(--border);}
+#stTableWrap{scrollbar-width:thin;scrollbar-color:var(--border) var(--bg2);}
+#stTableWrap::-webkit-scrollbar{width:5px;height:5px;}
 #stTableWrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
 </head>
@@ -1533,71 +1535,83 @@ const ANALYTICS = {
 
   // SABAB x FAN matritsasi
   // STUDENTS — individual o'quvchilar ro'yxati
+  // Kalitlar SheetJS header:1 bilan to'g'ri: 'ID', 'Ismi Familiyasi', 'Product',
+  //   'Final status', "O'qituvchi", 'Guruh', 'Ball', 'Year', 'Month'
   calcStudents(data) {
-    const FAN_ORDER = ['FA','FR','MA','FM','PM','AA','TX','SBR','AFM','APM','BT','DipIFR'];
-    const STATUS_ICON = {
-      'Passed':     { icon:'✅', cls:'st-pass',    short:'P' },
-      'Failed':     { icon:'❌', cls:'st-fail',    short:'F' },
-      'No Exam':    { icon:'📋', cls:'st-noex',    short:'NE' },
-      'In Progress':{ icon:'⏳', cls:'st-prog',    short:'IP' },
-      'Stopped':    { icon:'🚪', cls:'st-stop',    short:'ST' },
-    };
+    // Status prioriteti: Passed > In Progress > Failed > No Exam > Stopped
+    // (bir fan bo'yicha bir nechta satr bo'lsa — eng yaxshisini olamiz)
+    const PRIORITY = { 'Passed':5, 'In Progress':4, 'Failed':3, 'No Exam':2, 'Stopped':1 };
 
     // ID bo'yicha guruhlaymiz
     const byId = {};
     data.forEach(function(r) {
-      const id = r.ID || r.id;
+      // To'g'ri kalit nomlar (SheetJS dan keladi)
+      const id    = r['ID']   || r.ID   || r.id;
+      const name  = (r['Ismi Familiyasi'] || r.name || '').trim();
+      const prod  = (r['Product'] || r.product || '').trim().toUpperCase();
+      const st    = r['Final status'] || r.Final_status || r.final_status || '';
+      const teacher = r["O'qituvchi"] || r.Oqituvchi || r.teacher || '';
+      const guruh = r['Guruh'] || r.guruh || '';
+      const ball  = r['Ball']  || r.ball  || null;
+      const year  = r['Year']  || r.Year  || '';
+      const month = r['Month'] || r.Month || '';
+
       if (!id) return;
+
       if (!byId[id]) {
         byId[id] = {
-          id: id,
-          name: r['Ismi Familiyasi'] || r.name || '',
-          courses: {},
-          teachers: new Set(),
-          year: r.Year || '',
-          allRows: []
+          id:       id,
+          name:     name,
+          courses:  {},
+          teacherSet: new Set(),
+          years:    new Set(),
         };
       }
-      byId[id].allRows.push(r);
-      const prod = (r.Product || r.product || '').toUpperCase();
+
+      // Ism bo'sh bo'lsa — keyingi satrdan olamiz
+      if (!byId[id].name && name) byId[id].name = name;
+      if (year) byId[id].years.add(year);
+
       if (!prod) return;
-      // Bir o'quvchi bir fandan bir nechta satr bo'lishi mumkin — eng yaxshi natijani olamiz
-      const st = r.Final_status || r.final_status || '';
+
+      // Bir o'quvchi bir fandan ko'p satr bo'lsa — eng yuqori prioritetli natijani olamiz
       const existing = byId[id].courses[prod];
-      const priority = { 'Passed':5, 'In Progress':4, 'Failed':3, 'No Exam':2, 'Stopped':1 };
-      if (!existing || (priority[st]||0) > (priority[existing.status]||0)) {
+      const newPrio  = PRIORITY[st] || 0;
+      const oldPrio  = existing ? (PRIORITY[existing.status] || 0) : -1;
+
+      if (!existing || newPrio > oldPrio) {
         byId[id].courses[prod] = {
-          status: st,
-          icon: STATUS_ICON[st] || { icon:'—', cls:'', short:'—' },
-          teacher: r.Oqituvchi || r.teacher || '',
-          guruh: r.Guruh || r.guruh || '',
-          ball: r.Ball || r.ball || null,
-          year: r.Year || '',
-          month: r.Month || ''
+          status:  st,
+          teacher: teacher,
+          guruh:   guruh,
+          ball:    ball,
+          year:    year,
+          month:   month,
         };
       }
-      const t = r.Oqituvchi || r.teacher;
-      if (t) byId[id].teachers.add(t);
+      if (teacher) byId[id].teacherSet.add(teacher);
     });
 
     // Array ga o'tkazamiz
     const students = Object.values(byId).map(function(s) {
-      const courses = s.courses;
-      const coursesArr = Object.keys(courses);
-      const passedArr = coursesArr.filter(function(c){ return courses[c].status === 'Passed'; });
-      const mainTeacher = Array.from(s.teachers).slice(0,2).join(', ');
+      const cKeys      = Object.keys(s.courses);
+      const passedList = cKeys.filter(function(c){ return s.courses[c].status === 'Passed'; });
+      const teachers   = Array.from(s.teacherSet);
+      // Eng ko'p ishlatilgan o'qituvchi
+      const mainTeacher = teachers.length > 0 ? teachers[0] : '—';
       return {
-        id: s.id,
-        name: s.name,
-        courses: courses,
-        courseCount: coursesArr.length,
-        passedCount: passedArr.length,
-        teacher: mainTeacher,
-        year: s.year,
+        id:          s.id,
+        name:        s.name || '—',
+        courses:     s.courses,
+        courseCount: cKeys.length,
+        passedCount: passedList.length,
+        teacher:     mainTeacher,
+        teacherFull: teachers.join(', '),
+        years:       Array.from(s.years),
       };
     });
 
-    return { students, STATUS_ICON, FAN_ORDER };
+    return { students };
   },
 
   calcReasonByFan(data) {
@@ -2915,6 +2929,14 @@ let stYear = 'all';
 let stPage = 0;
 const ST_PAGE_SIZE = 50;
 let stAllStudents = [];
+const FAN_ORDER_ST = ['FA','FR','MA','FM','PM','AA','TX','SBR','AFM','APM','BT','DipIFR'];
+const STATUS_STYLE_ST = {
+  'Passed':      { bg:'rgba(46,202,138,0.15)',  color:'#2eca8a',   label:'P' },
+  'Failed':      { bg:'rgba(232,91,91,0.15)',   color:'#e85b5b',   label:'F' },
+  'No Exam':     { bg:'rgba(245,166,35,0.15)',  color:'#f5a623',   label:'NE' },
+  'In Progress': { bg:'rgba(91,141,238,0.15)',  color:'#5b8dee',   label:'IP' },
+  'Stopped':     { bg:'rgba(232,91,91,0.06)',   color:'#e85b5b66', label:'ST' },
+};
 
 function setSTY(y, btn) {
   stYear = y;
@@ -2922,7 +2944,7 @@ function setSTY(y, btn) {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   stPage = 0;
   renderStudents();
 }
@@ -2931,7 +2953,12 @@ function populateStudentFilters() {
   if (!snap || !snap.rawData) return;
   const tSel = document.getElementById('st-teacher');
   if (tSel && tSel.options.length <= 1) {
-    const teachers = [...new Set((snap.rawData||[]).map(function(r){ return r.Oqituvchi||r.teacher; }).filter(Boolean))].sort();
+    // To'g'ri kalit: "O'qituvchi"
+    const teachers = [...new Set(
+      (snap.rawData||[]).map(function(r){
+        return r["O'qituvchi"] || r.Oqituvchi || r.teacher || '';
+      }).filter(Boolean)
+    )].sort();
     teachers.forEach(function(t) {
       const opt = document.createElement('option');
       opt.value = t;
@@ -2942,42 +2969,41 @@ function populateStudentFilters() {
 }
 
 function stChangePage(dir) {
-  const maxPage = Math.ceil(stAllStudents.length / ST_PAGE_SIZE) - 1;
+  const maxPage = Math.max(0, Math.ceil(stAllStudents.length / ST_PAGE_SIZE) - 1);
   stPage = Math.max(0, Math.min(stPage + dir, maxPage));
   renderStudentsTable(stAllStudents);
 }
 
 function renderStudents() {
-  if (!snap) return;
+  if (!snap || !snap.rawData) return;
 
-  // Filter raw data
+  // Har doim barcha raw data dan olamiz (students bo'limi global filter ga bog'liq emas)
   let rawD = snap.rawData || [];
-  if (stYear !== 'all') rawD = rawD.filter(function(r){ return r.Year == stYear; });
 
-  // Global filter ham qo'llaymiz
-  if (gYear !== 'all') rawD = rawD.filter(function(r){ return r.Year == gYear; });
-  if (gMonth !== 'all') rawD = rawD.filter(function(r){ return r.Month && r.Month.endsWith('-' + gMonth); });
+  // Yil filtri (faqat students sahifasining o'z filtri)
+  if (stYear !== 'all') {
+    rawD = rawD.filter(function(r){ return r.Year == stYear; });
+  }
 
-  // Recalc students
+  // calcStudents — to'g'ri kalitlar bilan
   const studentData = ANALYTICS.calcStudents(rawD);
   let students = studentData.students || [];
 
-  // Filters
-  const searchQ = (document.getElementById('st-search')?.value || '').toLowerCase().trim();
-  const fanF = document.getElementById('st-fan')?.value || 'all';
-  const statusF = document.getElementById('st-status')?.value || 'all';
-  const teacherF = document.getElementById('st-teacher')?.value || 'all';
-  const minCourses = parseInt(document.getElementById('st-mincourses')?.value || '1');
-  const sortBy = document.getElementById('st-sort')?.value || 'name';
+  // --- FILTRLAR ---
+  const searchQ    = ((document.getElementById('st-search') || {}).value || '').toLowerCase().trim();
+  const fanF       = (document.getElementById('st-fan')        || {}).value || 'all';
+  const statusF    = (document.getElementById('st-status')     || {}).value || 'all';
+  const teacherF   = (document.getElementById('st-teacher')    || {}).value || 'all';
+  const minCourses = parseInt((document.getElementById('st-mincourses') || {}).value || '1');
+  const sortBy     = (document.getElementById('st-sort')       || {}).value || 'name';
 
-  // Apply filters
   if (searchQ) {
     students = students.filter(function(s) {
       return s.name.toLowerCase().includes(searchQ) || String(s.id).includes(searchQ);
     });
   }
   if (fanF !== 'all') {
-    students = students.filter(function(s) { return fanF.toUpperCase() in s.courses; });
+    students = students.filter(function(s) { return (fanF.toUpperCase() in s.courses); });
   }
   if (statusF !== 'all') {
     students = students.filter(function(s) {
@@ -2985,104 +3011,118 @@ function renderStudents() {
     });
   }
   if (teacherF !== 'all') {
-    students = students.filter(function(s) { return s.teacher.includes(teacherF); });
+    students = students.filter(function(s) { return s.teacherFull.includes(teacherF); });
   }
   if (minCourses > 1) {
     students = students.filter(function(s) { return s.courseCount >= minCourses; });
   }
 
-  // Sort
+  // --- SARALASH ---
   students.sort(function(a,b) {
-    if (sortBy === 'name') return a.name.localeCompare(b.name, 'uz');
+    if (sortBy === 'name')         return a.name.localeCompare(b.name, 'uz');
     if (sortBy === 'courses_desc') return b.courseCount - a.courseCount;
-    if (sortBy === 'id') return String(a.id).localeCompare(String(b.id));
-    if (sortBy === 'pass_count') return b.passedCount - a.passedCount;
+    if (sortBy === 'id')           return String(a.id).localeCompare(String(b.id));
+    if (sortBy === 'pass_count')   return b.passedCount - a.passedCount;
     return 0;
   });
 
   stAllStudents = students;
   stPage = 0;
 
-  // KPI row
+  // --- KPI KARTOCHKALAR ---
   const kpiEl = document.getElementById('st-kpi-row');
   if (kpiEl) {
-    const total = students.length;
-    const withPass = students.filter(function(s){ return s.passedCount > 0; }).length;
-    const multiCourse = students.filter(function(s){ return s.courseCount > 1; }).length;
-    const allPass = students.filter(function(s){ return s.courseCount > 0 && s.passedCount === s.courseCount; }).length;
+    const total      = students.length;
+    const withPass   = students.filter(function(s){ return s.passedCount > 0; }).length;
+    const multiCourse= students.filter(function(s){ return s.courseCount > 1; }).length;
+    const allPass    = students.filter(function(s){
+      return s.courseCount > 0 && s.passedCount === s.courseCount;
+    }).length;
+    const pct = total > 0 ? Math.round(withPass/total*100) : 0;
     kpiEl.innerHTML =
       '<div class="kpi bl"><div class="kl">Jami o&#39;quvchilar</div><div class="kv">' + n(total) + '</div><div class="ks">filtr natijasi</div></div>' +
-      '<div class="kpi gr"><div class="kl">Bir marta ham Passed</div><div class="kv">' + n(withPass) + '</div><div class="ks">' + (total>0?Math.round(withPass/total*100):0) + '%</div></div>' +
-      '<div class="kpi te"><div class="kl">Ko&#39;p kurs o&#39;qigan</div><div class="kv">' + n(multiCourse) + '</div><div class="ks">2+ kurs</div></div>' +
-      '<div class="kpi pu"><div class="kl">Barchasini Passed</div><div class="kv">' + n(allPass) + '</div><div class="ks">o&#39;qigan barcha fanidan</div></div>';
+      '<div class="kpi gr"><div class="kl">Bir marta ham Passed</div><div class="kv">' + n(withPass) + '</div><div class="ks">' + pct + '% — ' + n(withPass) + ' kishi</div></div>' +
+      '<div class="kpi te"><div class="kl">Ko&#39;p kurs o&#39;qigan</div><div class="kv">' + n(multiCourse) + '</div><div class="ks">2 va undan ko&#39;p kurs</div></div>' +
+      '<div class="kpi pu"><div class="kl">Barcha fanidan Passed</div><div class="kv">' + n(allPass) + '</div><div class="ks">o&#39;qigan fanlarining barchasidan</div></div>';
   }
 
   renderStudentsTable(students);
 }
 
 function renderStudentsTable(students) {
-  const FAN_ORDER = ['FA','FR','MA','FM','PM','AA','TX','SBR','AFM','APM','BT','DipIFR'];
-  const STATUS_STYLE = {
-    'Passed':      { bg:'rgba(46,202,138,0.15)',  color:'#2eca8a',  icon:'✅', label:'P' },
-    'Failed':      { bg:'rgba(232,91,91,0.15)',   color:'#e85b5b',  icon:'❌', label:'F' },
-    'No Exam':     { bg:'rgba(245,166,35,0.15)',  color:'#f5a623',  icon:'📋', label:'NE' },
-    'In Progress': { bg:'rgba(91,141,238,0.15)',  color:'#5b8dee',  icon:'⏳', label:'IP' },
-    'Stopped':     { bg:'rgba(232,91,91,0.08)',   color:'#e85b5b88',icon:'🚪', label:'ST' },
-    'not_yet':     { bg:'transparent',            color:'var(--bg3)',icon:'—',  label:'—' },
-  };
+  const total    = students.length;
+  const maxPage  = Math.max(0, Math.ceil(total / ST_PAGE_SIZE) - 1);
+  stPage         = Math.min(stPage, maxPage);
+  const pageSt   = students.slice(stPage * ST_PAGE_SIZE, (stPage+1) * ST_PAGE_SIZE);
 
-  const total = students.length;
-  const maxPage = Math.max(0, Math.ceil(total / ST_PAGE_SIZE) - 1);
-  stPage = Math.min(stPage, maxPage);
-  const pageStudents = students.slice(stPage * ST_PAGE_SIZE, (stPage+1) * ST_PAGE_SIZE);
-
+  // Pagination info
   const countEl = document.getElementById('st-count-label');
-  if (countEl) countEl.textContent = n(total) + ' ta o&#39;quvchi · ' + (stPage+1) + '/' + (maxPage+1) + ' sahifa';
-
+  if (countEl) countEl.textContent = n(total) + ' ta o&#39;quvchi  ·  ' + (stPage+1) + '/' + (maxPage+1) + ' sahifa';
   const prevBtn = document.getElementById('st-prev');
   const nextBtn = document.getElementById('st-next');
   const infoEl  = document.getElementById('st-page-info');
   if (prevBtn) prevBtn.disabled = stPage === 0;
   if (nextBtn) nextBtn.disabled = stPage >= maxPage;
-  if (infoEl)  infoEl.textContent = (stPage*ST_PAGE_SIZE+1) + '–' + Math.min((stPage+1)*ST_PAGE_SIZE, total) + ' / ' + n(total);
+  if (infoEl)  infoEl.textContent = (stPage*ST_PAGE_SIZE+1) + '-' + Math.min((stPage+1)*ST_PAGE_SIZE, total) + ' / ' + n(total);
 
   const tbody = document.getElementById('stTableBody');
   if (!tbody) return;
 
-  if (pageStudents.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;color:var(--muted);padding:32px;">Filtr bo&#39;yicha o&#39;quvchi topilmadi</td></tr>';
+  if (pageSt.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;color:var(--muted);padding:32px;">O&#39;quvchi topilmadi</td></tr>';
     return;
   }
 
   let rows = '';
-  pageStudents.forEach(function(s) {
-    rows += '<tr style="cursor:pointer;" onmouseover="this.style.background=&quot;var(--bg3)&quot;" onmouseout="this.style.background=&quot;&quot;">';
-    rows += '<td style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;">' + s.id + '</td>';
-    rows += '<td style="font-weight:500;font-size:11px;padding:7px 10px;">' + (s.name||'—') + '</td>';
+  pageSt.forEach(function(s) {
+    rows += '<tr class="st-row">';
 
-    // Har bir fan uchun katakcha
-    FAN_ORDER.forEach(function(fan) {
+    // ID
+    rows += '<td style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;white-space:nowrap;">' + s.id + '</td>';
+
+    // ISM — to'liq
+    rows += '<td style="font-weight:500;font-size:11px;padding:7px 10px;min-width:150px;white-space:nowrap;">' + (s.name || '—') + '</td>';
+
+    // Har fan uchun katak
+    FAN_ORDER_ST.forEach(function(fan) {
       const c = s.courses[fan];
       if (!c) {
-        // Not yet — hali o'qimagan
-        rows += '<td style="text-align:center;padding:5px 2px;">' +
-          '<span style="display:inline-block;width:36px;height:22px;background:var(--bg3);border-radius:4px;border:1px solid var(--border);font-size:9px;color:var(--muted);line-height:22px;text-align:center;">—</span>' +
-          '</td>';
+        rows += '<td style="text-align:center;padding:4px 2px;">' +
+          '<span class="st-cell st-none">—</span></td>';
         return;
       }
-      const st = STATUS_STYLE[c.status] || STATUS_STYLE['not_yet'];
-      const ballStr = c.ball && !isNaN(c.ball) ? Math.round(c.ball*100)+'%' : '';
-      const title = fan + ': ' + c.status + (c.teacher?' | '+c.teacher:'') + (c.guruh?' | '+c.guruh:'') + (ballStr?' | Ball: '+ballStr:'');
-      rows += '<td style="text-align:center;padding:5px 2px;" title="' + title + '">' +
-        '<span style="display:inline-block;min-width:36px;padding:0 3px;height:22px;background:' + st.bg + ';border-radius:4px;border:1px solid ' + st.color + '22;font-size:9px;font-weight:600;color:' + st.color + ';line-height:22px;text-align:center;">' +
-        st.label + (ballStr ? '<br style=\"margin-top:-3px\"><span style=\"font-size:8px;opacity:0.7\">' + ballStr + '</span>' : '') +
+      const ss   = STATUS_STYLE_ST[c.status];
+      const bl   = c.ball && !isNaN(parseFloat(c.ball)) ? Math.round(parseFloat(c.ball)*100) + '%' : '';
+      const tip  = fan + ': ' + (c.status||'') +
+        (c.teacher ? ' | ' + c.teacher : '') +
+        (c.guruh   ? ' | ' + c.guruh   : '') +
+        (bl        ? ' | Ball: ' + bl  : '') +
+        (c.year    ? ' | ' + c.year    : '');
+      const lblTxt = ss ? ss.label : c.status.substring(0,2).toUpperCase();
+      const bgC    = ss ? ss.bg    : 'transparent';
+      const txC    = ss ? ss.color : 'var(--muted)';
+      const bdC    = ss ? ss.color + '33' : 'var(--border)';
+      rows += '<td style="text-align:center;padding:4px 2px;" title="' + tip + '">' +
+        '<span style="display:inline-flex;flex-direction:column;align-items:center;justify-content:center;' +
+        'min-width:34px;padding:0 2px;height:' + (bl?'30px':'22px') + ';' +
+        'background:' + bgC + ';border-radius:4px;border:1px solid ' + bdC + ';' +
+        'font-size:9px;font-weight:700;color:' + txC + ';line-height:1.2;">' +
+        lblTxt +
+        (bl ? '<span style="font-size:7px;opacity:0.75;">' + bl + '</span>' : '') +
         '</span></td>';
     });
 
-    // Jami va Passed
-    rows += '<td style="text-align:center;font-weight:600;color:var(--blue);font-size:11px;">' + s.courseCount + '</td>';
-    rows += '<td style="text-align:center;font-weight:600;color:var(--green);font-size:11px;">' + s.passedCount + '</td>';
-    rows += '<td style="font-size:10px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + s.teacher + '">' + (s.teacher.split(',')[0]||'—') + '</td>';
+    // Jami kurslar soni
+    rows += '<td style="text-align:center;font-weight:700;color:var(--blue);font-size:12px;">' + s.courseCount + '</td>';
+
+    // Passed soni
+    const pColor = s.passedCount > 0 ? 'var(--green)' : 'var(--muted)';
+    rows += '<td style="text-align:center;font-weight:700;color:' + pColor + ';font-size:12px;">' + s.passedCount + '</td>';
+
+    // O'qituvchi (eng birinchisi)
+    const tShort = s.teacher && s.teacher !== '—' ? s.teacher.split(' ').slice(0,2).join(' ') : '—';
+    rows += '<td style="font-size:10px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + s.teacherFull + '">' + tShort + '</td>';
+
     rows += '</tr>';
   });
 
