@@ -1137,8 +1137,8 @@ const ANALYTICS = {
     // Col 11:Sotuv Menegeri, 12:To'lov operatori, 13:Chegirma, 14:Chegirma turi
     // Col 15:Qoshilgan, 16:Chiqgan, 17:Status, 18:Sabab, 19:Toxtatgan, 20:Ball, 21:Final status
     const col = {
-      ID: 2, Oqituvchi: 6, Boshlangan: 7, Product: 9, Product_type: 10,
-      Sotuv_mng: 11, Tolov_op: 12, Status: 17, Sabab: 18, Final_status: 21
+      ID: 2, Ismi: 3, Guruh: 1, Oqituvchi: 6, Boshlangan: 7, Product: 9, Product_type: 10,
+      Sotuv_mng: 11, Tolov_op: 12, Status: 17, Sabab: 18, Ball: 20, Final_status: 21
     };
 
     // Ma'lumotlarni tozalash
@@ -1158,6 +1158,9 @@ const ANALYTICS = {
       
       data.push({
         ID: Number(id),
+        Ismi: (row[col.Ismi] || '').toString().trim(),
+        Guruh: (row[col.Guruh] || '').toString().trim(),
+        Ball: row[col.Ball] ? parseFloat(row[col.Ball]) || null : null,
         Oqituvchi: (row[col.Oqituvchi] || '').toString().trim().toUpperCase(),
         Boshlangan: bDate,
         Product: (row[col.Product] || '').toString().trim(),
@@ -1547,14 +1550,15 @@ const ANALYTICS = {
     data.forEach(function(r) {
       // To'g'ri kalit nomlar (SheetJS dan keladi)
       const id    = r['ID']   || r.ID   || r.id;
-      const name  = (r['Ismi Familiyasi'] || r.name || '').trim();
-      const prod  = (r['Product'] || r.product || '').trim().toUpperCase();
-      const st    = r['Final status'] || r.Final_status || r.final_status || '';
-      const teacher = r["O'qituvchi"] || r.Oqituvchi || r.teacher || '';
-      const guruh = r['Guruh'] || r.guruh || '';
-      const ball  = r['Ball']  || r.ball  || null;
-      const year  = r['Year']  || r.Year  || '';
-      const month = r['Month'] || r.Month || '';
+      // Kalitlar analyzeCustomerBase data.push dan: Ismi, Product, Final_status, Oqituvchi, Guruh, Ball, Year, Month
+      const name  = (r.Ismi || '').trim();
+      const prod  = (r.Product || '').trim().toUpperCase();
+      const st    = r.Final_status || '';
+      const teacher = r.Oqituvchi || '';
+      const guruh = r.Guruh || '';
+      const ball  = r.Ball  || null;
+      const year  = r.Year  || '';
+      const month = r.Month || '';
 
       if (!id) return;
 
@@ -2956,7 +2960,7 @@ function populateStudentFilters() {
     // To'g'ri kalit: "O'qituvchi"
     const teachers = [...new Set(
       (snap.rawData||[]).map(function(r){
-        return r["O'qituvchi"] || r.Oqituvchi || r.teacher || '';
+        return r.Oqituvchi || '';
       }).filter(Boolean)
     )].sort();
     teachers.forEach(function(t) {
@@ -3011,7 +3015,7 @@ function renderStudents() {
     });
   }
   if (teacherF !== 'all') {
-    students = students.filter(function(s) { return s.teacherFull.includes(teacherF); });
+    students = students.filter(function(s) { return (s.teacherFull||'').includes(teacherF); });
   }
   if (minCourses > 1) {
     students = students.filter(function(s) { return s.courseCount >= minCourses; });
