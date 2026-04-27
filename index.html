@@ -32,9 +32,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .user-info{display:flex;align-items:center;gap:10px;}
 .user-name{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
 .logout-btn{background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:6px;font-size:11px;font-family:inherit;}
-.nav{display:flex;gap:2px;}
-.nb{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px 11px;border-radius:6px;font-size:12px;font-family:inherit;}
-.nb:hover{color:var(--text);background:var(--bg3);}.nb.active{color:var(--text);background:var(--bg3);}
+.nav{display:flex;align-items:center;gap:2px;overflow-x:auto;}
+.nb{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px 12px;border-radius:6px;font-size:11.5px;font-family:inherit;white-space:nowrap;transition:all .15s;}
+.nb:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.nb.active{color:var(--green);background:rgba(46,202,138,0.12);font-weight:600;}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,0.1);margin:0 6px;flex-shrink:0;}
+.nav-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;padding:0 2px;opacity:.7;}
 .refresh-btn{background:var(--gdim);border:1px solid rgba(46,202,138,0.2);color:var(--green);cursor:pointer;padding:4px 12px;border-radius:6px;font-size:11px;font-family:inherit;display:flex;align-items:center;gap:5px;}
 .refresh-btn:hover{opacity:0.8;}
 /* LOADING */
@@ -115,6 +118,26 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 .ai-result-box strong{color:var(--amber);}
 .pdf-btn{background:var(--gdim);border:1px solid rgba(46,202,138,0.3);color:var(--green);cursor:pointer;padding:6px 14px;border-radius:6px;font-size:11px;font-family:inherit;margin-top:10px;}
 .cost-note{font-size:10px;color:var(--muted);margin-top:8px;}
+.kpi-ceo{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;min-height:90px;}
+.kpi-ceo::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 12px 12px;}
+.kpi-ceo.gr::after{background:linear-gradient(90deg,var(--green),transparent);}
+.kpi-ceo.bl::after{background:linear-gradient(90deg,var(--blue),transparent);}
+.kpi-ceo.re::after{background:linear-gradient(90deg,var(--red),transparent);}
+.kpi-ceo.am::after{background:linear-gradient(90deg,var(--amber),transparent);}
+.kpi-ceo.te::after{background:linear-gradient(90deg,var(--teal),transparent);}
+.kpi-ceo.pu::after{background:linear-gradient(90deg,var(--purple),transparent);}
+.kpi-ceo .kl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.kpi-ceo .kv{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1;margin-bottom:4px;}
+.kpi-ceo .ks{font-size:10px;color:var(--muted);}
+.kpi-ceo.gr .kv{color:var(--green);}
+.kpi-ceo.bl .kv{color:var(--blue);}
+.kpi-ceo.re .kv{color:var(--red);}
+.kpi-ceo.am .kv{color:var(--amber);}
+.kpi-ceo.te .kv{color:var(--teal);}
+.kpi-ceo.pu .kv{color:var(--purple);}
+.ceo-grid{display:grid;grid-template-columns:repeat(4,1fr) repeat(3,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:1200px){.ceo-grid{grid-template-columns:repeat(4,1fr);}}
+.ceo-divider{grid-column:1/-1;height:1px;background:var(--border);margin:2px 0;}
 /* Students page */
 .st-row:hover td{background:var(--bg3)!important;}
 .st-cell{display:inline-flex;align-items:center;justify-content:center;
@@ -225,20 +248,68 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
   </div>
 
   <div class="sh"><div class="st" id="ov-title">Asosiy ko'rsatkichlar</div><div class="sl"></div></div>
-  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:14px;">
-    <div class="kpi gr"><div class="kl">Jami o&#x27;quvchi</div><div class="kv" id="ov-jami">-</div><div class="ks" id="ov-prog">faol baza</div></div>
-    <div class="kpi bl"><div class="kl">Hozir o&#x27;qiyapti</div><div class="kv" id="ov-inp">-</div><div class="ks">In Progress</div></div>
-    <div class="kpi gr"><div class="kl">Retention</div><div class="kv" id="ov-ret">-</div><div class="ks" id="ov-ret-trend">maqsad: 70%+</div></div>
-    <div class="kpi am"><div class="kl">No Exam %</div><div class="kv" id="ov-ne-pct">-</div><div class="ks" id="ov-ne-cnt">maqsad: &lt;25%</div></div>
-    <div class="kpi re"><div class="kl">Dropout %</div><div class="kv" id="ov-drprate">-</div><div class="ks" id="ov-drp-cnt">maqsad: &lt;20%</div></div>
-    <div class="kpi te"><div class="kl">Pass rate</div><div class="kv" id="ov-passrate">-</div><div class="ks" id="ov-pr">maqsad: &gt;30%</div></div>
-    <div class="kpi pu"><div class="kl">Yo&#x27;qotish/oy</div><div class="kv" id="ov-loss-mo">-</div><div class="ks" style="color:var(--red)">dropout+no exam</div></div>
+  <!-- CEO KPI GRID -->
+  <div class="ceo-grid" id="ceo-kpi-grid">
+    <!-- Qator 1: 4 asosiy operatsion -->
+    <div class="kpi-ceo gr">
+      <div class="kl">Jami o&#x27;quvchi</div>
+      <div class="kv" id="ov-jami">-</div>
+      <div class="ks" id="ov-prog">faol baza</div>
+    </div>
+    <div class="kpi-ceo bl">
+      <div class="kl">Hozir o&#x27;qiyapti</div>
+      <div class="kv" id="ov-inp">-</div>
+      <div class="ks">In Progress</div>
+    </div>
+    <div class="kpi-ceo gr">
+      <div class="kl">Passed (jami)</div>
+      <div class="kv" id="ov-pass">-</div>
+      <div class="ks" id="ov-pr2">-</div>
+    </div>
+    <div class="kpi-ceo am">
+      <div class="kl">No Exam (jami)</div>
+      <div class="kv" id="ov-ne">-</div>
+      <div class="ks">imtihon topshirmagan</div>
+    </div>
+    <!-- Qator 1: 3 foiz ko'rsatkich -->
+    <div class="kpi-ceo gr">
+      <div class="kl">Retention</div>
+      <div class="kv" id="ov-ret">-</div>
+      <div class="ks" id="ov-ret-trend">maqsad: 70%+</div>
+    </div>
+    <div class="kpi-ceo re">
+      <div class="kl">Dropout %</div>
+      <div class="kv" id="ov-drprate">-</div>
+      <div class="ks" id="ov-drp-cnt">maqsad: &lt;20%</div>
+    </div>
+    <div class="kpi-ceo am">
+      <div class="kl">No Exam %</div>
+      <div class="kv" id="ov-ne-pct">-</div>
+      <div class="ks" id="ov-ne-cnt">maqsad: &lt;25%</div>
+    </div>
   </div>
-  <div class="g4" style="margin-bottom:0">
-    <div class="kpi gr"><div class="kl">Passed</div><div class="kv" id="ov-pass">-</div><div class="ks" id="ov-pr2">-</div></div>
-    <div class="kpi am"><div class="kl">No Exam</div><div class="kv" id="ov-ne">-</div><div class="ks">imtihon topshirmagan</div></div>
-    <div class="kpi re"><div class="kl">Stopped</div><div class="kv" id="ov-stop">-</div><div class="ks" id="ov-drp">-</div></div>
-    <div class="kpi te"><div class="kl">Sana</div><div class="kv" id="ov-sana" style="font-size:13px;">-</div><div class="ks">yangilanish</div></div>
+  <!-- CEO qator 2: moliyaviy + sifat -->
+  <div class="g4" style="margin-bottom:16px;">
+    <div class="kpi te">
+      <div class="kl">Pass rate</div>
+      <div class="kv" id="ov-passrate">-</div>
+      <div class="ks" id="ov-pr">Passed/(Passed+Failed)</div>
+    </div>
+    <div class="kpi re">
+      <div class="kl">Stopped (jami)</div>
+      <div class="kv" id="ov-stop">-</div>
+      <div class="ks" id="ov-drp">dropout bo&#x27;lgan</div>
+    </div>
+    <div class="kpi pu">
+      <div class="kl">Yo&#x27;qotish/oy</div>
+      <div class="kv" id="ov-loss-mo">-</div>
+      <div class="ks" style="color:var(--red)">dropout+no exam zarar</div>
+    </div>
+    <div class="kpi te">
+      <div class="kl">Oxirgi yangilanish</div>
+      <div class="kv" id="ov-sana" style="font-size:14px;">-</div>
+      <div class="ks">real-time</div>
+    </div>
   </div>
 
   <div class="sh" style="margin-top:20px;"><div class="st">Product type kesimi</div><div class="sl"></div></div>
@@ -2073,6 +2144,7 @@ function renderCurrentPage() {
   else if (p==='sales') renderSales();
   else if (p==='marketing') renderMarketing();
   else if (p==='students') renderStudents();
+  else if (p==='revenue') renderRevenue();
 }
 
 // ── SNAPSHOT GLOBAL FILTER WRAPPER ──
@@ -2104,21 +2176,50 @@ function renderOv() {
   const ret=s.retention_pct||s.retention||0, pr=s.pass_rate_pct||s.pass_rate||0;
   const ee=s.exam_entry_pct||s.exam_entry||0, drp=jami>0?Math.round(stopped/jami*100):0;
 
-  document.getElementById('ov-jami').textContent = n(jami);
-  document.getElementById('ov-prog').textContent = `${n(inp)} in progress`;
-  document.getElementById('ov-stop').textContent = n(stopped);
-  document.getElementById('ov-drp').textContent = `${drp}% dropout`;
-  document.getElementById('ov-fin').textContent = n(yakunlagan);
-  document.getElementById('ov-inp').textContent = n(inp);
-  document.getElementById('ov-conv').textContent = n(conv);
-  document.getElementById('ov-pass').textContent = n(passed);
-  document.getElementById('ov-pr').textContent = `${pr}% pass rate`;
-  document.getElementById('ov-fail').textContent = n(failed);
-  document.getElementById('ov-ne').textContent = n(noexam);
-  document.getElementById('ov-ret').textContent = `${ret}%`;
-  document.getElementById('ov-passrate').textContent = `${pr}%`;
-  document.getElementById('ov-entry').textContent = `${ee}%`;
-  document.getElementById('ov-drprate').textContent = `${drp}%`;
+  // ── CEO KPI update ──
+  // Mavjud elementlarni xavfsiz yangilaymiz (null tekshiruvi bilan)
+  function setEl(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+  function setElStyle(id, val, prop, color) { var e = document.getElementById(id); if (!e) return; e.textContent = val; if (prop && color) e.style[prop] = color; }
+
+  setEl('ov-jami',    n(jami));
+  setEl('ov-prog',    n(jami) + ' ta oqim');
+  setEl('ov-inp',     n(inp));
+  setEl('ov-stop',    n(stopped));
+  setEl('ov-drp',     drp + '% dropout');
+  setEl('ov-pass',    n(passed));
+  setEl('ov-ne',      n(noexam));
+  setEl('ov-ret',     ret + '%');
+  setEl('ov-passrate',pr + '%');
+  setEl('ov-drprate', drp + '%');
+  setEl('ov-sana',    snap.summary.sana || '--');
+  setEl('ov-pr',      'Passed/' + n(yakunlagan) + ' yakunlagan');
+  setEl('ov-pr2',     n(passed) + ' ta (' + pr + '%)');
+  setEl('ov-drp-cnt', n(stopped) + ' ta stopped');
+
+  // No Exam %
+  var nePct2 = jami > 0 ? Math.round(noexam / jami * 100) : 0;
+  setEl('ov-ne-pct', nePct2 + '%');
+  var neCntEl = document.getElementById('ov-ne-cnt');
+  if (neCntEl) {
+    neCntEl.textContent = n(noexam) + ' ta';
+    neCntEl.style.color = nePct2 > 40 ? 'var(--red)' : nePct2 > 25 ? 'var(--amber)' : 'var(--green)';
+  }
+
+  // Retention trend
+  var retTrEl = document.getElementById('ov-ret-trend');
+  if (retTrEl) {
+    retTrEl.textContent = ret >= 70 ? 'OK ' + ret + '%' : ret >= 60 ? 'Yaqin ' + ret + '%' : 'Past ' + ret + '%';
+    retTrEl.style.color = ret >= 70 ? 'var(--green)' : ret >= 60 ? 'var(--amber)' : 'var(--red)';
+  }
+
+  // Yo'qotish/oy (revenue dan)
+  if (snap && snap.revenueLost) {
+    var rl = snap.revenueLost;
+    var mosCount = Math.max((rl.monthlyLoss || []).length, 1);
+    var lpm = Math.round(rl.total / mosCount);
+    var lpmStr = lpm >= 1e9 ? (lpm/1e9).toFixed(1) + ' mlrd' : Math.round(lpm/1e6) + ' mln';
+    setEl('ov-loss-mo', lpmStr);
+  }
   var nePct2 = jami>0 ? Math.round(noexam/jami*100) : 0;
   var el_nePct = document.getElementById('ov-ne-pct');
   if (el_nePct) el_nePct.textContent = nePct2 + '%';
@@ -3580,6 +3681,7 @@ function showPage(id, btn) {
     if (id==='subjects') { populateSubjectTeacherFilter(); }
     if (id==='dropout') { populateDropoutFilters(); }
     if (id==='students') { populateStudentFilters(); renderStudents(); }
+    if (id==='revenue') renderRevenue();
     if (id==='revenue') renderRevenue();
   }
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
