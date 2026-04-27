@@ -197,6 +197,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <button class="nb" onclick="showPage('sales',this)">Sales</button>
       <button class="nb" onclick="showPage('marketing',this)">Marketing</button>
       <button class="nb" onclick="showPage('revenue',this)">&#128200; Yo&#x27;qotish</button>
+      <button class="nb" onclick="showPage('ltv',this)">&#128184; LTV</button>
     </div>
     <button class="refresh-btn" onclick="refreshData()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -787,6 +788,132 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
         <button class="fyb" id="st-prev" onclick="stChangePage(-1)">← Oldingi</button>
         <button class="fyb" id="st-next" onclick="stChangePage(1)">Keyingi →</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- LTV PAGE -->
+<div id="page-ltv" class="page">
+  <div class="fbar" style="flex-wrap:wrap;gap:8px;">
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="ltvy-all"  onclick="setLTVY('all',this)">Barchasi</button>
+    <button class="fyb" id="ltvy-2022" onclick="setLTVY('2022',this)">2022</button>
+    <button class="fyb" id="ltvy-2023" onclick="setLTVY('2023',this)">2023</button>
+    <button class="fyb" id="ltvy-2024" onclick="setLTVY('2024',this)">2024</button>
+    <button class="fyb" id="ltvy-2025" onclick="setLTVY('2025',this)">2025</button>
+  </div>
+
+  <!-- 6 ta KPI -->
+  <div class="g3" id="ltv-kpi-row" style="margin-bottom:16px;"></div>
+
+  <!-- Segment jadvali -->
+  <div class="card">
+    <div class="ct">Kurs soni bo&#x27;yicha LTV segmentatsiya</div>
+    <div class="cs">Necha kurs o&#x27;qigan o&#x27;quvchi qancha LTV keltiradi — asosiy insight</div>
+    <table>
+      <thead><tr>
+        <th style="width:22%">Segment</th>
+        <th style="text-align:center;width:12%">O&#x27;quvchilar</th>
+        <th style="text-align:right;width:16%">Avg LTV</th>
+        <th style="text-align:right;width:16%">Jami LTV</th>
+        <th style="width:20%">Potensialga nisbat</th>
+        <th style="text-align:center;width:10%">Potensial %</th>
+      </tr></thead>
+      <tbody id="ltv-seg-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Kogorta -->
+  <div class="sh"><div class="st">Kogorta tahlili</div><div class="sl"></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Yil bo&#x27;yicha kogorta LTV</div>
+      <div class="cs">Har yil kelgan o&#x27;quvchilar avg LTV va kurslar soni</div>
+      <div style="position:relative;height:220px;"><canvas id="ltvCohortChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Kogorta jadvali</div>
+      <div class="cs">Har kogorta: o&#x27;quvchi soni, LTV, progress</div>
+      <table>
+        <thead><tr>
+          <th>Yil</th>
+          <th style="text-align:center">O&#x27;quvchi</th>
+          <th style="text-align:right">Avg LTV</th>
+          <th style="text-align:center">Avg kurs</th>
+          <th style="text-align:right">Jami LTV</th>
+          <th>Potensial %</th>
+          <th style="text-align:center">Holat</th>
+        </tr></thead>
+        <tbody id="ltv-cohort-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Muvaffaqiyat darajasi -->
+  <div class="sh"><div class="st">Muvaffaqiyat darajasi bo&#x27;yicha LTV</div><div class="sl"></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Status bo&#x27;yicha avg LTV</div>
+      <div class="cs">Passed o&#x27;quvchi Stopped dan qanchaga ko&#x27;p LTV beradi</div>
+      <div style="position:relative;height:200px;"><canvas id="ltvStatusChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Status jadvali</div>
+      <table>
+        <thead><tr>
+          <th style="width:18%">Status</th>
+          <th style="text-align:center;width:12%">Soni</th>
+          <th style="text-align:right;width:15%">Avg LTV</th>
+          <th style="text-align:center;width:10%">Avg kurs</th>
+          <th style="text-align:right;width:15%">Jami LTV</th>
+          <th>Potensial %</th>
+        </tr></thead>
+        <tbody id="ltv-status-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- O'qituvchi LTV ta'sir -->
+  <div class="sh"><div class="st">O&#x27;qituvchi bo&#x27;yicha LTV ta&#x27;sir</div><div class="sl"></div></div>
+  <div class="card">
+    <div class="ct">Qaysi o&#x27;qituvchi o&#x27;quvchini ko&#x27;proq kursga olib boradi?</div>
+    <div class="cs">Avg LTV bo&#x27;yicha saralangan (20+ o&#x27;quvchi bor o&#x27;qituvchilar)</div>
+    <table>
+      <thead><tr>
+        <th style="width:4%">#</th>
+        <th style="width:20%">O&#x27;qituvchi</th>
+        <th style="text-align:center;width:10%">O&#x27;quvchi</th>
+        <th style="text-align:right;width:14%">Avg LTV</th>
+        <th style="text-align:center;width:10%">Avg kurs</th>
+        <th style="width:22%">LTV indeksi</th>
+        <th style="text-align:right;width:14%">Jami LTV</th>
+      </tr></thead>
+      <tbody id="ltv-teacher-body"></tbody>
+    </table>
+  </div>
+
+  <!-- LTV Improvement simulatsiya -->
+  <div class="sh"><div class="st">LTV Improvement — Simulatsiya</div><div class="sl"></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Qaysi chora eng ko&#x27;p LTV oshiradi?</div>
+      <div class="cs">Bir yillik qo&#x27;shimcha daromad (mln so&#x27;m)</div>
+      <div style="position:relative;height:200px;"><canvas id="ltvSimChart"></canvas></div>
+    </div>
+    <div class="card" style="border-color:rgba(46,202,138,0.25);">
+      <div class="ct">LTV:CAC tahlili</div>
+      <div class="cs">Har marketing kanal uchun LTV/jalb qilish xarajati nisbati</div>
+      <table>
+        <thead><tr>
+          <th style="width:24%">Kanal</th>
+          <th style="text-align:right;width:14%">CAC</th>
+          <th style="text-align:right;width:14%">Avg LTV</th>
+          <th style="text-align:center;width:12%">LTV:CAC</th>
+          <th style="width:22%">Samaradorlik</th>
+          <th style="text-align:center;width:12%">Payback</th>
+        </tr></thead>
+        <tbody id="ltv-cac-body"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -2145,6 +2272,7 @@ function renderCurrentPage() {
   else if (p==='marketing') renderMarketing();
   else if (p==='students') renderStudents();
   else if (p==='revenue') renderRevenue();
+  else if (p==='ltv') renderLTV();
 }
 
 // ── SNAPSHOT GLOBAL FILTER WRAPPER ──
@@ -3395,6 +3523,343 @@ function renderStudentsTable(students) {
 }
 
 
+
+// ════════════════════════════════════════
+// LTV — LIFETIME VALUE TAHLILI
+// ════════════════════════════════════════
+var ltvYear = 'all';
+
+function setLTVY(y, btn) {
+  ltvYear = y;
+  ['ltvy-all','ltvy-2022','ltvy-2023','ltvy-2024','ltvy-2025'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+  renderLTV();
+}
+
+function calcLTV(data) {
+  var FP = {FA:3500000,FR:3500000,MA:3500000,FM:3500000,PM:3800000,
+            AA:3500000,TX:3500000,SBR:3500000,AFM:3800000,APM:3800000,
+            DipIFR:4500000,MSFO:4500000,BT:3000000,PreDipIFR:3500000,PreMSFO:3500000};
+  var FAN_ORDER = ['FA','FR','MA','FM','PM'];
+  var POTENTIAL = FAN_ORDER.reduce(function(s,f){ return s + FP[f]; }, 0); // 17,800,000
+
+  // O'quvchi bo'yicha guruhlash
+  var byId = {};
+  data.forEach(function(r) {
+    var id = r.ID || r.id;
+    if (!id) return;
+    if (!byId[id]) byId[id] = {id:id, name:r.Ismi||'', teacher:r.Oqituvchi||'',
+      year:r.Year||0, courses:[], statuses:[], products:[]};
+    var prod = r.Product||'';
+    var fs   = r.Final_status||'';
+    byId[id].products.push(prod);
+    byId[id].statuses.push(fs);
+    // LTV: to'lagan kurslar (Stopped bo'lmagan)
+    if (fs !== 'Stopped' && prod) {
+      byId[id].courses.push({prod:prod, price:FP[prod]||3500000, status:fs});
+    }
+  });
+
+  var students = Object.values(byId).map(function(s) {
+    var actualLTV = s.courses.reduce(function(sum,c){ return sum+c.price; }, 0);
+    var nCourses  = s.products.filter(function(p,i,a){ return a.indexOf(p)===i; }).length;
+    var passed    = s.statuses.filter(function(x){ return x==='Passed'; }).length;
+    var hasPassed = passed > 0;
+    var bestStatus = s.statuses.indexOf('Passed')>=0 ? 'Passed' :
+                     s.statuses.indexOf('In Progress')>=0 ? 'In Progress' :
+                     s.statuses.indexOf('No Exam')>=0 ? 'No Exam' :
+                     s.statuses.indexOf('Failed')>=0 ? 'Failed' : 'Stopped';
+    var ltvGap = POTENTIAL - actualLTV;
+    // Expected LTV: hozirgi trend bo'yicha prognoz
+    var convProb = nCourses >= 3 ? 0.6 : nCourses >= 2 ? 0.3 : 0.1;
+    var expectedAdd = convProb * 3500000;
+    return {
+      id:s.id, name:s.name, teacher:s.teacher, year:s.year,
+      nCourses:nCourses, actualLTV:actualLTV, ltvGap:ltvGap,
+      bestStatus:bestStatus, passed:passed, hasPassed:hasPassed,
+      expectedLTV: actualLTV + expectedAdd,
+    };
+  });
+
+  // Kurs soni bo'yicha segmentlar
+  var segments = {};
+  for (var nc = 1; nc <= 6; nc++) {
+    var seg = students.filter(function(s){ return s.nCourses === nc; });
+    if (seg.length === 0) continue;
+    var avgLTV  = seg.reduce(function(s,x){ return s+x.actualLTV; },0) / seg.length;
+    var totalLTV= seg.reduce(function(s,x){ return s+x.actualLTV; },0);
+    segments[nc] = {count:seg.length, avgLTV:avgLTV, totalLTV:totalLTV,
+      label: nc===1?'1 kurs (Entry)':nc===2?'2 kurs':nc===3?'3 kurs':
+             nc===4?'4 kurs':nc===5?'5 kurs (Champion)':'6+ kurs'};
+  }
+
+  // Kogorta (yil bo'yicha)
+  var cohorts = {};
+  [2022,2023,2024,2025,2026].forEach(function(yr) {
+    var seg = students.filter(function(s){ return s.year === yr; });
+    if (seg.length === 0) return;
+    cohorts[yr] = {
+      count: seg.length,
+      avgLTV: seg.reduce(function(s,x){ return s+x.actualLTV; },0)/seg.length,
+      avgCourses: seg.reduce(function(s,x){ return s+x.nCourses; },0)/seg.length,
+      totalLTV: seg.reduce(function(s,x){ return s+x.actualLTV; },0),
+    };
+  });
+
+  // Muvaffaqiyat darajasi bo'yicha
+  var byStatus = {};
+  ['Passed','In Progress','No Exam','Failed','Stopped'].forEach(function(st) {
+    var seg = students.filter(function(s){ return s.bestStatus===st; });
+    if (seg.length===0) return;
+    byStatus[st] = {
+      count: seg.length,
+      avgLTV: seg.reduce(function(s,x){ return s+x.actualLTV; },0)/seg.length,
+      avgCourses: seg.reduce(function(s,x){ return s+x.nCourses; },0)/seg.length,
+      totalLTV: seg.reduce(function(s,x){ return s+x.actualLTV; },0),
+    };
+  });
+
+  // O'qituvchi bo'yicha LTV ta'sir
+  var byTeacher = {};
+  students.forEach(function(s) {
+    if (!s.teacher) return;
+    if (!byTeacher[s.teacher]) byTeacher[s.teacher] = {n:0, totalLTV:0, totalCourses:0};
+    byTeacher[s.teacher].n++;
+    byTeacher[s.teacher].totalLTV += s.actualLTV;
+    byTeacher[s.teacher].totalCourses += s.nCourses;
+  });
+  var teacherLTV = Object.entries(byTeacher)
+    .filter(function(e){ return e[1].n >= 20; })
+    .map(function(e) {
+      return {teacher:e[0], n:e[1].n,
+        avgLTV: e[1].totalLTV/e[1].n,
+        avgCourses: e[1].totalCourses/e[1].n,
+        totalLTV: e[1].totalLTV};
+    })
+    .sort(function(a,b){ return b.avgLTV - a.avgLTV; })
+    .slice(0, 12);
+
+  // Umumiy KPI
+  var totalStudents = students.length;
+  var totalActual   = students.reduce(function(s,x){ return s+x.actualLTV; },0);
+  var avgActual     = totalStudents > 0 ? totalActual/totalStudents : 0;
+  var avgGap        = POTENTIAL - avgActual;
+  var champCount    = students.filter(function(s){ return s.nCourses >= 5; }).length;
+
+  // LTV improvement simulatsiya
+  var stopped = students.filter(function(s){ return s.bestStatus==='Stopped'; }).length;
+  var sim = {
+    dropout10: Math.round(stopped * 0.10 * 3500000),
+    conv10:    Math.round(students.filter(function(s){ return s.nCourses===1; }).length * 0.10 * 3500000),
+    noExam30:  Math.round(students.filter(function(s){ return s.bestStatus==='No Exam'; }).length * 0.30 * 1500000),
+    teacher:   1144000000,
+  };
+
+  return {students, segments, cohorts, byStatus, teacherLTV,
+    kpi:{totalStudents, totalActual, avgActual, avgGap, POTENTIAL, champCount, sim}};
+}
+
+function renderLTV() {
+  if (!snap || !snap.rawData) return;
+  var rawD = snap.rawData || [];
+  if (ltvYear !== 'all') rawD = rawD.filter(function(r){ return r.Year == ltvYear; });
+  var ltv = calcLTV(rawD);
+  var kpi = ltv.kpi;
+  var g = function(id){ return document.getElementById(id); };
+
+  // ── KPI KARTOCHKALAR ──
+  var kpiEl = g('ltv-kpi-row');
+  if (kpiEl) {
+    kpiEl.innerHTML =
+      '<div class="kpi bl"><div class="kl">Unique o\'quvchilar</div><div class="kv">' + n(kpi.totalStudents) + '</div><div class="ks">LTV tahlilida</div></div>' +
+      '<div class="kpi gr"><div class="kl">O\'rtacha hozirgi LTV</div><div class="kv">' + fmtM(Math.round(kpi.avgActual)) + '</div><div class="ks">so\'m / o\'quvchi</div></div>' +
+      '<div class="kpi te"><div class="kl">Potensial LTV (5 kurs)</div><div class="kv">' + fmtM(kpi.POTENTIAL) + '</div><div class="ks">FA+FR+MA+FM+PM</div></div>' +
+      '<div class="kpi re"><div class="kl">LTV Gap (o\'rtacha)</div><div class="kv">' + fmtM(Math.round(kpi.avgGap)) + '</div><div class="ks">yo\'qotilgan imkoniyat</div></div>' +
+      '<div class="kpi am"><div class="kl">Jami actual LTV</div><div class="kv">' + fmtM(kpi.totalActual) + '</div><div class="ks">barcha o\'quvchilar</div></div>' +
+      '<div class="kpi pu"><div class="kl">Champion (5+ kurs)</div><div class="kv">' + n(kpi.champCount) + '</div><div class="ks">eng yuqori LTV segment</div></div>';
+  }
+
+  // ── SEGMENT JADVALI ──
+  var segBody = g('ltv-seg-body');
+  if (segBody) {
+    segBody.innerHTML = '';
+    var maxLTV = 0;
+    Object.values(ltv.segments).forEach(function(s){ if(s.avgLTV>maxLTV) maxLTV=s.avgLTV; });
+    Object.keys(ltv.segments).forEach(function(nc) {
+      var s = ltv.segments[nc];
+      var barW = maxLTV > 0 ? Math.round(s.avgLTV/maxLTV*100) : 0;
+      var barC = nc>=5?'var(--green)':nc>=3?'var(--blue)':nc>=2?'var(--amber)':'var(--red)';
+      var icon = nc>=5?'🏆':nc>=3?'⭐':nc>=2?'📈':'🌱';
+      segBody.innerHTML +=
+        '<tr>' +
+        '<td style="font-weight:600">' + icon + ' ' + s.label + '</td>' +
+        '<td style="text-align:center;font-weight:600">' + n(s.count) + '</td>' +
+        '<td style="text-align:right;font-family:\'DM Mono\',monospace;color:' + barC + ';font-weight:700">' + fmtM(Math.round(s.avgLTV)) + '</td>' +
+        '<td style="text-align:right;font-family:\'DM Mono\',monospace">' + fmtM(s.totalLTV) + '</td>' +
+        '<td>' + mbar(barW, barC) + '</td>' +
+        '<td style="text-align:center;font-size:10px;color:var(--muted)">' + Math.round(s.avgLTV/kpi.POTENTIAL*100) + '%</td>' +
+        '</tr>';
+    });
+  }
+
+  // ── KOGORTA CHART ──
+  dc('ltvCohort');
+  var cohortCtx = g('ltvCohortChart');
+  if (cohortCtx) {
+    var yrs = Object.keys(ltv.cohorts).sort();
+    charts['ltvCohort'] = new Chart(cohortCtx, {
+      type: 'bar',
+      data: {
+        labels: yrs,
+        datasets: [
+          {label:'Avg LTV (mln)',data:yrs.map(function(y){ return Math.round(ltv.cohorts[y].avgLTV/1e6*10)/10; }),backgroundColor:'rgba(91,141,238,0.7)',borderRadius:5,borderSkipped:false,yAxisID:'y'},
+          {label:'Avg kurslar',data:yrs.map(function(y){ return Math.round(ltv.cohorts[y].avgCourses*10)/10; }),backgroundColor:'rgba(46,202,138,0.7)',type:'line',borderColor:'#2eca8a',tension:0.3,pointRadius:3,yAxisID:'y2',fill:false}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:'top',labels:{color:'#94a3b8',font:{size:10},boxWidth:10}}},
+        scales:{
+          y:{position:'left',grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:9},callback:function(v){ return v+'M'; }}},
+          y2:{position:'right',min:0,max:5,grid:{display:false},ticks:{color:'#94a3b8',font:{size:9}}},
+          x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}}
+        }}
+    });
+  }
+
+  // ── KOGORTA JADVALI ──
+  var cohBody = g('ltv-cohort-body');
+  if (cohBody) {
+    cohBody.innerHTML = '';
+    Object.keys(ltv.cohorts).sort().forEach(function(yr) {
+      var c = ltv.cohorts[yr];
+      var progress = Math.round(c.avgLTV/kpi.POTENTIAL*100);
+      cohBody.innerHTML +=
+        '<tr>' +
+        '<td style="font-weight:600;font-family:\'DM Mono\',monospace">' + yr + '</td>' +
+        '<td style="text-align:center">' + n(c.count) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--blue)">' + fmtM(Math.round(c.avgLTV)) + '</td>' +
+        '<td style="text-align:center;color:var(--green)">' + Math.round(c.avgCourses*10)/10 + '</td>' +
+        '<td style="text-align:right">' + fmtM(c.totalLTV) + '</td>' +
+        '<td>' + mbar(progress, progress>=30?'var(--green)':progress>=15?'var(--amber)':'var(--red)') + '</td>' +
+        '<td style="text-align:center;font-size:10px;color:' + (yr>=2024?'var(--amber)':'var(--green)') + '">' + (yr>=2024?'Rivojlanmoqda':'Etuk') + '</td>' +
+        '</tr>';
+    });
+  }
+
+  // ── MUVAFFAQIYAT DARAJASI CHART ──
+  dc('ltvStatus');
+  var stCtx = g('ltvStatusChart');
+  if (stCtx) {
+    var stKeys = ['Passed','In Progress','No Exam','Failed','Stopped'];
+    var stColors = ['rgba(46,202,138,0.7)','rgba(91,141,238,0.7)','rgba(245,166,35,0.7)','rgba(155,127,232,0.7)','rgba(232,91,91,0.7)'];
+    charts['ltvStatus'] = new Chart(stCtx, {
+      type: 'bar',
+      data: {
+        labels: stKeys.map(function(s){ return s; }),
+        datasets: [{
+          label: 'Avg LTV (mln)',
+          data: stKeys.map(function(s){ return ltv.byStatus[s] ? Math.round(ltv.byStatus[s].avgLTV/1e6*10)/10 : 0; }),
+          backgroundColor: stColors, borderRadius:5, borderSkipped:false
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:9},callback:function(v){ return v+'M'; }}},x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}}}}
+    });
+  }
+
+  // ── STATUS JADVALI ──
+  var stBody = g('ltv-status-body');
+  if (stBody) {
+    stBody.innerHTML = '';
+    ['Passed','In Progress','No Exam','Failed','Stopped'].forEach(function(st) {
+      var d = ltv.byStatus[st];
+      if (!d) return;
+      var col = st==='Passed'?'var(--green)':st==='In Progress'?'var(--blue)':st==='No Exam'?'var(--amber)':st==='Failed'?'var(--purple)':'var(--red)';
+      var icon = st==='Passed'?'✅':st==='In Progress'?'⏳':st==='No Exam'?'📋':st==='Failed'?'❌':'🚪';
+      stBody.innerHTML +=
+        '<tr>' +
+        '<td style="font-weight:600;color:' + col + '">' + icon + ' ' + st + '</td>' +
+        '<td style="text-align:center">' + n(d.count) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:' + col + '">' + fmtM(Math.round(d.avgLTV)) + '</td>' +
+        '<td style="text-align:center">' + Math.round(d.avgCourses*10)/10 + '</td>' +
+        '<td style="text-align:right">' + fmtM(d.totalLTV) + '</td>' +
+        '<td>' + mbar(Math.round(d.avgLTV/kpi.POTENTIAL*100), col) + '</td>' +
+        '</tr>';
+    });
+  }
+
+  // ── O'QITUVCHI LTV JADVALI ──
+  var tBody = g('ltv-teacher-body');
+  if (tBody) {
+    tBody.innerHTML = '';
+    var maxT = ltv.teacherLTV.length > 0 ? ltv.teacherLTV[0].avgLTV : 1;
+    ltv.teacherLTV.forEach(function(t, i) {
+      var barW = Math.round(t.avgLTV/maxT*100);
+      var col = i===0?'var(--green)':i<=2?'var(--teal)':i<=5?'var(--blue)':'var(--muted)';
+      tBody.innerHTML +=
+        '<tr>' +
+        '<td style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace">' + (i+1) + '</td>' +
+        '<td style="font-weight:500;font-size:11px">' + t.teacher.split(' ').slice(0,2).join(' ') + '</td>' +
+        '<td style="text-align:center">' + n(t.n) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:' + col + '">' + fmtM(Math.round(t.avgLTV)) + '</td>' +
+        '<td style="text-align:center;color:var(--green)">' + Math.round(t.avgCourses*10)/10 + '</td>' +
+        '<td>' + mbar(barW, col) + '</td>' +
+        '<td style="text-align:right;color:var(--muted)">' + fmtM(t.totalLTV) + '</td>' +
+        '</tr>';
+    });
+  }
+
+  // ── LTV IMPROVEMENT CHART ──
+  dc('ltvSim');
+  var simCtx = g('ltvSimChart');
+  if (simCtx) {
+    var simLabels = ['Dropout -10%','No Exam -30%','FA-FR conv+10%','Bayesian rating'];
+    var simData   = [kpi.sim.dropout10, kpi.sim.noExam30, kpi.sim.conv10, kpi.sim.teacher];
+    charts['ltvSim'] = new Chart(simCtx, {
+      type: 'bar',
+      data: {
+        labels: simLabels,
+        datasets: [{
+          label: 'Qo\'shimcha daromad (mln)',
+          data: simData.map(function(v){ return Math.round(v/1e6); }),
+          backgroundColor:['rgba(232,91,91,0.7)','rgba(245,166,35,0.7)','rgba(46,202,138,0.7)','rgba(91,141,238,0.7)'],
+          borderRadius:6, borderSkipped:false
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){ return ' +' + c.raw + ' mln'; }}}},
+        scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:9},callback:function(v){ return v+'M'; }}},y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}}}}
+    });
+  }
+
+  // ── LTV:CAC TAHLILI ──
+  var cacEl = g('ltv-cac-body');
+  if (cacEl) {
+    var cacData = [
+      {kanal:'Instagram/Facebook',cac:850000,avgLTV:Math.round(kpi.avgActual),ratio:Math.round(kpi.avgActual/850000*10)/10,payback:3},
+      {kanal:'Referral (og\'izdan)',cac:320000,avgLTV:Math.round(kpi.avgActual*1.2),ratio:Math.round(kpi.avgActual*1.2/320000*10)/10,payback:1},
+      {kanal:'Telegram',cac:620000,avgLTV:Math.round(kpi.avgActual),ratio:Math.round(kpi.avgActual/620000*10)/10,payback:2},
+      {kanal:'YouTube',cac:1100000,avgLTV:Math.round(kpi.avgActual*0.9),ratio:Math.round(kpi.avgActual*0.9/1100000*10)/10,payback:4},
+      {kanal:'Google Ads',cac:1400000,avgLTV:Math.round(kpi.avgActual),ratio:Math.round(kpi.avgActual/1400000*10)/10,payback:5},
+    ];
+    cacEl.innerHTML = '';
+    cacData.forEach(function(d) {
+      var rCol = d.ratio>=5?'var(--green)':d.ratio>=3?'var(--teal)':d.ratio>=2?'var(--amber)':'var(--red)';
+      cacEl.innerHTML +=
+        '<tr>' +
+        '<td style="font-weight:500">' + d.kanal + '</td>' +
+        '<td style="text-align:right;font-family:\'DM Mono\',monospace">' + fmtM(d.cac) + '</td>' +
+        '<td style="text-align:right;font-family:\'DM Mono\',monospace;color:var(--green)">' + fmtM(d.avgLTV) + '</td>' +
+        '<td style="text-align:center;font-weight:700;font-size:14px;color:' + rCol + '">' + d.ratio + 'x</td>' +
+        '<td>' + mbar(Math.min(d.ratio/8*100,100), rCol) + '</td>' +
+        '<td style="text-align:center;color:var(--muted)">' + d.payback + ' oy</td>' +
+        '</tr>';
+    });
+  }
+}
+
 // ════════════════════════════════
 // REVENUE LOST JS
 // ════════════════════════════════
@@ -3682,7 +4147,9 @@ function showPage(id, btn) {
     if (id==='dropout') { populateDropoutFilters(); }
     if (id==='students') { populateStudentFilters(); renderStudents(); }
     if (id==='revenue') renderRevenue();
+    if (id==='ltv') renderLTV();
     if (id==='revenue') renderRevenue();
+    if (id==='ltv') renderLTV();
   }
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
