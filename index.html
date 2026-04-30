@@ -1107,36 +1107,41 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
       AI Chuqur Tahlil
     </div>
-    <div class="modal-sub">Claude AI moliyaviy hisob-kitoblar, yo'qotishlar va strategik tavsiyalar beradi. ~$0.03-0.08 xarajat.</div>
-    
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Qaysi bo'limni tahlil qilish kerak?</div>
-    <div class="modal-sections">
-      <button class="modal-sec-btn selected" onclick="selectSection('overview',this)">📊 Umumiy tahlil</button>
-      <button class="modal-sec-btn" onclick="selectSection('teachers',this)">👨‍🏫 O'qituvchilar</button>
-      <button class="modal-sec-btn" onclick="selectSection('subjects',this)">📚 Fanlar</button>
-      <button class="modal-sec-btn" onclick="selectSection('dropout',this)">🚪 Dropout</button>
-      <button class="modal-sec-btn" onclick="selectSection('sales',this)">💼 Sales</button>
-      <button class="modal-sec-btn" onclick="selectSection('marketing',this)">📣 Marketing</button>
+    <div class="modal-sub">Claude AI moliyaviy hisob-kitoblar, yo'qotishlar va strategik tavsiyalar beradi. Bir nechta bo'limni tanlash mumkin.</div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);">Qaysi bo'limlarni tahlil qilish kerak? (bir nechta tanlash mumkin)</div>
+      <div style="display:flex;gap:6px;">
+        <button class="modal-sec-btn" id="aiSelectAll" onclick="aiSelectAll()" style="padding:4px 10px;font-size:10px;">Barchasini tanlash</button>
+        <button class="modal-sec-btn" id="aiClearAll" onclick="aiClearAll()" style="padding:4px 10px;font-size:10px;">Tozalash</button>
+      </div>
     </div>
-    <div style="margin-bottom:16px;">
-      <button class="modal-sec-btn" id="allSectionsBtn" onclick="selectSection('all',this)" style="width:100%;text-align:center;background:var(--pdim);border-color:rgba(155,127,232,0.3);color:var(--purple);">
-        🤖 Barcha bo'limlarni tahlil qilish (To'liq hisobot)
-      </button>
+    <div class="modal-sections" id="aiSectionsGrid">
+      <button class="modal-sec-btn selected" data-section="overview" onclick="toggleSection('overview',this)">📊 CEO Umumiy</button>
+      <button class="modal-sec-btn" data-section="teachers" onclick="toggleSection('teachers',this)">👨‍🏫 O'qituvchilar</button>
+      <button class="modal-sec-btn" data-section="subjects" onclick="toggleSection('subjects',this)">📚 Fanlar</button>
+      <button class="modal-sec-btn" data-section="dropout" onclick="toggleSection('dropout',this)">🚪 Dropout</button>
+      <button class="modal-sec-btn" data-section="rating" onclick="toggleSection('rating',this)">⭐ Rating</button>
+      <button class="modal-sec-btn" data-section="students" onclick="toggleSection('students',this)">👤 O'quvchilar</button>
+      <button class="modal-sec-btn" data-section="sales" onclick="toggleSection('sales',this)">💼 Sales</button>
+      <button class="modal-sec-btn" data-section="marketing" onclick="toggleSection('marketing',this)">📣 Marketing</button>
+      <button class="modal-sec-btn" data-section="revenue" onclick="toggleSection('revenue',this)">📉 Yo'qotish</button>
+      <button class="modal-sec-btn" data-section="ltv" onclick="toggleSection('ltv',this)">💰 LTV</button>
     </div>
-    
+
     <div id="aiResultDiv" style="display:none;">
       <div class="ai-result-box" id="aiResultText"></div>
       <button class="pdf-btn" onclick="downloadPdf()">📥 PDF yuklab olish</button>
     </div>
-    
+
     <div id="aiLoadingDiv" style="display:none;text-align:center;padding:20px;">
       <div style="width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
       <div style="font-size:12px;color:var(--muted);" id="loadingSubText">Claude tahlil qilmoqda... (~10-20 soniya)</div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="loadingProgress"></div>
     </div>
-    
-    <div class="cost-note" id="costNote">⚡ Har bir tahlil ~$0.03-0.08 · To'liq hisobot ~$0.20-0.40</div>
-    
+
+    <div class="cost-note" id="costNote">⚡ <span id="aiSelectionInfo">1 ta bo'lim tanlandi</span> · taxminiy xarajat: <span id="aiCostInfo">~$0.05</span></div>
+
     <div class="modal-actions" style="margin-top:16px;">
       <button class="modal-cancel" onclick="closeAiModal()">Bekor qilish</button>
       <button class="modal-run" id="runAiBtn" onclick="runAiAnalysis()">🤖 Tahlil boshlash</button>
@@ -4205,9 +4210,24 @@ function populateFanFilters() {
 
 // ── AI TAHLIL ──
 const FUNC_URL = "https://fba-api-bkbgbcewcmgdfcea.centralus-01.azurewebsites.net/api/analyze";
-let selectedSection = 'overview';
+
+// Multi-select bo'limlar — har biri ID, label va taxminiy xarajat (USD)
+const AI_SECTIONS = [
+  { key: 'overview',  label: '📊 CEO Umumiy',     cost: 0.05 },
+  { key: 'teachers',  label: '👨‍🏫 Oqituvchilar', cost: 0.06 },
+  { key: 'subjects',  label: '📚 Fanlar',          cost: 0.05 },
+  { key: 'dropout',   label: '🚪 Dropout',         cost: 0.05 },
+  { key: 'rating',    label: '⭐ Rating',          cost: 0.04 },
+  { key: 'students',  label: '👤 Oquvchilar',     cost: 0.05 },
+  { key: 'sales',     label: '💼 Sales',           cost: 0.05 },
+  { key: 'marketing', label: '📣 Marketing',       cost: 0.04 },
+  { key: 'revenue',   label: '📉 Yoqotish',       cost: 0.05 },
+  { key: 'ltv',       label: '💰 LTV',             cost: 0.05 }
+];
+
+let selectedSections = ['overview']; // default: 1 ta bo'lim tanlangan
 let lastAnalysis = '';
-let lastSection = 'overview';
+let lastSections = ['overview'];
 
 function showAiModal() {
   document.getElementById('aiModal').style.display = 'flex';
@@ -4215,20 +4235,68 @@ function showAiModal() {
   document.getElementById('aiLoadingDiv').style.display = 'none';
   document.getElementById('runAiBtn').disabled = false;
   document.getElementById('costNote').style.display = 'block';
+  syncAiButtonsUI();
+  updateAiCostInfo();
 }
 
 function closeAiModal() {
   document.getElementById('aiModal').style.display = 'none';
 }
 
-function selectSection(section, btn) {
-  selectedSection = section;
-  document.querySelectorAll('.modal-sec-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
+// Toggle: bo'limni qo'shish/olib tashlash
+function toggleSection(section, btn) {
+  const idx = selectedSections.indexOf(section);
+  if (idx >= 0) {
+    selectedSections.splice(idx, 1);
+    btn.classList.remove('selected');
+  } else {
+    selectedSections.push(section);
+    btn.classList.add('selected');
+  }
   document.getElementById('aiResultDiv').style.display = 'none';
-  // Update run button text
+  updateAiCostInfo();
+}
+
+function aiSelectAll() {
+  selectedSections = AI_SECTIONS.map(s => s.key);
+  syncAiButtonsUI();
+  updateAiCostInfo();
+}
+
+function aiClearAll() {
+  selectedSections = [];
+  syncAiButtonsUI();
+  updateAiCostInfo();
+}
+
+// Tugmalar holatini selectedSections ga moslash
+function syncAiButtonsUI() {
+  document.querySelectorAll('#aiSectionsGrid .modal-sec-btn').forEach(b => {
+    const sec = b.getAttribute('data-section');
+    if (selectedSections.indexOf(sec) >= 0) b.classList.add('selected');
+    else b.classList.remove('selected');
+  });
+}
+
+// Xarajat va tanlash hisoblagichini yangilash
+function updateAiCostInfo() {
+  const cnt = selectedSections.length;
+  const totalCost = selectedSections.reduce((s, k) => {
+    const sec = AI_SECTIONS.find(x => x.key === k);
+    return s + (sec ? sec.cost : 0.05);
+  }, 0);
+  const infoEl = document.getElementById('aiSelectionInfo');
+  const costEl = document.getElementById('aiCostInfo');
+  if (infoEl) infoEl.textContent = cnt === 0 ? "Hech narsa tanlanmagan" : `${cnt} ta bo'lim tanlandi`;
+  if (costEl) costEl.textContent = cnt === 0 ? '~$0.00' : `~$${totalCost.toFixed(2)}`;
+
   const runBtn = document.getElementById('runAiBtn');
-  if (runBtn) runBtn.textContent = section === "all" ? "Toʻliq hisobot" : "Tahlil boshlash";
+  if (runBtn) {
+    runBtn.disabled = cnt === 0;
+    if (cnt === 0)      runBtn.textContent = "Bo'lim tanlang";
+    else if (cnt === 1) runBtn.textContent = "🤖 Tahlil boshlash";
+    else                runBtn.textContent = `🤖 ${cnt} ta bo'limni tahlil qilish`;
+  }
 }
 
 function formatAnalysis(text) {
@@ -4253,60 +4321,50 @@ async function fetchSection(snapWithSm, section) {
 
 async function runAiAnalysis() {
   if (!snap) { alert("Avval ma'lumot yuklansin!"); return; }
-  
+  if (!selectedSections || selectedSections.length === 0) {
+    alert("Kamida bitta bo'lim tanlang!");
+    return;
+  }
+
   const btn = document.getElementById('runAiBtn');
   btn.disabled = true;
   document.getElementById('aiLoadingDiv').style.display = 'block';
   document.getElementById('aiResultDiv').style.display = 'none';
   document.getElementById('costNote').style.display = 'none';
-  
+
   const snapWithSm = { ...snap, sales: smData.sales, marketing: smData.marketing };
-  
+
   try {
-    if (selectedSection === 'all') {
-      // Barcha bo'limlarni ketma-ket tahlil qilish
-      const sections = [
-        { key: 'overview', label: '📊 Umumiy tahlil' },
-        { key: "teachers", label: "O\u02BBqituvchilar" },
-        { key: 'subjects', label: '📚 Fanlar' },
-        { key: 'dropout', label: '🚪 Dropout' },
-        { key: 'sales', label: '💼 Sales' },
-        { key: 'marketing', label: '📣 Marketing' }
-      ];
-      
+    const selectedMeta = selectedSections.map(k => AI_SECTIONS.find(s => s.key === k)).filter(Boolean);
+
+    if (selectedMeta.length === 1) {
+      // Bitta bo'lim — oddiy chaqiruv
+      const sec = selectedMeta[0];
+      const sub = document.getElementById('loadingSubText');
+      if (sub) sub.textContent = `${sec.label} tahlil qilinmoqda...`;
+      const analysis = await fetchSection(snapWithSm, sec.key);
+      lastAnalysis = analysis;
+    } else {
+      // Bir nechta bo'lim — ketma-ket
       let fullReport = '';
-      
-      for (let i = 0; i < sections.length; i++) {
-        const sec = sections[i];
+      for (let i = 0; i < selectedMeta.length; i++) {
+        const sec = selectedMeta[i];
         const prog = document.getElementById('loadingProgress');
         const sub = document.getElementById('loadingSubText');
-        if (prog) prog.textContent = `${i+1}/${sections.length} — ${sec.label}`;
+        if (prog) prog.textContent = `${i+1}/${selectedMeta.length} — ${sec.label}`;
         if (sub) sub.textContent = 'Claude tahlil qilmoqda...';
-        
         const analysis = await fetchSection(snapWithSm, sec.key);
-        fullReport += `
-
-${'='.repeat(60)}
-${sec.label.toUpperCase()}
-${'='.repeat(60)}
-
-${analysis}`;
+        fullReport += `\n\n${'='.repeat(60)}\n${sec.label.toUpperCase()}\n${'='.repeat(60)}\n\n${analysis}`;
       }
-      
-      lastAnalysis = fullReport;
-      lastSection = 'all';
-      
-    } else {
-      const analysis = await fetchSection(snapWithSm, selectedSection);
-      lastAnalysis = analysis;
-      lastSection = selectedSection;
+      lastAnalysis = fullReport.trim();
     }
-    
+
+    lastSections = [...selectedSections];
     document.getElementById('aiResultText').innerHTML = formatAnalysis(lastAnalysis);
     document.getElementById('aiResultDiv').style.display = 'block';
     document.getElementById('aiLoadingDiv').style.display = 'none';
     btn.disabled = false;
-    
+
   } catch(e) {
     document.getElementById('aiLoadingDiv').style.display = 'none';
     document.getElementById('costNote').style.display = 'block';
@@ -4317,18 +4375,29 @@ ${analysis}`;
 
 function downloadPdf() {
   if (!lastAnalysis) return;
-  
+
   const sectionNames = {
-    overview: 'Umumiy Tahlil',
-    teachers: "O'qituvchilar Tahlili",
-    subjects: 'Fanlar Tahlili',
-    dropout: 'Dropout Tahlili',
-    sales: 'Sales Tahlili',
+    overview:  'CEO Umumiy Tahlil',
+    teachers:  "O'qituvchilar Tahlili",
+    subjects:  'Fanlar Tahlili',
+    dropout:   'Dropout Tahlili',
+    rating:    'Rating Tahlili',
+    students:  "O'quvchilar Tahlili",
+    sales:     'Sales Tahlili',
     marketing: 'Marketing Tahlili',
-    all: "To'liq Professional Hisobot"
+    revenue:   "Yo'qotish Tahlili",
+    ltv:       'LTV Tahlili'
   };
-  
-  const secName = sectionNames[lastSection] || sectionNames[selectedSection] || 'Tahlil';
+
+  // Yangi multi-select holati
+  let secName;
+  if (lastSections && lastSections.length > 1) {
+    secName = `Birlashgan Hisobot (${lastSections.length} bo'lim)`;
+  } else if (lastSections && lastSections.length === 1) {
+    secName = sectionNames[lastSections[0]] || 'Tahlil';
+  } else {
+    secName = 'Tahlil';
+  }
   
   // Convert markdown to HTML
   let body = lastAnalysis;
