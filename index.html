@@ -143,8 +143,15 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 .st-cell{display:inline-flex;align-items:center;justify-content:center;
   min-width:34px;height:22px;border-radius:4px;font-size:9px;font-weight:700;}
 .st-none{background:transparent;color:var(--muted);border:1px solid var(--border);}
+#stTableWrap table{table-layout:auto;min-width:1100px;}
 #stTableWrap table thead th{position:sticky;top:0;background:var(--bg2);z-index:5;
   padding:8px 4px;font-size:10px;border-bottom:1px solid var(--border);}
+/* Sticky columns: ID + Ism — gorizontal scrolda qotib qoladi */
+#stTableWrap table thead th.st-sticky-1{position:sticky;left:0;z-index:7;background:var(--bg2);}
+#stTableWrap table thead th.st-sticky-2{position:sticky;left:50px;z-index:7;background:var(--bg2);box-shadow:1px 0 0 var(--border);}
+#stTableWrap table tbody td.st-sticky-1{position:sticky;left:0;z-index:3;background:var(--bg2);}
+#stTableWrap table tbody td.st-sticky-2{position:sticky;left:50px;z-index:3;background:var(--bg2);box-shadow:1px 0 0 var(--border);}
+.st-row:hover td.st-sticky-1,.st-row:hover td.st-sticky-2{background:var(--bg3)!important;}
 #stTableWrap{scrollbar-width:thin;scrollbar-color:var(--border) var(--bg2);}
 #stTableWrap::-webkit-scrollbar{width:5px;height:5px;}
 #stTableWrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -366,6 +373,18 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <span class="flabel">O'qituvchi:</span>
     <select class="fselect" id="t-teacher-filter" onchange="renderTeachers()"><option value="all">Barchasi</option></select>
     <div class="fsep"></div>
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="ty-all" onclick="setTY('all',this)">Barchasi</button>
+    <button class="fyb" id="ty-2024" onclick="setTY('2024',this)">2024</button>
+    <button class="fyb" id="ty-2025" onclick="setTY('2025',this)">2025</button>
+    <button class="fyb" id="ty-2026" onclick="setTY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">Product:</span>
+    <button class="fyb active" id="tp-all" onclick="setTPT('all',this)">Barchasi</button>
+    <button class="fyb" id="tp-fc" onclick="setTPT('Full course',this)">Full course</button>
+    <button class="fyb" id="tp-rv" onclick="setTPT('Revision',this)">Revision</button>
+    <button class="fyb" id="tp-vl" onclick="setTPT('Video Lesson',this)">Video Lesson</button>
+    <div class="fsep"></div>
     <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer;">
       <input type="checkbox" id="t-excl-preclass" onchange="renderTeachers()" style="cursor:pointer;">
       <span>1-darsgacha chiqganlarni olib tashlash</span>
@@ -440,6 +459,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <button class="fyb" id="sy-2024" onclick="setSY('2024',this)">2024</button>
     <button class="fyb" id="sy-2025" onclick="setSY('2025',this)">2025</button>
     <button class="fyb" id="sy-2026" onclick="setSY('2026',this)">2026</button>
+    <div class="fsep"></div>
+    <span class="flabel">Product:</span>
+    <button class="fyb active" id="sp-all" onclick="setSPT('all',this)">Barchasi</button>
+    <button class="fyb" id="sp-fc" onclick="setSPT('Full course',this)">Full course</button>
+    <button class="fyb" id="sp-rv" onclick="setSPT('Revision',this)">Revision</button>
+    <button class="fyb" id="sp-vl" onclick="setSPT('Video Lesson',this)">Video Lesson</button>
     <div class="fsep"></div>
     <span class="flabel">O'qituvchi:</span>
     <select class="fselect" id="s-teacher-filter" onchange="renderSubjects()"><option value="all">Barchasi</option></select>
@@ -760,8 +785,8 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <table>
         <thead style="position:sticky;top:0;z-index:10;background:var(--bg2);">
           <tr>
-            <th style="min-width:50px;padding:8px 12px;">ID</th>
-            <th style="min-width:160px;">Ism Familiya</th>
+            <th class="st-sticky-1" style="min-width:50px;padding:8px 12px;">ID</th>
+            <th class="st-sticky-2" style="min-width:170px;">Ism Familiya</th>
             <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FA</th>
             <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FR</th>
             <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">MA</th>
@@ -1138,7 +1163,7 @@ let msalInstance = null;   // window.onload da yaratiladi — msal.js yuklanib b
 let snap    = null;
 let smData  = { sales: {}, marketing: {} };
 let charts  = {};
-let yF = 'all', tF = 'all', tY = 'all', sY = 'all', dY = 'all', dD = 'all';
+let yF = 'all', tF = 'all', tY = 'all', tPT = 'all', sY = 'all', sPT = 'all', dY = 'all', dD = 'all';
 let curPage = 'overview';
 
 // ── AUTH ──
@@ -2210,19 +2235,24 @@ function ins(type,label,text) { return `<div class="ins ${type}"><div class="il"
 function n(v) { return (v||0).toLocaleString(); }
 
 // ── FILTERS ──
+// Global filterlar (gYear, gMonth, tF) ni e'tiborga oladi
 function getS() {
   if (!snap) return {};
-  const s = snap.summary;
-  const norm = (d) => ({ ...d, retention_pct: d.retention_pct||d.retention||0, pass_rate_pct: d.pass_rate_pct||d.pass_rate||0, exam_entry_pct: d.exam_entry_pct||d.exam_entry||0, converted: s.converted||0 });
-  if (yF !== 'all' && tF !== 'all') {
-    const yd = snap.yearly?.[yF]; const pt = snap.product_types?.[tF];
-    if (!yd || !pt) return norm(s);
-    const ratio = s.jami > 0 ? pt.jami / s.jami : 0;
-    return norm({ jami:Math.round(yd.jami*ratio), stopped:Math.round((yd.stopped||0)*ratio), passed:Math.round((yd.passed||0)*ratio), failed:Math.round((yd.failed||0)*ratio), no_exam:Math.round((yd.no_exam||0)*ratio), in_progress:Math.round((yd.in_progress||0)*ratio), yakunlagan:Math.round((yd.yakunlagan||0)*ratio), retention:pt.retention, pass_rate:pt.pass_rate, exam_entry:pt.exam_entry });
+  const norm = (d) => ({ ...d, retention_pct: d.retention_pct||d.retention||0, pass_rate_pct: d.pass_rate_pct||d.pass_rate||0, exam_entry_pct: d.exam_entry_pct||d.exam_entry||0, converted: d.converted||0 });
+
+  // Agar global filterlar (yil/oy/product) qo'llanilgan bo'lsa — raw datadan qayta hisoblaymiz
+  const gActive = gYear !== 'all' || gMonth !== 'all' || tF !== 'all';
+  if (gActive && snap.rawData) {
+    let filtered = snap.rawData;
+    if (gYear !== 'all') filtered = filtered.filter(r => r.Year == gYear);
+    if (gMonth !== 'all') filtered = filtered.filter(r => r.Month && r.Month.endsWith('-' + gMonth));
+    if (tF !== 'all') filtered = filtered.filter(r => r.Product_type === tF);
+    if (filtered.length === 0) return norm({ jami:0, stopped:0, passed:0, failed:0, no_exam:0, in_progress:0, yakunlagan:0, retention:0, pass_rate:0, exam_entry:0, converted:0 });
+    const recalc = ANALYTICS.calcSummary(filtered, new Date().toISOString().split('T')[0]);
+    return norm(recalc);
   }
-  if (yF !== 'all') { const yd = snap.yearly?.[yF]; if (!yd) return norm(s); return norm({...yd}); }
-  if (tF !== 'all') { const pt = snap.product_types?.[tF]; if (!pt) return norm(s); return norm({...pt}); }
-  return norm(s);
+  // Filtersiz — asosiy summary
+  return norm(snap.summary);
 }
 
 // ── GLOBAL FILTER STATE ──
@@ -2285,7 +2315,8 @@ function getGlobalSnap() {
 
 function setYF(y, btn) { yF=y; ['fp-all','fp-fc','fp-rv','fp-vl','gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el && ['Barchasi','2024','2025','2026'].some(t=>el.textContent.includes(t))) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTF(t, btn) { tF=t; ['fp-all','fp-fc','fp-rv','fp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
-function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
+function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025','ty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
+function setTPT(t, btn) { tPT=t; ['tp-all','tp-fc','tp-rv','tp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
 function setRY(y, btn) { ['ry-all','ry-2024','ry-2025','ry-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderRating(); }
 function setSalesY(y, btn) { ['saly-all','saly-2024','saly-2025','saly-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderSales(); }
 function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderMarketing(); }
@@ -2294,9 +2325,11 @@ function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forE
 function renderOv() {
   if (!snap) return;
   const s = getS();
-  const label = yF==='all'?'Barchasi':yF;
+  const MONTHS = {'01':'Yan','02':'Fev','03':'Mar','04':'Apr','05':'May','06':'Iyn','07':'Iyl','08':'Avg','09':'Sen','10':'Okt','11':'Noy','12':'Dek'};
+  const yLabel = gYear==='all' ? 'Barchasi' : gYear;
+  const mLabel = gMonth==='all' ? '' : ` · ${MONTHS[gMonth]||gMonth}`;
   const tlabel = tF==='all'?'':` · ${tF}`;
-  document.getElementById('ov-title').textContent = `Asosiy ko'rsatkichlar (${label}${tlabel})`;
+  document.getElementById('ov-title').textContent = `Asosiy ko'rsatkichlar (${yLabel}${mLabel}${tlabel})`;
   document.getElementById('ov-sana').textContent = snap.summary.sana;
 
   const jami=s.jami||0, stopped=s.stopped||0, yakunlagan=s.yakunlagan||0, inp=s.in_progress||0;
@@ -2573,8 +2606,10 @@ function getFilteredTeachers() {
   const teacherF = document.getElementById('t-teacher-filter')?.value || 'all';
   const exclPreclass = document.getElementById('t-excl-preclass')?.checked || false;
 
-  // Global filter + preclass filter qo'llash
+  // Global filter + sahifaning o'z filterlari (yil + product type) raw data ga
   let rawD = getGlobalFilteredData();
+  if (tY !== 'all') rawD = rawD.filter(r => r.Year == tY);
+  if (tPT !== 'all') rawD = rawD.filter(r => r.Product_type === tPT);
   if (exclPreclass) rawD = rawD.filter(r => r.Status !== '1-darsgacha chiqqanlar');
 
   // Recalculate teachers from filtered raw data
@@ -2598,26 +2633,22 @@ function getFilteredTeachers() {
         by_subject: t.by_subject
       };
     });
-    const sub = fan !== 'all' ? `Fan: ${fan}` : 'Barcha fanlar';
+    const sub = `Fan: ${fan}`;
     const ysub = tY !== 'all' ? ` · ${tY}` : '';
+    const psub = tPT !== 'all' ? ` · ${tPT}` : '';
     const el1 = document.getElementById('t-ret-sub');
     const el2 = document.getElementById('t-pass-sub');
-    if(el1) el1.textContent = sub + ysub;
-    if(el2) el2.textContent = sub + ysub;
+    if(el1) el1.textContent = sub + ysub + psub;
+    if(el2) el2.textContent = sub + ysub + psub;
   } else {
+    const parts = [];
+    if (tY !== 'all') parts.push(`${tY}-yil`);
+    if (tPT !== 'all') parts.push(tPT);
+    const lbl = parts.length > 0 ? parts.join(' · ') : 'Barcha fanlar';
     const el1 = document.getElementById('t-ret-sub');
     const el2 = document.getElementById('t-pass-sub');
-    if(el1) el1.textContent = tY !== 'all' ? `${tY}-yil` : 'Barcha fanlar';
-    if(el2) el2.textContent = tY !== 'all' ? `${tY}-yil` : 'Barcha fanlar';
-  }
-
-  // Yil filtri
-  if (tY !== 'all') {
-    ts = ts.map(t => {
-      const yd = t.by_year?.[tY];
-      if (!yd || yd.jami < 3) return null;
-      return { Oqituvchi: t.Oqituvchi, ...yd, by_year: t.by_year, by_subject: t.by_subject };
-    }).filter(Boolean);
+    if(el1) el1.textContent = lbl;
+    if(el2) el2.textContent = lbl;
   }
 
   return ts.sort((a, b) => b.retention - a.retention);
@@ -2722,7 +2753,9 @@ function renderTeachers() {
   }
 
   // ── YANGI: Oylik dinamika chart ──
-  const rawD2 = getGlobalFilteredData();
+  let rawD2 = getGlobalFilteredData();
+  if (tY !== 'all') rawD2 = rawD2.filter(r => r.Year == tY);
+  if (tPT !== 'all') rawD2 = rawD2.filter(r => r.Product_type === tPT);
   const filteredForChart = teacherF !== 'all' ? rawD2.filter(r=>r.Oqituvchi===teacherF) : rawD2;
   const fanF2 = document.getElementById('t-fan-filter')?.value || 'all';
   const chartData = (fanF2!=='all') ? filteredForChart.filter(r=>r.Product===fanF2) : filteredForChart;
@@ -2760,17 +2793,39 @@ function setSY(y, btn) {
   ['sy-all','sy-2024','sy-2025','sy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   btn.classList.add('active'); renderSubjects();
 }
+function setSPT(t, btn) {
+  sPT = t;
+  ['sp-all','sp-fc','sp-rv','sp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  btn.classList.add('active'); renderSubjects();
+}
 function renderSubjects() {
-  let subs = snap?.subjects || [];
-  if (sY !== 'all') {
-    subs = subs.map(s => {
-      const yd = s.by_year?.[sY];
-      if (!yd) return null;
-      return { ...s, ...yd, Product: s.Product, by_year: s.by_year };
-    }).filter(Boolean);
+  if (!snap || !snap.rawData) return;
+
+  // Sahifa filterlari raw data ga
+  let rawD = getGlobalFilteredData();
+  if (sY !== 'all') rawD = rawD.filter(r => r.Year == sY);
+  if (sPT !== 'all') rawD = rawD.filter(r => r.Product_type === sPT);
+  const teacherF = document.getElementById('s-teacher-filter')?.value || 'all';
+  if (teacherF !== 'all') rawD = rawD.filter(r => r.Oqituvchi === teacherF);
+  const exclPre = document.getElementById('s-excl-preclass')?.checked || false;
+  if (exclPre) rawD = rawD.filter(r => r.Status !== '1-darsgacha chiqqanlar');
+
+  // Recalculate subjects
+  const recalc = ANALYTICS.reCalcFromFiltered(rawD);
+  let subs = recalc?.subjects || [];
+
+  // Sub label
+  const parts = [];
+  if (sY !== 'all') parts.push(`${sY}-yil`);
+  if (sPT !== 'all') parts.push(sPT);
+  if (teacherF !== 'all') parts.push(teacherF.split(' ').slice(0,2).join(' '));
+  document.getElementById('s-ret-sub').textContent = parts.length ? parts.join(' · ') : 'Fanlar kesimida';
+  if (!subs || subs.length === 0) {
+    // Bo'sh holatda chartlarni tozalash
+    dc('sRetPass'); dc('sExam'); dc('sExamTime'); dc('sNoExam');
+    const tb=document.getElementById('sTableBody'); if(tb) tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px;">Filtr natijasi bo\'sh</td></tr>';
+    return;
   }
-  document.getElementById('s-ret-sub').textContent = sY !== 'all' ? `${sY}-yil` : 'Fanlar kesimida';
-  if (!subs || subs.length === 0) return;
   dc('sRetPass');
   charts['sRetPass'] = new Chart(document.getElementById('sRetPassChart'), {
     type:'bar',
@@ -3399,9 +3454,18 @@ function renderStudents() {
     students = students.filter(function(s) { return (fanF.toUpperCase() in s.courses); });
   }
   if (statusF !== 'all') {
-    students = students.filter(function(s) {
-      return Object.values(s.courses).some(function(c){ return c.status === statusF; });
-    });
+    if (fanF !== 'all') {
+      // Fan tanlangan: faqat shu fanda statusF bo'lganlar qoladi
+      const fanKey = fanF.toUpperCase();
+      students = students.filter(function(s) {
+        return s.courses[fanKey] && s.courses[fanKey].status === statusF;
+      });
+    } else {
+      // Fan tanlanmagan: istalgan kursida statusF bo'lganlar
+      students = students.filter(function(s) {
+        return Object.values(s.courses).some(function(c){ return c.status === statusF; });
+      });
+    }
   }
   if (teacherF !== 'all') {
     students = students.filter(function(s) { return (s.teacherFull||'').includes(teacherF); });
@@ -3470,11 +3534,11 @@ function renderStudentsTable(students) {
   pageSt.forEach(function(s) {
     rows += '<tr class="st-row">';
 
-    // ID
-    rows += '<td style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;white-space:nowrap;">' + s.id + '</td>';
+    // ID (sticky chap)
+    rows += '<td class="st-sticky-1" style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;white-space:nowrap;">' + s.id + '</td>';
 
-    // ISM — to'liq
-    rows += '<td style="font-weight:500;font-size:11px;padding:7px 10px;min-width:150px;white-space:nowrap;">' + (s.name || '—') + '</td>';
+    // ISM — to'liq (sticky chap)
+    rows += '<td class="st-sticky-2" style="font-weight:500;font-size:11px;padding:7px 10px;min-width:170px;white-space:nowrap;">' + (s.name || '—') + '</td>';
 
     // Har fan uchun katak
     FAN_ORDER_ST.forEach(function(fan) {
@@ -3900,7 +3964,7 @@ function calcRevenueLost(data, avgPrice) {
     if (r.Final_status === 'No Exam') mGrp[r.Month].noExam++;
   });
   var monthlyLoss = Object.keys(mGrp).sort().slice(-18).map(function(m) {
-    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*REVISION};
+    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*1750000};
   });
   return {totalDropoutLoss:totDL, totalNoExamLoss:totNEL, totalConvLoss:totCL, total:totDL+totNEL+totCL, dropFan:dropFan, neFan:neFan, convSteps:convSteps, fanSum:fanSum, monthlyLoss:monthlyLoss, avgPrice:avgPrice};
 }
@@ -4116,8 +4180,6 @@ function showPage(id, btn) {
     if (id==='subjects') { populateSubjectTeacherFilter(); }
     if (id==='dropout') { populateDropoutFilters(); }
     if (id==='students') { populateStudentFilters(); renderStudents(); }
-    if (id==='revenue') renderRevenue();
-    if (id==='ltv') renderLTV();
     if (id==='revenue') renderRevenue();
     if (id==='ltv') renderLTV();
   }
