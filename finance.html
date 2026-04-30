@@ -136,6 +136,74 @@ th.num{text-align:right;}
 .cashier-pos{color:var(--green);font-family:'DM Mono',monospace;}
 .cashier-neg{color:var(--red);font-family:'DM Mono',monospace;}
 .cashier-bal{font-weight:600;font-family:'DM Mono',monospace;}
+
+/* ── PAGE NAVIGATION ── */
+.nav{display:flex;align-items:center;gap:2px;overflow-x:auto;padding-bottom:2px;}
+.nb{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px 12px;border-radius:6px;font-size:11.5px;font-family:inherit;white-space:nowrap;transition:all .15s;}
+.nb:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.nb.active{color:var(--green);background:rgba(46,202,138,0.12);font-weight:600;}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,0.1);margin:0 6px;flex-shrink:0;}
+
+.page{display:none;}.page.active{display:block;}
+
+/* ── PLAN VS FACT TABLE ── */
+.pf-table{width:100%;border-collapse:collapse;font-size:11px;}
+.pf-table th{position:sticky;top:0;background:var(--bg2);z-index:5;padding:8px 10px;font-size:10px;border-bottom:1px solid var(--border);}
+.pf-table td{padding:7px 10px;border-bottom:0.5px solid var(--border);}
+.pf-table tr.section td{background:var(--bg3);font-weight:600;font-size:11px;color:var(--text);text-transform:uppercase;letter-spacing:0.4px;}
+.pf-table tr.indent td:first-child{padding-left:24px;color:var(--muted);font-size:10.5px;}
+.pf-table tr.total td{font-weight:700;border-top:1px solid var(--border);}
+.pf-table tr:hover td{background:rgba(255,255,255,0.02);}
+.pf-table .num{text-align:right;font-family:'DM Mono',monospace;}
+.var-pos{color:var(--green);}.var-neg{color:var(--red);}.var-neu{color:var(--muted);}
+.var-cell{display:inline-flex;align-items:center;gap:4px;}
+.var-pct{font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;font-family:'DM Mono',monospace;}
+.vp-good{background:var(--gdim);color:var(--green);}
+.vp-bad{background:var(--rdim);color:var(--red);}
+.vp-neu{background:rgba(255,255,255,0.05);color:var(--muted);}
+
+/* ── INSIGHTS ── */
+.ins{border-radius:10px;padding:13px;border-left:3px solid;margin-bottom:8px;}
+.i-d{background:var(--rdim);border-color:var(--red);}
+.i-w{background:var(--adim);border-color:var(--amber);}
+.i-g{background:var(--gdim);border-color:var(--green);}
+.i-b{background:var(--bdim);border-color:var(--blue);}
+.il{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:4px;}
+.i-d .il{color:var(--red);}.i-w .il{color:var(--amber);}.i-g .il{color:var(--green);}.i-b .il{color:var(--blue);}
+.it{font-size:12px;color:var(--text);line-height:1.5;}
+
+/* ── MOBILE OPTIMIZATIONS ── */
+@media(max-width:900px){
+  .cont{padding:14px;}
+  .header{padding:10px 14px;flex-wrap:wrap;gap:8px;}
+  .lt{font-size:12px;}
+  .ls{font-size:9px;}
+  .fin-badge{font-size:9px;padding:1px 6px;}
+  .back-dash, .refresh-btn{padding:3px 8px;font-size:10px;}
+  .last-update{display:none;}
+  .user-name{display:none;}
+  .nav{width:100%;order:10;border-top:1px solid var(--border);padding-top:8px;margin-top:6px;}
+  .g6{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .g3{grid-template-columns:repeat(1,minmax(0,1fr));}
+  .g2{grid-template-columns:repeat(1,minmax(0,1fr));}
+  .kpi{padding:12px;}
+  .kv{font-size:18px;}
+  .card{padding:14px;}
+  .ct{font-size:12px;}
+  .cs{font-size:10px;}
+  .pf-table{font-size:10px;}
+  .pf-table th{padding:6px 6px;font-size:9px;}
+  .pf-table td{padding:5px 6px;}
+  .auth-box{width:90%;padding:32px 24px;}
+  .pin-numpad{max-width:200px;gap:6px;}
+  .pin-key{padding:11px;font-size:16px;}
+}
+@media(max-width:500px){
+  .g6, .g4{grid-template-columns:repeat(1,minmax(0,1fr));}
+  .header{padding:8px 12px;}
+  .fbar{padding:8px 10px;gap:6px;}
+}
 </style>
 </head>
 <body>
@@ -209,13 +277,21 @@ th.num{text-align:right;}
     <div class="lm">FA</div>
     <div>
       <div class="lt">FBA Academy <span class="fin-badge">💰 FINANCE</span></div>
-      <div class="ls">Moliya Dashboard · Maxfiy</div>
+      <div class="ls">Moliya Dashboard · Plan vs Fact</div>
     </div>
+  </div>
+  <div class="nav">
+    <button class="nb active" onclick="showPage('pl',this)">📊 P&L</button>
+    <button class="nb" onclick="showPage('cf',this)">💸 Cash Flow</button>
+    <button class="nb" onclick="showPage('revenue',this)">📚 Tushum (Fanlar)</button>
+    <button class="nb" onclick="showPage('costs',this)">💰 Xarajatlar</button>
+    <button class="nb" onclick="showPage('balance',this)">🏦 Kunlik balans</button>
+    <button class="nb" onclick="showPage('analytics',this)">⭐ Tahlil & CEO</button>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
     <a href="/" class="back-dash">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      Asosiy Dashboard
+      Asosiy
     </a>
     <button class="refresh-btn" onclick="refreshData()">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -231,120 +307,316 @@ th.num{text-align:right;}
 
 <div class="cont">
 
-<!-- FILTER BAR -->
+<!-- ── GLOBAL FILTER BAR ── -->
 <div class="fbar">
   <span class="flabel">Yil:</span>
-  <select class="fselect" id="fin-year-sel" onchange="renderAll()">
-    <option value="2024">2024</option>
-    <option value="2025">2025</option>
+  <select class="fselect" id="fin-year-sel" onchange="onFilterChange()">
     <option value="2026" selected>2026</option>
+    <option value="2027">2027</option>
+    <option value="2028">2028</option>
   </select>
   <div class="fsep"></div>
   <span class="flabel">Oy:</span>
-  <select class="fselect" id="fin-month-sel" onchange="renderAll()">
-    <option value="all">Barchasi (YTD)</option>
-    <option value="0">Yanvar</option>
-    <option value="1">Fevral</option>
-    <option value="2">Mart</option>
-    <option value="3">Aprel</option>
-    <option value="4">May</option>
-    <option value="5">Iyun</option>
-    <option value="6">Iyul</option>
-    <option value="7">Avgust</option>
-    <option value="8">Sentabr</option>
-    <option value="9">Oktabr</option>
-    <option value="10">Noyabr</option>
-    <option value="11">Dekabr</option>
+  <select class="fselect" id="fin-month-sel" onchange="onFilterChange()">
+    <option value="all">Yillik (jami)</option>
+    <option value="1">Yanvar</option>
+    <option value="2">Fevral</option>
+    <option value="3">Mart</option>
+    <option value="4">Aprel</option>
+    <option value="5">May</option>
+    <option value="6">Iyun</option>
+    <option value="7">Iyul</option>
+    <option value="8">Avgust</option>
+    <option value="9">Sentabr</option>
+    <option value="10">Oktabr</option>
+    <option value="11">Noyabr</option>
+    <option value="12">Dekabr</option>
   </select>
   <div class="fsep"></div>
-  <span class="flabel" style="color:var(--amber);">⚡ Real-time · SharePoint dan yuklanadi</span>
+  <span class="flabel" style="color:var(--amber);font-size:10px;">⚡ SharePoint · Real-time</span>
 </div>
 
-<!-- ── P&L KPI CARDS ── -->
-<div class="sh"><div class="st">P&L Asosiy ko'rsatkichlar</div><div class="sl"></div></div>
-<div class="g6" id="plKpiCards">
-  <div class="kpi gr"><div class="kl">Revenue</div><div class="kv" id="kv-revenue">—</div><div class="ks" id="ks-revenue">so'm</div></div>
-  <div class="kpi bl"><div class="kl">Marginal Profit</div><div class="kv" id="kv-marginal">—</div><div class="ks" id="ks-marginal">—</div></div>
-  <div class="kpi bl"><div class="kl">Gross Profit</div><div class="kv" id="kv-gross">—</div><div class="ks" id="ks-gross">—</div></div>
-  <div class="kpi am"><div class="kl">EBITDA</div><div class="kv" id="kv-ebitda">—</div><div class="ks" id="ks-ebitda">—</div></div>
-  <div class="kpi am"><div class="kl">EBIT</div><div class="kv" id="kv-ebit">—</div><div class="ks" id="ks-ebit">—</div></div>
-  <div class="kpi re"><div class="kl">Net Profit</div><div class="kv" id="kv-net">—</div><div class="ks" id="ks-net">—</div></div>
-</div>
+<!-- ══════════════════════════════════════════
+     PAGE 1: PROFIT & LOSS (Plan vs Fact)
+═════════════════════════════════════════════ -->
+<div id="page-pl" class="page active">
 
-<!-- ── CHARTS ROW ── -->
-<div class="g2">
+  <div class="sh"><div class="st">P&L Plan vs Fact — Asosiy ko'rsatkichlar</div><div class="sl"></div></div>
+
+  <!-- KPI cards: Revenue, Marginal, Gross, EBITDA, Net -->
+  <div class="g4" id="plKpiCards">
+    <div class="kpi gr"><div class="kl">Revenue</div>
+      <div class="kv" id="kv-rev">—</div>
+      <div class="ks" id="ks-rev">Plan: —</div>
+    </div>
+    <div class="kpi bl"><div class="kl">Gross Profit</div>
+      <div class="kv" id="kv-gp">—</div>
+      <div class="ks" id="ks-gp">Plan: —</div>
+    </div>
+    <div class="kpi am"><div class="kl">EBITDA</div>
+      <div class="kv" id="kv-eb">—</div>
+      <div class="ks" id="ks-eb">Plan: —</div>
+    </div>
+    <div class="kpi pu"><div class="kl">Net Profit</div>
+      <div class="kv" id="kv-np">—</div>
+      <div class="ks" id="ks-np">Plan: —</div>
+    </div>
+  </div>
+
+  <!-- Plan vs Fact charts -->
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Revenue oylik dinamika</div>
+      <div class="cs">Plan vs Fact (mln so'm)</div>
+      <div style="position:relative;height:240px;"><canvas id="plRevChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">EBITDA oylik dinamika</div>
+      <div class="cs">Plan vs Fact (mln so'm)</div>
+      <div style="position:relative;height:240px;"><canvas id="plEbChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Full P&L table -->
   <div class="card">
-    <div class="ct">Oylik Revenue dinamikasi</div>
-    <div class="cs">So'm · million</div>
-    <div style="position:relative;height:200px;"><canvas id="revenueChart"></canvas></div>
+    <div class="ct">P&L Statement — to'liq jadval</div>
+    <div class="cs" id="pl-period">Plan vs Fact har bir qator uchun · variance va %</div>
+    <div style="overflow-x:auto;" id="plTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
   </div>
+
+  <!-- Top variances -->
   <div class="card">
-    <div class="ct">Foyda ko'rsatkichlari — oylik</div>
-    <div class="cs">Gross Profit · EBITDA · Net Profit</div>
-    <div style="position:relative;height:200px;"><canvas id="profitChart"></canvas></div>
+    <div class="ct">⚡ Eng katta farqlar (Top variances)</div>
+    <div class="cs">Plan vs Fact — eng yirik chetlanishlar</div>
+    <div id="plInsights"></div>
   </div>
 </div>
 
-<!-- ── P&L TABLE ── -->
-<div class="card">
-  <div class="ct">P&L Statement</div>
-  <div class="cs" id="pl-period-label">Tanlangan davr bo'yicha</div>
-  <div style="overflow-x:auto;" id="plTableWrap">
-    <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
-  </div>
-</div>
+<!-- ══════════════════════════════════════════
+     PAGE 2: CASH FLOW (Plan vs Fact)
+═════════════════════════════════════════════ -->
+<div id="page-cf" class="page">
+  <div class="sh"><div class="st">Cash Flow Plan vs Fact</div><div class="sl"></div></div>
 
-<!-- ── REVENUE BREAKDOWN ── -->
-<div class="g2">
+  <div class="g3">
+    <div class="kpi gr"><div class="kl">Operating CF</div>
+      <div class="kv" id="kv-ocf">—</div>
+      <div class="ks" id="ks-ocf">Plan: —</div>
+    </div>
+    <div class="kpi bl"><div class="kl">Investing CF</div>
+      <div class="kv" id="kv-icf">—</div>
+      <div class="ks" id="ks-icf">Plan: —</div>
+    </div>
+    <div class="kpi am"><div class="kl">Financing CF</div>
+      <div class="kv" id="kv-fcf">—</div>
+      <div class="ks" id="ks-fcf">Plan: —</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Cash Flow oylik dinamika</div>
+      <div class="cs">Operating + Investing + Financing</div>
+      <div style="position:relative;height:240px;"><canvas id="cfChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Closing balance trend</div>
+      <div class="cs">Yopilish balansi oyma-oy</div>
+      <div style="position:relative;height:240px;"><canvas id="cfBalChart"></canvas></div>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="ct">Revenue tarkibi</div>
-    <div class="cs">Manba bo'yicha taqsimot</div>
-    <div style="position:relative;height:220px;"><canvas id="revBreakChart"></canvas></div>
+    <div class="ct">Cash Flow Statement — to'liq jadval</div>
+    <div class="cs">Plan vs Fact, hamma OPERATING/INVESTING/FINANCING qatorlari bilan</div>
+    <div style="overflow-x:auto;" id="cfTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
   </div>
+
   <div class="card">
-    <div class="ct">Xarajatlar tarkibi</div>
-    <div class="cs">Kategoriya bo'yicha</div>
-    <div style="position:relative;height:220px;"><canvas id="costBreakChart"></canvas></div>
+    <div class="ct">⚡ Cash Flow farqlari</div>
+    <div class="cs">Eng katta variancelar</div>
+    <div id="cfInsights"></div>
   </div>
 </div>
 
-<!-- ── CASH FLOW ── -->
-<div class="sh" style="margin-top:6px;"><div class="st">Cash Flow</div><div class="sl"></div></div>
-<div class="g3">
-  <div class="kpi gr"><div class="kl">Operating CF</div><div class="kv" id="kv-ocf">—</div><div class="ks">asosiy faoliyat</div></div>
-  <div class="kpi bl"><div class="kl">Investing CF</div><div class="kv" id="kv-icf">—</div><div class="ks">investitsiya</div></div>
-  <div class="kpi am"><div class="kl">Financing CF</div><div class="kv" id="kv-fcf">—</div><div class="ks">moliyalashtirish</div></div>
-</div>
-<div class="card">
-  <div class="ct">Cash Flow — oylik dinamika</div>
-  <div class="cs">SCF (Statement of Cash Flows)</div>
-  <div style="position:relative;height:200px;"><canvas id="cfChart"></canvas></div>
-</div>
-<div class="card">
-  <div class="ct">Cash Flow jadvali</div>
-  <div class="cs">Oyma-oy tafsilot</div>
-  <div style="overflow-x:auto;" id="cfTableWrap">
-    <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+<!-- ══════════════════════════════════════════
+     PAGE 3: REVENUE BY SUBJECT (fanlar)
+═════════════════════════════════════════════ -->
+<div id="page-revenue" class="page">
+  <div class="sh"><div class="st">Tushum tahlili — Fanlar kesimida</div><div class="sl"></div></div>
+
+  <div class="g3">
+    <div class="kpi gr"><div class="kl">Plan tushum</div>
+      <div class="kv" id="kv-rev-plan">—</div>
+      <div class="ks">tanlangan davr</div>
+    </div>
+    <div class="kpi bl"><div class="kl">Fact tushum</div>
+      <div class="kv" id="kv-rev-fact">—</div>
+      <div class="ks">tanlangan davr</div>
+    </div>
+    <div class="kpi am"><div class="kl">Bajarilish %</div>
+      <div class="kv" id="kv-rev-pct">—</div>
+      <div class="ks">Fact / Plan</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Fanlar kesimida Plan vs Fact</div>
+    <div class="cs">Har bir fan uchun — qaysi sotuv bajarildi, qaysi yo'q</div>
+    <div style="position:relative;height:300px;"><canvas id="revFanChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Fanlar bo'yicha to'liq jadval</div>
+    <div class="cs">Plan vs Fact, variance, bajarilish %</div>
+    <div style="overflow-x:auto;" id="revFanTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Product type bo'yicha (Full course / Revision / Video lesson)</div>
+    <div style="overflow-x:auto;" id="revPtTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">⚡ Tushum xulosalari</div>
+    <div id="revInsights"></div>
   </div>
 </div>
 
-<!-- ── CASHIER / DAILY BALANCE ── -->
-<div class="sh" style="margin-top:6px;"><div class="st">Kunlik Balans (Cashier)</div><div class="sl"></div></div>
-<div class="g3" style="margin-bottom:14px;">
-  <div class="kpi gr"><div class="kl">Oxirgi balans</div><div class="kv" id="kv-lastbal">—</div><div class="ks" id="ks-lastbal">so'm</div></div>
-  <div class="kpi bl"><div class="kl">Jami kirim</div><div class="kv" id="kv-totalin">—</div><div class="ks">davrda</div></div>
-  <div class="kpi re"><div class="kl">Jami chiqim</div><div class="kv" id="kv-totalout">—</div><div class="ks">davrda</div></div>
+<!-- ══════════════════════════════════════════
+     PAGE 4: COSTS (Plan vs Fact)
+═════════════════════════════════════════════ -->
+<div id="page-costs" class="page">
+  <div class="sh"><div class="st">Xarajatlar Plan vs Fact</div><div class="sl"></div></div>
+
+  <div class="g4">
+    <div class="kpi re"><div class="kl">COS</div>
+      <div class="kv" id="kv-cos-fact">—</div>
+      <div class="ks" id="ks-cos">Plan: —</div>
+    </div>
+    <div class="kpi am"><div class="kl">Admin</div>
+      <div class="kv" id="kv-adm-fact">—</div>
+      <div class="ks" id="ks-adm">Plan: —</div>
+    </div>
+    <div class="kpi bl"><div class="kl">Selling</div>
+      <div class="kv" id="kv-sel-fact">—</div>
+      <div class="ks" id="ks-sel">Plan: —</div>
+    </div>
+    <div class="kpi pu"><div class="kl">Marketing</div>
+      <div class="kv" id="kv-mkt-fact">—</div>
+      <div class="ks" id="ks-mkt">Plan: —</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Xarajatlar oylik dinamika (Fact)</div>
+      <div class="cs">Asosiy 4 ta kategoriya</div>
+      <div style="position:relative;height:240px;"><canvas id="costMonthChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Xarajat strukturasi (Fact)</div>
+      <div class="cs">Tanlangan davr</div>
+      <div style="position:relative;height:240px;"><canvas id="costPieChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Xarajatlar — detali jadval (Plan vs Fact)</div>
+    <div style="overflow-x:auto;" id="costTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">⚡ Xarajat farqlari</div>
+    <div id="costInsights"></div>
+  </div>
 </div>
-<div class="card">
-  <div class="ct">Balans grafigi</div>
-  <div class="cs">Kunlik balans o'zgarishi</div>
-  <div style="position:relative;height:180px;"><canvas id="balanceChart"></canvas></div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 5: DAILY BALANCE (Cashier)
+═════════════════════════════════════════════ -->
+<div id="page-balance" class="page">
+  <div class="sh"><div class="st">Kunlik balans — Bank, Card, Cash</div><div class="sl"></div></div>
+
+  <div class="g4" id="balKpiRow">
+    <div class="kpi gr"><div class="kl">Bank (UZS)</div><div class="kv" id="kv-bank">—</div><div class="ks">joriy balans</div></div>
+    <div class="kpi bl"><div class="kl">Card</div><div class="kv" id="kv-card">—</div><div class="ks">joriy balans</div></div>
+    <div class="kpi am"><div class="kl">Cash</div><div class="kv" id="kv-cash">—</div><div class="ks">joriy balans</div></div>
+    <div class="kpi pu"><div class="kl">Jami</div><div class="kv" id="kv-totalbal">—</div><div class="ks">barcha hisoblar</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Joriy balanslar — barcha hisoblar</div>
+    <div class="cs" id="bal-asof">Accounts balances dan</div>
+    <div style="overflow-x:auto;" id="balAccountsWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Kunlik balans dinamikasi (so'nggi 90 kun)</div>
+    <div class="cs">Cash Data tranzaksiyalaridan hisoblangan</div>
+    <div style="position:relative;height:280px;"><canvas id="balChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Hisob turlari bo'yicha kunlik balans</div>
+    <div class="cs">Bank / Card / Cash alohida</div>
+    <div style="position:relative;height:240px;"><canvas id="balBreakChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">So'nggi tranzaksiyalar (200 ta)</div>
+    <div class="cs">Cash Data — eng yangidan eskigacha</div>
+    <div style="overflow-x:auto;max-height:480px;overflow-y:auto;" id="cashierTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
 </div>
-<div class="card">
-  <div class="ct">Kunlik operatsiyalar</div>
-  <div class="cs">Cash Data — Cashier.xlsb</div>
-  <div style="overflow-x:auto;max-height:420px;overflow-y:auto;" id="cashierTableWrap">
-    <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 6: ANALYTICS & CEO
+═════════════════════════════════════════════ -->
+<div id="page-analytics" class="page">
+  <div class="sh"><div class="st">Moliyaviy tahlil va CEO ko'rsatkichlari</div><div class="sl"></div></div>
+
+  <div class="g4">
+    <div class="kpi gr"><div class="kl">Gross Margin</div><div class="kv" id="kv-gm">—</div><div class="ks" id="ks-gm">Plan: —</div></div>
+    <div class="kpi bl"><div class="kl">EBITDA Margin</div><div class="kv" id="kv-em">—</div><div class="ks" id="ks-em">Plan: —</div></div>
+    <div class="kpi am"><div class="kl">Net Margin</div><div class="kv" id="kv-nm">—</div><div class="ks" id="ks-nm">Plan: —</div></div>
+    <div class="kpi pu"><div class="kl">Plan Execution %</div><div class="kv" id="kv-pe">—</div><div class="ks">Fact / Plan jami</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Moliyachi metrikalar</div>
+    <div class="cs">Profession financial analyst uchun ko'rsatkichlar</div>
+    <div style="overflow-x:auto;" id="finMetricsWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">CEO uchun KPI</div>
+    <div class="cs">Strategik metrikalar</div>
+    <div style="overflow-x:auto;" id="ceoMetricsWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">⚡ Avtomatik tahlil va xulosalar</div>
+    <div class="cs">Asosiy topilmalar va tavsiyalar</div>
+    <div id="ceoInsights"></div>
   </div>
 </div>
 
@@ -375,8 +647,23 @@ const PIN_EXPIRY_DAYS = 7;
 let msalInstance = null;
 let currentPin = '';
 const PIN_LENGTH = 6;
-let finData = { pl: null, cf: null, cashier: null };
+
+// ── DATA STATE ──
+// Asosiy ma'lumotlar — 3 fayldan yuklanadi
+let finData = {
+  plan: null,    // Fin Model for 2026 (Plan).xlsx — SPL SFP SCF (Plan), Sales Plan
+  fact: null,    // Fin Model - (with Flexed budget).xlsb — SPL SFP SCF, Direct CASH FLOW, Revenue
+  cashier: null, // Cashier.xlsx — Cash Data, Accounts balances
+};
 let charts = {};
+let curPage = 'pl';
+
+// Joriy filter holati
+let filterYear = 2026;
+let filterMonth = 'all'; // 'all' | 1..12
+
+// Fan tartibi (jadvallarda standartlashgan)
+const FAN_ORDER_FIN = ['FA','FR','MA','FM','PM','AA','TX','SBR','AFM','APM','BT','MSFO','DipIFR','PreDipIFR','PreMSFO','Hybrid','Exclusive'];
 
 // ══════════════════════════════════════════
 // AUTH FLOW — loginRedirect usuli
@@ -596,7 +883,7 @@ function setLoadingText(txt) { document.getElementById('loadingText').textConten
 function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
 
 // ══════════════════════════════════════════
-// DATA LOADING
+// FAYLLAR YUKLASH (3 ta fayl: Plan, Fact, Cashier)
 // ══════════════════════════════════════════
 async function loadData() {
   showLoading("Moliya ma'lumotlari yuklanmoqda...");
@@ -604,52 +891,87 @@ async function loadData() {
     const token = await getToken();
     setLoadingText("SharePoint ulanmoqda...");
     const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`,
-      { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     const site = await siteRes.json();
     const siteId = site.id;
     const driveRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drive`,
-      { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     const drive = await driveRes.json();
     const driveId = drive.id;
 
-    setLoadingText("P&L yuklanmoqda (Fin Model)...");
-    let plBuffer = null;
-    try { plBuffer = await fetchExcel(token, driveId, "Fin Model - Fact Only"); } catch(e){ console.warn("PL:",e); }
+    // 1. PLAN file
+    setLoadingText("Plan yuklanmoqda (Fin Model for 2026)...");
+    let planBuffer = null;
+    try {
+      planBuffer = await fetchExcel(token, driveId, [
+        "Fin Model for 2026 (Plan)",
+        "Fin Model for 2026"
+      ]);
+    } catch (e) { console.warn("Plan:", e); }
 
+    // 2. FACT file
+    setLoadingText("Fact yuklanmoqda (Flexed budget)...");
+    let factBuffer = null;
+    try {
+      factBuffer = await fetchExcel(token, driveId, [
+        "Fin Model - (with Flexed budget)",
+        "Fin Model with Flexed budget",
+        "Fin Model - Fact",
+        "Fin Model"
+      ]);
+    } catch (e) { console.warn("Fact:", e); }
+
+    // 3. CASHIER file
     setLoadingText("Cashier yuklanmoqda...");
     let cashBuffer = null;
-    try { cashBuffer = await fetchExcel(token, driveId, "Cashier"); } catch(e){ console.warn("Cashier:",e); }
+    try {
+      cashBuffer = await fetchExcel(token, driveId, ["Cashier"]);
+    } catch (e) { console.warn("Cashier:", e); }
 
     setLoadingText("Ma'lumotlar tahlil qilinmoqda...");
-    finData.pl = plBuffer ? parsePL(plBuffer) : null;
-    finData.cashier = cashBuffer ? parseCashier(cashBuffer) : null;
+    finData.plan = planBuffer ? parsePlanFile(planBuffer) : null;
+    finData.fact = factBuffer ? parseFactFile(factBuffer) : null;
+    finData.cashier = cashBuffer ? parseCashierFile(cashBuffer) : null;
 
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
     hideLoading();
-    renderAll();
-  } catch(e) {
+    renderCurrentPage();
+  } catch (e) {
     hideLoading();
     alert("Xato: " + e.message);
     console.error(e);
   }
 }
 
-async function fetchExcel(token, driveId, baseName) {
+// fetchExcel — endi 1 ta nom o'rniga ro'yxatdan birinchi mosini topadi
+async function fetchExcel(token, driveId, baseNames) {
+  if (typeof baseNames === 'string') baseNames = [baseNames];
+
   async function searchFolder(folderId) {
     const res = await fetch(
-      `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children?$top=100`,
-      { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
+      `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children?$top=200`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     const data = await res.json();
     const items = data.value || [];
-    const match = items.find(i =>
-      i.name === baseName + '.xlsx' ||
-      i.name === baseName + '.xlsb' ||
-      i.name.startsWith(baseName)
-    );
-    if (match) {
-      console.log(`✅ ${match.name}`);
-      return match.id;
+
+    // Avval ro'yxatdagi har bir nom bilan to'liq mos kelishni qidiramiz
+    for (const baseName of baseNames) {
+      const exact = items.find(i =>
+        i.name === baseName + '.xlsx' ||
+        i.name === baseName + '.xlsb' ||
+        i.name === baseName + '.xlsm'
+      );
+      if (exact) { console.log(`✅ exact: ${exact.name}`); return exact.id; }
     }
+    // Keyin "boshlanadi" tekshiruvi
+    for (const baseName of baseNames) {
+      const partial = items.find(i =>
+        (i.name.toLowerCase().startsWith(baseName.toLowerCase())) &&
+        (i.name.endsWith('.xlsx') || i.name.endsWith('.xlsb') || i.name.endsWith('.xlsm'))
+      );
+      if (partial) { console.log(`✅ partial: ${partial.name}`); return partial.id; }
+    }
+    // Subfolder larga kirib qidirish
     for (const item of items) {
       if (item.folder) {
         const r = await searchFolder(item.id);
@@ -658,14 +980,15 @@ async function fetchExcel(token, driveId, baseName) {
     }
     return null;
   }
+
   const rootRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${driveId}/root`,
-    { headers:{ Authorization:`Bearer ${token}` }, cache:'no-store' });
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
   const root = await rootRes.json();
   const itemId = await searchFolder(root.id);
-  if (!itemId) throw new Error(`${baseName} topilmadi`);
+  if (!itemId) throw new Error(`${baseNames[0]} topilmadi`);
   const fileRes = await fetch(
     `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?ts=${Date.now()}`,
-    { headers:{ Authorization:`Bearer ${token}`, 'Cache-Control':'no-cache' }, cache:'no-store' });
+    { headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache' }, cache: 'no-store' });
   return await fileRes.arrayBuffer();
 }
 
@@ -673,520 +996,1357 @@ async function fetchExcel(token, driveId, baseName) {
 // EXCEL PARSERS
 // ══════════════════════════════════════════
 
-// SPL SFP SCF sheet strukturasi:
-// Row 7: header (col6=yil, col7..18=oylar, col19..22=kvartallar)
-// Row 8+: ma'lumotlar (col0=label, col6=yillik jami, col7..18=oy qiymatlari)
-// Row 117+: SCF qismi (OPERATING, INVESTING, FINANCING, CLOSING BALANCE)
+// PLAN file: 'SPL SFP SCF (Plan)' + 'Sales Plan' sheets
+function parsePlanFile(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('Plan sheets:', wb.SheetNames);
 
-function parsePL(buffer) {
-  const wb = XLSX.read(buffer, { type:'array', cellDates:false });
-  console.log('Sheets:', wb.SheetNames);
+  const splSheet = wb.SheetNames.find(s => s.includes('SPL SFP SCF') && s.includes('Plan'))
+                || wb.SheetNames.find(s => s.includes('SPL SFP SCF'));
+  const salesPlanSheet = wb.SheetNames.find(s => s === 'Sales Plan' || s.includes('Sales Plan'));
 
-  // SPL SFP SCF — asosiy sheet
-  const splSheet = wb.SheetNames.find(s => s.includes('SPL')) || wb.SheetNames[0];
-  // Direct CASH FLOW — oylik CF pivot
-  const cfSheet = wb.SheetNames.find(s => s.includes('CASH FLOW') || s.includes('Cash Flow'));
-
-  let splRows = [], cfRows = [];
+  const result = { splRows: [], salesPlanRows: [] };
 
   if (splSheet) {
-    const ws = wb.Sheets[splSheet];
-    splRows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
+    result.splRows = XLSX.utils.sheet_to_json(wb.Sheets[splSheet], { header: 1, raw: true, defval: null });
+  }
+  if (salesPlanSheet) {
+    result.salesPlanRows = XLSX.utils.sheet_to_json(wb.Sheets[salesPlanSheet], { header: 1, raw: true, defval: null });
+  }
+  return result;
+}
+
+// FACT file: 'SPL SFP SCF' + 'Direct CASH FLOW' + 'Revenue' sheets
+function parseFactFile(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('Fact sheets:', wb.SheetNames);
+
+  const splSheet = wb.SheetNames.find(s => s === 'SPL SFP SCF') || wb.SheetNames.find(s => s.includes('SPL SFP SCF') && !s.includes('Plan'));
+  const cfSheet = wb.SheetNames.find(s => s.includes('CASH FLOW') || s.includes('Cash Flow'));
+  const revenueSheet = wb.SheetNames.find(s => s === 'Revenue');
+
+  const result = { splRows: [], cfRows: [], revenueRows: [] };
+
+  if (splSheet) {
+    result.splRows = XLSX.utils.sheet_to_json(wb.Sheets[splSheet], { header: 1, raw: true, defval: null });
   }
   if (cfSheet) {
-    const ws = wb.Sheets[cfSheet];
-    cfRows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null });
+    result.cfRows = XLSX.utils.sheet_to_json(wb.Sheets[cfSheet], { header: 1, raw: true, defval: null });
   }
-
-  return { splRows, cfRows };
+  if (revenueSheet) {
+    result.revenueRows = XLSX.utils.sheet_to_json(wb.Sheets[revenueSheet], { header: 1, raw: true, defval: null });
+  }
+  return result;
 }
 
-function parseCashier(buffer) {
-  const wb = XLSX.read(buffer, { type:'array', cellDates:false });
-  const cashSheet = wb.SheetNames.find(s => s === 'Cash Data' || s.toLowerCase().includes('cash')) || wb.SheetNames[0];
-  console.log('Cashier sheet:', cashSheet);
-  const ws = wb.Sheets[cashSheet];
-  const rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:false, defval:null });
-  return { rows, sheetName: cashSheet };
+// CASHIER file: 'Cash Data' + 'Accounts balances' sheets
+function parseCashierFile(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('Cashier sheets:', wb.SheetNames);
+
+  const cashSheet = wb.SheetNames.find(s => s === 'Cash Data' || s.toLowerCase().includes('cash data')) || wb.SheetNames[0];
+  const accountsSheet = wb.SheetNames.find(s => s === 'Accounts balances' || s.toLowerCase().includes('accounts balance'));
+
+  const result = { cashRows: [], accountsRows: [] };
+
+  if (cashSheet) {
+    result.cashRows = XLSX.utils.sheet_to_json(wb.Sheets[cashSheet], { header: 1, raw: false, defval: null });
+  }
+  if (accountsSheet) {
+    result.accountsRows = XLSX.utils.sheet_to_json(wb.Sheets[accountsSheet], { header: 1, raw: false, defval: null });
+  }
+  return result;
 }
 
 // ══════════════════════════════════════════
-// RENDER
+// SPL SFP SCF — LABEL → ROW VALUES extraction
 // ══════════════════════════════════════════
-function renderAll() {
-  const year = parseInt(document.getElementById('fin-year-sel').value);
-  const monthVal = document.getElementById('fin-month-sel').value;
-  const month = monthVal === 'all' ? null : parseInt(monthVal);
+// Plan/Fact strukturasi:
+// Row 8: header (col 6 = year/yearly, col 7..18 = Yan..Dec)
+// Row 9+: data (col 2 = label, col 6 = yearly, col 7..18 = monthly)
+//
+// Bu funksiya barcha qatorlarni mapga aylantiradi:
+// { 'Revenue': { label, yearly, months: [12 qiymatlar] }, ... }
 
-  if (finData.pl) {
-    renderPL(finData.pl, year, month);
-    renderCF(finData.pl, year, month);
-  } else {
-    ['plTableWrap','cfTableWrap'].forEach(id => {
-      document.getElementById(id).innerHTML = '<div style="color:var(--red);font-size:12px;padding:16px;">⚠️ Fin Model fayli yuklanmadi</div>';
-    });
-  }
-  if (finData.cashier) {
-    renderCashier(finData.cashier, year, month);
-  } else {
-    document.getElementById('cashierTableWrap').innerHTML = '<div style="color:var(--red);font-size:12px;padding:16px;">⚠️ Cashier fayli yuklanmadi</div>';
-  }
-}
-
-// ── P&L RENDERER ──
-// SPL SFP SCF sheet: Row 7 = header, col6=yillik, col7..18 = Jan..Dec
-// Label col = 0, data cols = 6 (annual) + 7-18 (monthly)
-function renderPL(data, year, month) {
-  const { splRows } = data;
-  if (!splRows || splRows.length < 10) {
-    document.getElementById('plTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot mavjud emas</div>';
-    return;
-  }
-
-  // Header row = row index 7
-  const HEADER_ROW = 7;
-  // Data starts from row 8, ends before SCF section (row ~117)
-  const DATA_START = 8;
-  const DATA_END = 117;
-
-  // Col 6 = yillik jami, col 7..18 = Jan..Dec
-  const ANNUAL_COL = 6;
-  const MONTH_COLS = [7,8,9,10,11,12,13,14,15,16,17,18]; // Jan=0..Dec=11
-  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-  // Oy tanlangan bo'lsa — faqat o'sha ustun, aks holda barcha oylar
-  let displayCols;
-  if (month !== null) {
-    displayCols = [{ idx: MONTH_COLS[month], label: MONTH_NAMES[month] }];
-  } else {
-    // Yillik jami + barcha oylar
-    displayCols = [
-      { idx: ANNUAL_COL, label: 'Yillik' },
-      ...MONTH_NAMES.map((m, i) => ({ idx: MONTH_COLS[i], label: m }))
-    ];
-  }
-
-  const kpi = { revenue:0, marginal:0, gross:0, ebitda:0, ebit:0, net:0 };
-
-  // P&L da muhim qatorlar row indekslari (0-based)
-  const KEY_ROWS = {
-    revenue: 8,       // Revenue
-    marginal: 24,     // Marginal profit
-    gross: 38,        // Gross profit
-    ebitda: 89,       // EBITDA
-    ebit: 96,         // EBIT
-    net: 102,         // Net profit
-  };
-
-  // KPI qiymatlarini olish
-  const getVal = (rowIdx, colIdx) => {
-    const row = splRows[rowIdx];
-    if (!row) return 0;
-    const v = row[colIdx];
-    const n = parseFloat(String(v === null || v === undefined ? '0' : v));
-    return isNaN(n) ? 0 : n;
-  };
-
-  const displayColIdx = month !== null ? MONTH_COLS[month] : ANNUAL_COL;
-  Object.keys(KEY_ROWS).forEach(k => {
-    kpi[k] = getVal(KEY_ROWS[k], displayColIdx);
-  });
-
-  // KPI cards yangilash
-  const KPI_COLORS = { revenue:'gr', marginal:'bl', gross:'bl', ebitda:'am', ebit:'am', net:'re' };
-  ['revenue','marginal','gross','ebitda','ebit','net'].forEach(k => {
-    const el = document.getElementById(`kv-${k}`);
-    const sub = document.getElementById(`ks-${k}`);
-    const card = el?.closest('.kpi');
-    if (el) el.textContent = fmtNum(kpi[k]);
-    if (sub) sub.textContent = Math.abs(kpi[k]) >= 1e9 ? 'mlrd so\'m' : Math.abs(kpi[k]) >= 1e6 ? 'mln so\'m' : 'so\'m';
-    if (card) {
-      const base = KPI_COLORS[k];
-      card.className = card.className.replace(/\b(gr|bl|am|re|pu|te)\b/, kpi[k] < 0 ? 're' : base);
+function buildSplMap(splRows) {
+  const map = {};
+  if (!splRows || splRows.length === 0) return map;
+  // 0-indexed: rowIndex 0 = R1
+  for (let i = 8; i < splRows.length; i++) {
+    const row = splRows[i] || [];
+    const label = row[2];
+    if (!label || typeof label !== 'string' || !label.trim()) continue;
+    const lbl = label.trim();
+    const yearly = toNum(row[6]);
+    const months = [];
+    for (let m = 7; m <= 18; m++) months.push(toNum(row[m]));
+    // Agar bir nechta qator bir xil labelga ega bo'lsa (CF qismi) — birinchisini saqlaymiz P&L uchun,
+    // aniq mapping uchun rowIndex bilan ham saqlaymiz
+    if (!(lbl in map)) {
+      map[lbl] = { label: lbl, yearly: yearly, months: months, rowIndex: i + 1 };
     }
+    // CF (Cash Flow) qismi uchun alohida key — "_cf:" prefiksi bilan
+    if (i >= 108) { // R109+ — CF zone
+      const cfKey = '_cf:' + lbl;
+      if (!(cfKey in map)) {
+        map[cfKey] = { label: lbl, yearly: yearly, months: months, rowIndex: i + 1 };
+      }
+    }
+  }
+  return map;
+}
+
+function toNum(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return isNaN(v) ? 0 : v;
+  const n = parseFloat(String(v).replace(/,/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
+// SPL labels — Plan vs Fact P&L jadvali tartibi
+const PL_STRUCTURE = [
+  { type: 'section', label: 'REVENUE' },
+  { type: 'main', label: 'Revenue', plan: 'Revenue', fact: 'Revenue' },
+  { type: 'sub', label: 'Full course', plan: 'Full course', fact: 'Full course' },
+  { type: 'sub', label: 'Hybrid', plan: 'Hybrid', fact: 'Hybrid' },
+  { type: 'sub', label: 'Revision', plan: 'Revision', fact: 'Revision' },
+  { type: 'sub', label: 'Video lesson', plan: 'Video lesson', fact: 'Video lesson' },
+  { type: 'sub', label: 'Exclusive', plan: 'Exclusive', fact: 'Exclusive' },
+
+  { type: 'section', label: 'COST OF SALES' },
+  { type: 'main', label: 'Marginal cost of sales', plan: 'Marginal cost of sales', fact: 'Marginal cost of sales', expense: true },
+  // Plan'da "Tutors' Salary", Fact'da "Tutor's salary" — ikkalasini sinab ko'ramiz
+  { type: 'sub', label: "Tutors' Salary", plan: "Tutors' Salary", fact: "Tutor's salary", altFact: "Tutors' Salary", expense: true },
+
+  { type: 'main', label: 'Marginal profit', plan: 'Marginal profit', fact: 'Marginal profit' },
+
+  { type: 'main', label: 'Production costs', plan: 'Production costs', fact: 'Production costs', expense: true },
+  { type: 'sub', label: 'Internet and communication', plan: 'Internet and communication services', fact: 'Internet and communication services', expense: true },
+  { type: 'sub', label: 'Rental of premises', plan: 'Rental of premises', fact: 'Rental of premises', expense: true },
+  { type: 'sub', label: 'Zoom subscription', plan: 'Zoom subscription', fact: 'Zoom subscription', expense: true },
+  { type: 'sub', label: 'Expenses on utilities', plan: 'Expenses on utilities', fact: 'Expenses on utilities', expense: true },
+
+  { type: 'total', label: 'Gross profit', plan: 'Gross profit', fact: 'Gross profit' },
+
+  { type: 'section', label: 'OPERATING EXPENSES' },
+  { type: 'main', label: 'Other income', plan: 'Other income', fact: 'Other income' },
+  { type: 'sub', label: 'Sundry income', plan: '__skip__', fact: 'Sundry income' },
+
+  { type: 'main', label: 'Admin expenses', plan: 'Admin expenses', fact: 'Admin expenses', expense: true },
+  { type: 'sub', label: 'Wages and salaries', plan: 'Wages and salaries', fact: 'Wages and salaries', expense: true },
+  { type: 'sub', label: 'Other admin expenses', plan: 'Other admin expenses', fact: 'Other admin expenses', expense: true },
+
+  { type: 'main', label: 'Selling costs', plan: 'Selling costs', fact: 'Selling costs', expense: true },
+  { type: 'sub', label: 'Sales costs', plan: 'Sales costs', fact: 'Sales costs', expense: true },
+
+  { type: 'main', label: 'Marketing costs', plan: 'Marketing costs', fact: 'Marketing costs', expense: true },
+  { type: 'sub', label: 'Salary of marketing staff', plan: 'Salary of marketing staff', fact: 'Salary of marketing staff', expense: true },
+  { type: 'sub', label: 'Target', plan: 'Target', fact: 'Target', expense: true },
+
+  { type: 'total', label: 'EBITDA', plan: 'EBITDA', fact: 'EBITDA' },
+
+  { type: 'section', label: 'BELOW EBITDA' },
+  { type: 'main', label: 'Depreciation', plan: 'Depreciation', fact: 'Depreciation', expense: true },
+  { type: 'main', label: 'Finance costs', plan: 'Finance costs', fact: 'Finance costs', expense: true },
+  { type: 'main', label: 'Tax', plan: 'Tax', fact: 'Tax', expense: true },
+
+  { type: 'total', label: 'Net profit', plan: 'Net profit', fact: 'Net profit' },
+];
+
+// CF tuzilishi
+const CF_STRUCTURE = [
+  { type: 'section', label: 'OPERATING ACTIVITIES' },
+  { type: 'main', label: 'OPERATING ACTIVITIES (Total)', plan: '_cf:OPERATING ACTIVITIES', fact: '_cf:OPERATING ACTIVITIES' },
+  { type: 'sub', label: 'Receipts from main activities', plan: '_cf:Receipts from main activities', fact: '_cf:Receipts from main activities' },
+  { type: 'sub', label: 'Refunds (Payment)', plan: '_cf:Refunds (Payment)', fact: '_cf:Refunds (Payment)' },
+  { type: 'sub', label: "Tutors' Salary", plan: "_cf:Tutors' Salary", fact: "_cf:Tutors' Salary", expense: true },
+  { type: 'sub', label: 'Production costs', plan: '_cf:Production costs', fact: '_cf:Production costs', expense: true },
+  { type: 'sub', label: 'Admin expenses', plan: '_cf:Admin expenses', fact: '_cf:Admin expenses', expense: true },
+  { type: 'sub', label: 'Wages and salaries', plan: '_cf:Wages and salaries', fact: '_cf:Wages and salaries', expense: true },
+  { type: 'sub', label: 'Sales costs', plan: '_cf:Sales costs', fact: '_cf:Sales costs', expense: true },
+  { type: 'sub', label: 'Marketing costs', plan: '_cf:Marketing costs', fact: '_cf:Marketing costs', expense: true },
+  { type: 'sub', label: 'Tax', plan: '_cf:Tax', fact: '_cf:Tax', expense: true },
+
+  { type: 'section', label: 'INVESTING ACTIVITIES' },
+  { type: 'main', label: 'INVESTING ACTIVITIES (Total)', plan: '_cf:INVESTING ACTIVITIES', fact: '_cf:INVESTING ACTIVITIES' },
+  { type: 'sub', label: 'Inflow from Investing', plan: '_cf:Inflow from Investing', fact: '_cf:Inflow from Investing' },
+  { type: 'sub', label: 'Outflow from Investing', plan: '_cf:Outflow from Investing', fact: '_cf:Outflow from Investing', expense: true },
+  { type: 'sub', label: 'Purchase of fixed assets', plan: '_cf:Purchase of fixed assets', fact: '_cf:Purchase of fixed assets', expense: true },
+
+  { type: 'section', label: 'FINANCING ACTIVITIES' },
+  { type: 'main', label: 'FINANCING ACTIVITIES (Total)', plan: '_cf:FINANCING ACTIVITIES', fact: '_cf:FINANCING ACTIVITIES' },
+  { type: 'sub', label: 'Inflow from Financing', plan: '_cf:Inflow from Financing activities', fact: '_cf:Inflow from Financing activities' },
+  { type: 'sub', label: 'Loans received (inflows)', plan: '_cf:Loans received (inflows)', fact: '_cf:Loans received (inflows)' },
+  { type: 'sub', label: 'Outflow from Financing', plan: '_cf:Outflow from Financing', fact: '_cf:Outflow from Financing', expense: true },
+  { type: 'sub', label: 'Dividends payable (outflows)', plan: '_cf:Dividends payable (outflows)', fact: '_cf:Dividends payable (outflows)', expense: true },
+  { type: 'sub', label: 'Loans received (principal repayment)', plan: '_cf:Loans received (principal repayment)', fact: '_cf:Loans received (principal repayment)', expense: true },
+
+  { type: 'total', label: 'Closing balance', plan: 'Closing balance', fact: '_cf:Closing balance' },
+];
+
+// Filter qiymatini olish
+function getValueForFilter(obj, year, month) {
+  if (!obj) return 0;
+  // Hozircha faqat 2026 — Plan/Fact ikkalasi ham 2026 ga mo'ljallangan
+  // Keyinchalik yil bo'yicha ham qator topish kerak
+  if (month === 'all') return obj.yearly || 0;
+  const monthIdx = parseInt(month) - 1;
+  if (isNaN(monthIdx) || monthIdx < 0 || monthIdx > 11) return obj.yearly || 0;
+  return obj.months[monthIdx] || 0;
+}
+
+function lookupSplValue(splMap, key, altKey) {
+  if (key === '__skip__') return 0;
+  if (splMap[key]) return splMap[key];
+  if (altKey && splMap[altKey]) return splMap[altKey];
+  return null;
+}
+
+// ══════════════════════════════════════════
+// CASHIER PARSING — Daily balances
+// ══════════════════════════════════════════
+// Cash Data sheet (R6+ data):
+// col 1=Date, 7=Account name, 8=Inflow, 9=Outflow, 12=Inflow(UZS), 13=Outflow(UZS),
+// 17=Inflow/Outflow direction, 20=Activity type, 21=Running balance
+function buildCashierMap(cashRows) {
+  if (!cashRows || cashRows.length < 6) return { transactions: [], accountTypes: {} };
+  const transactions = [];
+  // Type mapping: account name → type (Bank UZS / Card / Cash USD / Cash UZS)
+  const ACCOUNT_TYPE = (name) => {
+    if (!name) return 'Other';
+    const s = String(name);
+    if (s.includes('Cash: USD')) return 'Cash USD';
+    if (s.includes('Cash: UZS')) return 'Cash UZS';
+    if (s.includes('Cash: Card') || s.includes('Visa card')) return 'Card';
+    if (s.startsWith('№ счёта') || s.includes('м/а') || s.includes('M/A')) return 'Bank UZS';
+    return 'Other';
+  };
+
+  for (let i = 5; i < cashRows.length; i++) {
+    const r = cashRows[i] || [];
+    const dateRaw = r[1];
+    if (!dateRaw) continue;
+    const date = parseAnyDate(dateRaw);
+    if (!date) continue;
+
+    const inflowUZS = toNum(r[12]);
+    const outflowUZS = toNum(r[13]);
+    if (inflowUZS === 0 && outflowUZS === 0) continue;
+
+    transactions.push({
+      date,
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      account: r[7] || '',
+      accountType: ACCOUNT_TYPE(r[7]),
+      details: r[5] || '',
+      inflow: inflowUZS,
+      outflow: outflowUZS,
+      classification: r[18] || '',
+      activityType: r[20] || '',
+      runningBalance: toNum(r[21]),
+    });
+  }
+  return { transactions };
+}
+
+function parseAnyDate(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  if (typeof v === 'number') {
+    // Excel serial date
+    return new Date(Math.round((v - 25569) * 86400 * 1000));
+  }
+  const s = String(v);
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Accounts balances
+function buildAccountsMap(accountsRows) {
+  if (!accountsRows || accountsRows.length < 5) return { accounts: [], total: 0, asOf: '' };
+  const accounts = [];
+  let total = 0;
+  let asOf = '';
+  // Header r4 (index 3): № | Name | Code | Today's Balance | Fact Balance | Checking | . | Opening | Inflow | Outflow | Closing
+  // Date in row 2 col 9 (index 9)
+  if (accountsRows[1] && accountsRows[1][9]) {
+    const d = parseAnyDate(accountsRows[1][9]);
+    if (d) asOf = d.toLocaleDateString('uz');
+  }
+  for (let i = 4; i < accountsRows.length; i++) {
+    const r = accountsRows[i] || [];
+    const num = r[0];
+    const name = r[1];
+    if (!name || !num || String(name).toLowerCase().includes('total')) continue;
+    const todayBal = toNum(r[3]);
+    const factBal = toNum(r[4]);
+    accounts.push({
+      num, name: String(name).trim(),
+      code: r[2] || '',
+      todayBalance: todayBal,
+      factBalance: factBal,
+      type: classifyAccount(String(name))
+    });
+    total += todayBal;
+  }
+  return { accounts, total, asOf };
+}
+
+function classifyAccount(name) {
+  if (!name) return 'Other';
+  const s = String(name);
+  if (s.includes('Cash: USD')) return 'Cash USD';
+  if (s.includes('Cash: UZS') || s.includes('Cash: Card') || s.includes('Visa card UZS')) return 'Cash';
+  if (s.includes('FBA M/A') || s.includes('FBA GBP') || s.includes('FBA Convert') ||
+      s.includes('All-Madinah')) return 'Bank';
+  return 'Other';
+}
+
+// ══════════════════════════════════════════
+// REVENUE BY SUBJECT — Plan vs Fact
+// ══════════════════════════════════════════
+
+// Plan: Sales Plan sheet
+// col 1=Fan, col 4=Product turi, col 15=Date, col 17=Revenue
+function buildPlanRevenueByFan(salesPlanRows, year) {
+  if (!salesPlanRows || salesPlanRows.length < 2) return { byFan: {}, byProductType: {}, monthly: {} };
+  const byFan = {};
+  const byProductType = {};
+  const monthly = {}; // 'YYYY-MM' → total
+
+  for (let i = 1; i < salesPlanRows.length; i++) {
+    const r = salesPlanRows[i] || [];
+    const fan = r[1];
+    const ptype = r[4];
+    const dateRaw = r[15];
+    const rev = toNum(r[17]);
+    if (!fan || rev === 0) continue;
+    const d = parseAnyDate(dateRaw);
+    if (!d) continue;
+    if (year && d.getFullYear() !== year) continue;
+
+    const monthIdx = d.getMonth() + 1;
+    const fanKey = String(fan).trim();
+    const ptKey = String(ptype || 'Other').trim();
+    const monthKey = `${d.getFullYear()}-${String(monthIdx).padStart(2, '0')}`;
+
+    if (!byFan[fanKey]) byFan[fanKey] = { yearly: 0, months: new Array(12).fill(0) };
+    byFan[fanKey].yearly += rev;
+    byFan[fanKey].months[monthIdx - 1] += rev;
+
+    if (!byProductType[ptKey]) byProductType[ptKey] = { yearly: 0, months: new Array(12).fill(0) };
+    byProductType[ptKey].yearly += rev;
+    byProductType[ptKey].months[monthIdx - 1] += rev;
+
+    monthly[monthKey] = (monthly[monthKey] || 0) + rev;
+  }
+  return { byFan, byProductType, monthly };
+}
+
+// Fact: Revenue sheet
+// col 3=Product (Fan), col 6=Product type, col 16=Total revenue, col 17=Date (Excel serial)
+function buildFactRevenueByFan(revenueRows, year) {
+  if (!revenueRows || revenueRows.length < 2) return { byFan: {}, byProductType: {}, monthly: {} };
+  const byFan = {};
+  const byProductType = {};
+  const monthly = {};
+
+  for (let i = 1; i < revenueRows.length; i++) {
+    const r = revenueRows[i] || [];
+    const fan = r[3];
+    const ptype = r[6];
+    const rev = toNum(r[16]);
+    const dateRaw = r[17];
+    if (!fan || rev === 0) continue;
+    const d = parseAnyDate(dateRaw);
+    if (!d) continue;
+    if (year && d.getFullYear() !== year) continue;
+
+    const monthIdx = d.getMonth() + 1;
+    const fanKey = String(fan).trim();
+    const ptKey = String(ptype || 'Other').trim();
+    const monthKey = `${d.getFullYear()}-${String(monthIdx).padStart(2, '0')}`;
+
+    if (!byFan[fanKey]) byFan[fanKey] = { yearly: 0, months: new Array(12).fill(0) };
+    byFan[fanKey].yearly += rev;
+    byFan[fanKey].months[monthIdx - 1] += rev;
+
+    if (!byProductType[ptKey]) byProductType[ptKey] = { yearly: 0, months: new Array(12).fill(0) };
+    byProductType[ptKey].yearly += rev;
+    byProductType[ptKey].months[monthIdx - 1] += rev;
+
+    monthly[monthKey] = (monthly[monthKey] || 0) + rev;
+  }
+  return { byFan, byProductType, monthly };
+}
+
+// ══════════════════════════════════════════
+// FORMATTING UTILS
+// ══════════════════════════════════════════
+function fmtNum(n, short = false) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (short) {
+    if (Math.abs(n) >= 1e12) return (n / 1e12).toFixed(1) + 'T';
+    if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+    if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(0) + 'K';
+    return n.toFixed(0);
+  }
+  return n.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmtMln(n) {
+  if (n === null || n === undefined || isNaN(n) || n === 0) return '—';
+  if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2) + ' mlrd';
+  return Math.round(n / 1e6) + ' mln';
+}
+function fmtPct(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+}
+
+// Variance pill HTML — Plan vs Fact farqi
+function variancePill(plan, fact, isExpense) {
+  if (plan === 0 && fact === 0) return '<span class="var-pct vp-neu">—</span>';
+  if (plan === 0) {
+    return `<span class="var-pct ${fact > 0 ? 'vp-good' : 'vp-bad'}">∞</span>`;
+  }
+  const vPct = ((fact - plan) / Math.abs(plan)) * 100;
+  // Tushum uchun: yashil = ortiq, qizil = kam
+  // Xarajat uchun: yashil = kam, qizil = ortiq
+  let cls = 'vp-neu';
+  if (Math.abs(vPct) > 2) {
+    if (isExpense) {
+      // Xarajatda Math.abs(fact) > Math.abs(plan) yomon, kam = yaxshi
+      cls = (Math.abs(fact) > Math.abs(plan)) ? 'vp-bad' : 'vp-good';
+    } else {
+      cls = (fact > plan) ? 'vp-good' : 'vp-bad';
+    }
+  }
+  const sign = vPct >= 0 ? '+' : '';
+  return `<span class="var-pct ${cls}">${sign}${vPct.toFixed(1)}%</span>`;
+}
+
+function varianceVal(plan, fact, isExpense) {
+  const diff = fact - plan;
+  if (Math.abs(diff) < 1) return '<span class="var-neu">—</span>';
+  let cls = 'var-neu';
+  if (isExpense) {
+    cls = (Math.abs(fact) > Math.abs(plan)) ? 'var-neg' : 'var-pos';
+  } else {
+    cls = (fact > plan) ? 'var-pos' : 'var-neg';
+  }
+  return `<span class="${cls}">${diff > 0 ? '+' : ''}${fmtMln(diff)}</span>`;
+}
+
+function ins(type, label, text) {
+  return `<div class="ins ${type}"><div class="il">${label}</div><div class="it">${text}</div></div>`;
+}
+
+// ══════════════════════════════════════════
+// PAGE NAVIGATION & FILTER CHANGE
+// ══════════════════════════════════════════
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(el => el.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  if (btn) btn.classList.add('active');
+  curPage = id;
+  renderCurrentPage();
+}
+
+function onFilterChange() {
+  filterYear = parseInt(document.getElementById('fin-year-sel').value);
+  const m = document.getElementById('fin-month-sel').value;
+  filterMonth = m === 'all' ? 'all' : parseInt(m);
+  renderCurrentPage();
+}
+
+function renderCurrentPage() {
+  if (!finData.plan && !finData.fact && !finData.cashier) return;
+  switch (curPage) {
+    case 'pl':        renderPLPage(); break;
+    case 'cf':        renderCFPage(); break;
+    case 'revenue':   renderRevenuePage(); break;
+    case 'costs':     renderCostsPage(); break;
+    case 'balance':   renderBalancePage(); break;
+    case 'analytics': renderAnalyticsPage(); break;
+  }
+}
+
+// ══════════════════════════════════════════
+// PAGE 1: P&L PLAN VS FACT
+// ══════════════════════════════════════════
+function renderPLPage() {
+  const planMap = finData.plan ? buildSplMap(finData.plan.splRows) : {};
+  const factMap = finData.fact ? buildSplMap(finData.fact.splRows) : {};
+
+  // KPI cards: Revenue, GP, EBITDA, NP
+  const kpis = [
+    { id: 'rev', plan: 'Revenue', fact: 'Revenue', isExp: false },
+    { id: 'gp',  plan: 'Gross profit', fact: 'Gross profit', isExp: false },
+    { id: 'eb',  plan: 'EBITDA', fact: 'EBITDA', isExp: false },
+    { id: 'np',  plan: 'Net profit', fact: 'Net profit', isExp: false },
+  ];
+  kpis.forEach(k => {
+    const planObj = planMap[k.plan];
+    const factObj = factMap[k.fact];
+    const planV = getValueForFilter(planObj, filterYear, filterMonth);
+    const factV = getValueForFilter(factObj, filterYear, filterMonth);
+    const kvEl = document.getElementById('kv-' + k.id);
+    const ksEl = document.getElementById('ks-' + k.id);
+    if (kvEl) kvEl.textContent = fmtMln(factV);
+    if (ksEl) ksEl.innerHTML = `Plan: ${fmtMln(planV)} · ${variancePill(planV, factV, k.isExp)}`;
   });
 
-  // P&L jadval quramiz
-  // Faqat label bor va bo'sh bo'lmagan qatorlarni
-  const SKIP_LABELS = ['%', '0', ''];
-  let html = '<table><thead><tr><th style="min-width:200px">Ko\'rsatkich</th>';
-  displayCols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
-  html += '</tr></thead><tbody>';
+  // Period label
+  const periodLbl = filterMonth === 'all'
+    ? `${filterYear}-yil (yillik)`
+    : `${filterYear}-yil ${monthName(filterMonth)}`;
+  const pe = document.getElementById('pl-period');
+  if (pe) pe.textContent = periodLbl + ' · Plan vs Fact';
 
-  for (let ri = DATA_START; ri < Math.min(DATA_END, splRows.length); ri++) {
-    const row = splRows[ri];
-    if (!row) continue;
-    const rawLabel = row[0];
-    if (rawLabel === null || rawLabel === undefined) continue;
-    const label = String(rawLabel).trim();
-    if (!label || SKIP_LABELS.includes(label) || label === '0.0') continue;
+  // Build full table
+  renderPLTable(planMap, factMap);
 
-    // Qator uslubi
-    const isTotal = ['Revenue','Marginal profit','Gross profit','EBITDA','EBIT','Net profit',
-                     'Production costs','Admin expenses','Selling costs','Marginal cost of sal'].some(k => label.startsWith(k));
-    const isSub = !isTotal && label.length > 0;
-    let rowCls = isTotal ? 'pl-row-total' : 'pl-indent';
+  // Charts: Revenue oylik, EBITDA oylik
+  renderRevMonthlyChart(planMap, factMap);
+  renderEbMonthlyChart(planMap, factMap);
 
-    html += `<tr class="${rowCls}">`;
-    html += `<td style="${isSub && !isTotal ? 'padding-left:20px;color:var(--muted)' : 'font-weight:500'}">${label}</td>`;
+  // Insights
+  renderPLInsights(planMap, factMap);
+}
 
-    displayCols.forEach(c => {
-      const v = row[c.idx];
-      const n = v === null || v === undefined ? null : parseFloat(String(v));
-      if (n === null || isNaN(n) || n === 0) {
-        html += `<td class="num neu">—</td>`;
-      } else {
-        html += `<td class="num ${n > 0 ? 'pos' : 'neg'}">${fmtNum(n)}</td>`;
-      }
-    });
-    html += '</tr>';
-  }
+function renderPLTable(planMap, factMap) {
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Qator</th>' +
+    '<th class="num">Plan</th>' +
+    '<th class="num">Fact</th>' +
+    '<th class="num">Variance</th>' +
+    '<th class="num">Var %</th>' +
+    '</tr></thead><tbody>';
+
+  PL_STRUCTURE.forEach(row => {
+    if (row.type === 'section') {
+      html += `<tr class="section"><td colspan="5">${row.label}</td></tr>`;
+      return;
+    }
+    const planObj = lookupSplValue(planMap, row.plan, row.altPlan);
+    const factObj = lookupSplValue(factMap, row.fact, row.altFact);
+    const planV = getValueForFilter(planObj, filterYear, filterMonth);
+    const factV = getValueForFilter(factObj, filterYear, filterMonth);
+    const isExp = !!row.expense;
+    const cls = row.type === 'sub' ? 'indent' : (row.type === 'total' ? 'total' : '');
+    html += `<tr class="${cls}">
+      <td>${row.label}</td>
+      <td class="num">${fmtMln(planV)}</td>
+      <td class="num">${fmtMln(factV)}</td>
+      <td class="num">${varianceVal(planV, factV, isExp)}</td>
+      <td class="num">${variancePill(planV, factV, isExp)}</td>
+    </tr>`;
+  });
+
   html += '</tbody></table>';
   document.getElementById('plTableWrap').innerHTML = html;
-
-  // Revenue breakdown pie — Full course, Hybrid, Revision, Video lesson, Exclusive
-  const revSubLabels = ['Full course','Hybrid','Revision','Video lesson','Exclusive'];
-  const revSubRows = [10,11,12,13,14]; // actual row indices
-  const revBreakLabels = [], revBreakData = [];
-  revSubRows.forEach((ri, i) => {
-    const v = Math.abs(getVal(ri, displayColIdx));
-    if (v > 0) { revBreakLabels.push(revSubLabels[i]); revBreakData.push(v); }
-  });
-  renderPieChart('revBreakChart', revBreakLabels, revBreakData, ['#2eca8a','#5b8dee','#f5a623','#9b7fe8','#2ec4b6']);
-
-  // Cost breakdown pie — main cost categories
-  const costLabels2 = ['Marginal cost','Production costs','Admin expenses','Selling costs','Marketing costs'];
-  const costRows2 = [16,26,43,72,82];
-  const costBL = [], costBD = [];
-  costRows2.forEach((ri, i) => {
-    const v = Math.abs(getVal(ri, displayColIdx));
-    if (v > 0) { costBL.push(costLabels2[i]); costBD.push(v); }
-  });
-  renderPieChart('costBreakChart', costBL, costBD, ['#e85b5b','#f5a623','#9b7fe8','#5b8dee','#2ec4b6']);
-
-  // Oylik grafiklar (barcha oylar)
-  const monthLabels = MONTH_NAMES;
-  const revMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.revenue, ci));
-  renderLineChart('revenueChart', monthLabels, [
-    { label:'Revenue', data: revMonthly, color:'#2eca8a' }
-  ]);
-  const grossMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.gross, ci));
-  const ebitdaMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.ebitda, ci));
-  const netMonthly = MONTH_COLS.map(ci => getVal(KEY_ROWS.net, ci));
-  renderLineChart('profitChart', monthLabels, [
-    { label:'Gross Profit', data: grossMonthly, color:'#5b8dee' },
-    { label:'EBITDA', data: ebitdaMonthly, color:'#f5a623' },
-    { label:'Net Profit', data: netMonthly, color:'#e85b5b' },
-  ]);
 }
 
-// ── CF RENDERER ──
-// SPL SFP SCF sheet, SCF qismi:
-// Row 117: header (col6=yillik, col7..18=Jan..Dec)
-// Row 118: OPENING BALANCE
-// Row 119: OPERATING ACTIVITIES  (yillik=col6, oylar=col7..18)
-// Row 183: INVESTING ACTIVITIES
-// Row 192: FINANCING ACTIVITIES
-// Row 201: Closing balance
-function renderCF(data, year, month) {
-  const { splRows } = data;
-  if (!splRows || splRows.length < 120) {
-    document.getElementById('cfTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Cash Flow ma\'lumot topilmadi</div>';
-    ['ocf','icf','fcf'].forEach(k => { const el = document.getElementById(`kv-${k}`); if(el) el.textContent='—'; });
-    return;
-  }
+function monthName(m) {
+  const M = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  return M[m - 1] || '';
+}
 
-  const ANNUAL_COL = 6;
-  const MONTH_COLS = [7,8,9,10,11,12,13,14,15,16,17,18];
-  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function renderRevMonthlyChart(planMap, factMap) {
+  destroyChart('plRev');
+  const planRev = planMap['Revenue'];
+  const factRev = factMap['Revenue'];
+  if (!planRev && !factRev) return;
+  const labels = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  const planData = planRev ? planRev.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0);
+  const factData = factRev ? factRev.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0);
+  const ctx = document.getElementById('plRevChart');
+  if (!ctx) return;
+  charts['plRev'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Plan', data: planData, backgroundColor: 'rgba(91,141,238,0.7)', borderRadius: 3 },
+        { label: 'Fact', data: factData, backgroundColor: 'rgba(46,202,138,0.8)', borderRadius: 3 },
+      ]
+    },
+    options: chartOpts({ legendShow: true, yLabel: 'mln' })
+  });
+}
 
-  const getVal = (rowIdx, colIdx) => {
-    const row = splRows[rowIdx];
-    if (!row) return 0;
-    const v = row[colIdx];
-    const n = parseFloat(String(v === null || v === undefined ? '0' : v));
-    return isNaN(n) ? 0 : n;
-  };
+function renderEbMonthlyChart(planMap, factMap) {
+  destroyChart('plEb');
+  const planObj = planMap['EBITDA'];
+  const factObj = factMap['EBITDA'];
+  const labels = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  const planData = planObj ? planObj.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0);
+  const factData = factObj ? factObj.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0);
+  const ctx = document.getElementById('plEbChart');
+  if (!ctx) return;
+  charts['plEb'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Plan', data: planData, borderColor: '#5b8dee', backgroundColor: 'rgba(91,141,238,0.1)', tension: 0.3, fill: false, pointRadius: 3 },
+        { label: 'Fact', data: factData, borderColor: '#2eca8a', backgroundColor: 'rgba(46,202,138,0.1)', tension: 0.3, fill: false, pointRadius: 3 },
+      ]
+    },
+    options: chartOpts({ legendShow: true, yLabel: 'mln' })
+  });
+}
 
-  // Tanlangan ustun
-  const displayColIdx = month !== null ? MONTH_COLS[month] : ANNUAL_COL;
+function renderPLInsights(planMap, factMap) {
+  // Top 5 variances
+  const variances = [];
+  PL_STRUCTURE.forEach(row => {
+    if (row.type === 'section') return;
+    const planObj = lookupSplValue(planMap, row.plan, row.altPlan);
+    const factObj = lookupSplValue(factMap, row.fact, row.altFact);
+    if (!planObj || !factObj) return;
+    const planV = getValueForFilter(planObj, filterYear, filterMonth);
+    const factV = getValueForFilter(factObj, filterYear, filterMonth);
+    if (planV === 0 || row.type === 'sub') return;
+    const diff = factV - planV;
+    const pct = (diff / Math.abs(planV)) * 100;
+    variances.push({ label: row.label, planV, factV, diff, pct, isExp: !!row.expense });
+  });
+  variances.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+  let html = '';
+  variances.slice(0, 6).forEach(v => {
+    let goodBad;
+    if (v.isExp) {
+      goodBad = (Math.abs(v.factV) > Math.abs(v.planV)) ? 'i-d' : 'i-g';
+    } else {
+      goodBad = (v.factV > v.planV) ? 'i-g' : 'i-d';
+    }
+    const icon = goodBad === 'i-g' ? '✅' : '⚠️';
+    const sign = v.diff >= 0 ? '+' : '';
+    html += ins(goodBad, `${icon} ${v.label}`,
+      `Plan: ${fmtMln(v.planV)} · Fact: ${fmtMln(v.factV)} · Farq: ${sign}${fmtMln(v.diff)} (${sign}${v.pct.toFixed(1)}%)`);
+  });
+  document.getElementById('plInsights').innerHTML = html || '<div style="color:var(--muted);font-size:11px;padding:10px;">Ma\'lumot yetarli emas</div>';
+}
 
-  // KPI
-  const kpiCF = {
-    ocf: getVal(119, displayColIdx),
-    icf: getVal(183, displayColIdx),
-    fcf: getVal(192, displayColIdx),
-  };
-  ['ocf','icf','fcf'].forEach(k => {
-    const el = document.getElementById(`kv-${k}`);
-    if (el) el.textContent = fmtNum(kpiCF[k]);
+// ══════════════════════════════════════════
+// PAGE 2: CASH FLOW
+// ══════════════════════════════════════════
+function renderCFPage() {
+  const planMap = finData.plan ? buildSplMap(finData.plan.splRows) : {};
+  const factMap = finData.fact ? buildSplMap(finData.fact.splRows) : {};
+
+  // KPI: OCF, ICF, FCF
+  const kpis = [
+    { id: 'ocf', key: '_cf:OPERATING ACTIVITIES' },
+    { id: 'icf', key: '_cf:INVESTING ACTIVITIES' },
+    { id: 'fcf', key: '_cf:FINANCING ACTIVITIES' },
+  ];
+  kpis.forEach(k => {
+    const planV = getValueForFilter(planMap[k.key], filterYear, filterMonth);
+    const factV = getValueForFilter(factMap[k.key], filterYear, filterMonth);
+    const kvEl = document.getElementById('kv-' + k.id);
+    const ksEl = document.getElementById('ks-' + k.id);
+    if (kvEl) kvEl.textContent = fmtMln(factV);
+    if (ksEl) ksEl.innerHTML = `Plan: ${fmtMln(planV)} · ${variancePill(planV, factV, false)}`;
   });
 
-  // Jadval sarlavhalari
-  let displayCols;
-  if (month !== null) {
-    displayCols = [{ idx: MONTH_COLS[month], label: MONTH_NAMES[month] }];
-  } else {
-    displayCols = [
-      { idx: ANNUAL_COL, label: 'Yillik' },
-      ...MONTH_NAMES.map((m,i) => ({ idx: MONTH_COLS[i], label: m }))
-    ];
-  }
+  renderCFTable(planMap, factMap);
+  renderCFMonthlyChart(planMap, factMap);
+  renderCFBalChart(planMap, factMap);
+  renderCFInsights(planMap, factMap);
+}
 
-  // CF qatorlari
-  const CF_ROWS = [
-    { ri: 118, label: 'Opening Balance',      indent: false },
-    { ri: 119, label: 'Operating Activities',  indent: false, key: 'ocf' },
-    { ri: 120, label: '↳ Receipts (main)',      indent: true },
-    { ri: 122, label: '↳ Refunds',              indent: true },
-    { ri: 124, label: '↳ Marginal cost',        indent: true },
-    { ri: 128, label: '↳ Production costs',     indent: true },
-    { ri: 183, label: 'Investing Activities',   indent: false, key: 'icf' },
-    { ri: 184, label: '↳ Inflow',               indent: true },
-    { ri: 188, label: '↳ Outflow',              indent: true },
-    { ri: 192, label: 'Financing Activities',   indent: false, key: 'fcf' },
-    { ri: 193, label: '↳ Inflow',               indent: true },
-    { ri: 197, label: '↳ Outflow',              indent: true },
-    { ri: 201, label: 'Closing Balance',        indent: false },
-  ];
-
-  let html = '<table><thead><tr><th style="min-width:200px">Ko\'rsatkich</th>';
-  displayCols.forEach(c => { html += `<th class="num">${c.label}</th>`; });
-  html += '</tr></thead><tbody>';
-
-  CF_ROWS.forEach(({ ri, label, indent }) => {
-    html += `<tr class="${indent ? '' : 'pl-row-total'}">`;
-    html += `<td style="${indent ? 'padding-left:20px;color:var(--muted);font-size:10px' : 'font-weight:600'}">${label}</td>`;
-    displayCols.forEach(c => {
-      const v = getVal(ri, c.idx);
-      html += `<td class="num ${v > 0 ? 'pos' : v < 0 ? 'neg' : 'neu'}">${v !== 0 ? fmtNum(v) : '—'}</td>`;
-    });
-    html += '</tr>';
+function renderCFTable(planMap, factMap) {
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Qator</th><th class="num">Plan</th><th class="num">Fact</th>' +
+    '<th class="num">Variance</th><th class="num">Var %</th></tr></thead><tbody>';
+  CF_STRUCTURE.forEach(row => {
+    if (row.type === 'section') {
+      html += `<tr class="section"><td colspan="5">${row.label}</td></tr>`;
+      return;
+    }
+    const planObj = lookupSplValue(planMap, row.plan);
+    const factObj = lookupSplValue(factMap, row.fact);
+    const planV = getValueForFilter(planObj, filterYear, filterMonth);
+    const factV = getValueForFilter(factObj, filterYear, filterMonth);
+    const isExp = !!row.expense;
+    const cls = row.type === 'sub' ? 'indent' : (row.type === 'total' ? 'total' : '');
+    html += `<tr class="${cls}">
+      <td>${row.label}</td>
+      <td class="num">${fmtMln(planV)}</td>
+      <td class="num">${fmtMln(factV)}</td>
+      <td class="num">${varianceVal(planV, factV, isExp)}</td>
+      <td class="num">${variancePill(planV, factV, isExp)}</td>
+    </tr>`;
   });
   html += '</tbody></table>';
   document.getElementById('cfTableWrap').innerHTML = html;
-
-  // CF Bar Chart — oylik
-  const chartLabels = MONTH_NAMES;
-  const getMonthData = (ri) => MONTH_COLS.map(ci => getVal(ri, ci));
-  renderBarChart('cfChart', chartLabels, [
-    { label:'Operating CF',   data: getMonthData(119), color:'#2eca8a' },
-    { label:'Investing CF',   data: getMonthData(183), color:'#5b8dee' },
-    { label:'Financing CF',   data: getMonthData(192), color:'#f5a623' },
-    { label:'Closing Balance', data: getMonthData(201), color:'#9b7fe8' },
-  ]);
 }
-// ── CASHIER RENDERER ──
-function renderCashier(data, year, month) {
-  const { rows } = data;
-  if (!rows || rows.length < 2) {
-    document.getElementById('cashierTableWrap').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;">Ma\'lumot yo\'q</div>';
+
+function renderCFMonthlyChart(planMap, factMap) {
+  destroyChart('cfChart');
+  const labels = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  const ocf = factMap['_cf:OPERATING ACTIVITIES'];
+  const icf = factMap['_cf:INVESTING ACTIVITIES'];
+  const fcf = factMap['_cf:FINANCING ACTIVITIES'];
+  const ctx = document.getElementById('cfChart');
+  if (!ctx) return;
+  charts['cfChart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Operating', data: ocf ? ocf.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0), backgroundColor: 'rgba(46,202,138,0.7)', borderRadius: 3 },
+        { label: 'Investing', data: icf ? icf.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0), backgroundColor: 'rgba(91,141,238,0.7)', borderRadius: 3 },
+        { label: 'Financing', data: fcf ? fcf.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0), backgroundColor: 'rgba(245,166,35,0.7)', borderRadius: 3 },
+      ]
+    },
+    options: chartOpts({ legendShow: true, yLabel: 'mln' })
+  });
+}
+
+function renderCFBalChart(planMap, factMap) {
+  destroyChart('cfBal');
+  const labels = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  const ctx = document.getElementById('cfBalChart');
+  if (!ctx) return;
+  // Closing balance — Plan / Fact agar mavjud bo'lsa
+  const planClose = planMap['Closing balance'] || planMap['_cf:Closing balance'];
+  const factClose = factMap['_cf:Closing balance'] || factMap['Closing balance'];
+  charts['cfBal'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Plan closing', data: planClose ? planClose.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0), borderColor: '#5b8dee', tension: 0.3, fill: false, pointRadius: 3 },
+        { label: 'Fact closing', data: factClose ? factClose.months.map(v => Math.round(v / 1e6)) : new Array(12).fill(0), borderColor: '#2eca8a', tension: 0.3, fill: false, pointRadius: 3 },
+      ]
+    },
+    options: chartOpts({ legendShow: true, yLabel: 'mln' })
+  });
+}
+
+function renderCFInsights(planMap, factMap) {
+  const variances = [];
+  ['_cf:OPERATING ACTIVITIES', '_cf:INVESTING ACTIVITIES', '_cf:FINANCING ACTIVITIES'].forEach(k => {
+    const planV = getValueForFilter(planMap[k], filterYear, filterMonth);
+    const factV = getValueForFilter(factMap[k], filterYear, filterMonth);
+    if (planV === 0 && factV === 0) return;
+    variances.push({
+      label: k.replace('_cf:', ''),
+      planV, factV, diff: factV - planV,
+      pct: planV !== 0 ? (factV - planV) / Math.abs(planV) * 100 : 0,
+    });
+  });
+  variances.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+  let html = '';
+  variances.forEach(v => {
+    const cls = v.factV >= v.planV ? 'i-g' : 'i-w';
+    html += ins(cls, v.label,
+      `Plan: ${fmtMln(v.planV)} · Fact: ${fmtMln(v.factV)} · Farq: ${v.diff >= 0 ? '+' : ''}${fmtMln(v.diff)}`);
+  });
+  document.getElementById('cfInsights').innerHTML = html || '<div style="color:var(--muted);font-size:11px;padding:10px;">Ma\'lumot yetarli emas</div>';
+}
+
+// ══════════════════════════════════════════
+// PAGE 3: REVENUE BY SUBJECT
+// ══════════════════════════════════════════
+function renderRevenuePage() {
+  const planRev = finData.plan ? buildPlanRevenueByFan(finData.plan.salesPlanRows, filterYear) : { byFan: {}, byProductType: {} };
+  const factRev = finData.fact ? buildFactRevenueByFan(finData.fact.revenueRows, filterYear) : { byFan: {}, byProductType: {} };
+
+  // KPI: total Plan vs Fact
+  let planTotal = 0, factTotal = 0;
+  Object.values(planRev.byFan).forEach(o => {
+    planTotal += filterMonth === 'all' ? o.yearly : o.months[filterMonth - 1];
+  });
+  Object.values(factRev.byFan).forEach(o => {
+    factTotal += filterMonth === 'all' ? o.yearly : o.months[filterMonth - 1];
+  });
+  const pct = planTotal > 0 ? (factTotal / planTotal * 100) : 0;
+  const setEl = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  setEl('kv-rev-plan', fmtMln(planTotal));
+  setEl('kv-rev-fact', fmtMln(factTotal));
+  setEl('kv-rev-pct', pct.toFixed(1) + '%');
+
+  // Fan-fan jadval
+  renderRevFanTable(planRev, factRev);
+  renderRevFanChart(planRev, factRev);
+  renderRevPtTable(planRev, factRev);
+  renderRevInsights(planRev, factRev);
+}
+
+function renderRevFanTable(planRev, factRev) {
+  const allFans = new Set([...Object.keys(planRev.byFan), ...Object.keys(factRev.byFan)]);
+  const fans = Array.from(allFans).sort((a, b) => {
+    const aIdx = FAN_ORDER_FIN.indexOf(a);
+    const bIdx = FAN_ORDER_FIN.indexOf(b);
+    if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+    if (aIdx === -1) return 1;
+    if (bIdx === -1) return -1;
+    return aIdx - bIdx;
+  });
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Fan</th><th class="num">Plan</th><th class="num">Fact</th>' +
+    '<th class="num">Variance</th><th class="num">Bajarilish %</th></tr></thead><tbody>';
+  let totP = 0, totF = 0;
+  fans.forEach(fan => {
+    const planObj = planRev.byFan[fan];
+    const factObj = factRev.byFan[fan];
+    const planV = planObj ? (filterMonth === 'all' ? planObj.yearly : planObj.months[filterMonth - 1]) : 0;
+    const factV = factObj ? (filterMonth === 'all' ? factObj.yearly : factObj.months[filterMonth - 1]) : 0;
+    if (planV === 0 && factV === 0) return;
+    totP += planV; totF += factV;
+    const pct = planV > 0 ? (factV / planV * 100) : 0;
+    const pctClass = pct >= 90 ? 'vp-good' : (pct >= 70 ? 'vp-neu' : 'vp-bad');
+    html += `<tr>
+      <td style="font-weight:600;font-family:'DM Mono',monospace;">${fan}</td>
+      <td class="num">${fmtMln(planV)}</td>
+      <td class="num">${fmtMln(factV)}</td>
+      <td class="num">${varianceVal(planV, factV, false)}</td>
+      <td class="num"><span class="var-pct ${pctClass}">${pct.toFixed(1)}%</span></td>
+    </tr>`;
+  });
+  // Total row
+  const totPct = totP > 0 ? (totF / totP * 100) : 0;
+  html += `<tr class="total">
+    <td>JAMI</td>
+    <td class="num">${fmtMln(totP)}</td>
+    <td class="num">${fmtMln(totF)}</td>
+    <td class="num">${varianceVal(totP, totF, false)}</td>
+    <td class="num"><span class="var-pct ${totPct >= 90 ? 'vp-good' : 'vp-bad'}">${totPct.toFixed(1)}%</span></td>
+  </tr>`;
+  html += '</tbody></table>';
+  document.getElementById('revFanTableWrap').innerHTML = html;
+}
+
+function renderRevFanChart(planRev, factRev) {
+  destroyChart('revFan');
+  const allFans = new Set([...Object.keys(planRev.byFan), ...Object.keys(factRev.byFan)]);
+  const fans = Array.from(allFans).sort((a, b) => {
+    const aV = (factRev.byFan[a]?.yearly || 0) + (planRev.byFan[a]?.yearly || 0);
+    const bV = (factRev.byFan[b]?.yearly || 0) + (planRev.byFan[b]?.yearly || 0);
+    return bV - aV;
+  }).slice(0, 12);
+  const planData = fans.map(f => {
+    const o = planRev.byFan[f];
+    return o ? Math.round((filterMonth === 'all' ? o.yearly : o.months[filterMonth - 1]) / 1e6) : 0;
+  });
+  const factData = fans.map(f => {
+    const o = factRev.byFan[f];
+    return o ? Math.round((filterMonth === 'all' ? o.yearly : o.months[filterMonth - 1]) / 1e6) : 0;
+  });
+  const ctx = document.getElementById('revFanChart');
+  if (!ctx) return;
+  charts['revFan'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: fans,
+      datasets: [
+        { label: 'Plan', data: planData, backgroundColor: 'rgba(91,141,238,0.7)', borderRadius: 3 },
+        { label: 'Fact', data: factData, backgroundColor: 'rgba(46,202,138,0.8)', borderRadius: 3 },
+      ]
+    },
+    options: chartOpts({ legendShow: true, yLabel: 'mln' })
+  });
+}
+
+function renderRevPtTable(planRev, factRev) {
+  const allPt = new Set([...Object.keys(planRev.byProductType), ...Object.keys(factRev.byProductType)]);
+  const pts = Array.from(allPt).sort();
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Product type</th><th class="num">Plan</th><th class="num">Fact</th>' +
+    '<th class="num">Variance</th><th class="num">Bajarilish %</th></tr></thead><tbody>';
+  pts.forEach(pt => {
+    const planObj = planRev.byProductType[pt];
+    const factObj = factRev.byProductType[pt];
+    const planV = planObj ? (filterMonth === 'all' ? planObj.yearly : planObj.months[filterMonth - 1]) : 0;
+    const factV = factObj ? (filterMonth === 'all' ? factObj.yearly : factObj.months[filterMonth - 1]) : 0;
+    if (planV === 0 && factV === 0) return;
+    const pct = planV > 0 ? (factV / planV * 100) : 0;
+    const pctClass = pct >= 90 ? 'vp-good' : (pct >= 70 ? 'vp-neu' : 'vp-bad');
+    html += `<tr>
+      <td style="font-weight:600;">${pt}</td>
+      <td class="num">${fmtMln(planV)}</td>
+      <td class="num">${fmtMln(factV)}</td>
+      <td class="num">${varianceVal(planV, factV, false)}</td>
+      <td class="num"><span class="var-pct ${pctClass}">${pct.toFixed(1)}%</span></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('revPtTableWrap').innerHTML = html;
+}
+
+function renderRevInsights(planRev, factRev) {
+  const allFans = new Set([...Object.keys(planRev.byFan), ...Object.keys(factRev.byFan)]);
+  const items = [];
+  allFans.forEach(fan => {
+    const p = planRev.byFan[fan];
+    const f = factRev.byFan[fan];
+    const planV = p ? (filterMonth === 'all' ? p.yearly : p.months[filterMonth - 1]) : 0;
+    const factV = f ? (filterMonth === 'all' ? f.yearly : f.months[filterMonth - 1]) : 0;
+    if (planV === 0 && factV === 0) return;
+    const diff = factV - planV;
+    items.push({ fan, planV, factV, diff });
+  });
+  items.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+  let html = '';
+  items.slice(0, 5).forEach(it => {
+    const cls = it.factV >= it.planV ? 'i-g' : 'i-d';
+    const icon = it.factV >= it.planV ? '✅' : '⚠️';
+    html += ins(cls, `${icon} ${it.fan}`,
+      `Plan: ${fmtMln(it.planV)} · Fact: ${fmtMln(it.factV)} · Farq: ${it.diff >= 0 ? '+' : ''}${fmtMln(it.diff)}`);
+  });
+  document.getElementById('revInsights').innerHTML = html || '<div style="color:var(--muted);font-size:11px;padding:10px;">Ma\'lumot yetarli emas</div>';
+}
+
+// ══════════════════════════════════════════
+// PAGE 4: COSTS PLAN VS FACT
+// ══════════════════════════════════════════
+function renderCostsPage() {
+  const planMap = finData.plan ? buildSplMap(finData.plan.splRows) : {};
+  const factMap = finData.fact ? buildSplMap(finData.fact.splRows) : {};
+
+  const cats = [
+    { id: 'cos', label: 'Marginal cost of sales' },
+    { id: 'adm', label: 'Admin expenses' },
+    { id: 'sel', label: 'Selling costs' },
+    { id: 'mkt', label: 'Marketing costs' },
+  ];
+  cats.forEach(c => {
+    const planV = Math.abs(getValueForFilter(planMap[c.label], filterYear, filterMonth));
+    const factV = Math.abs(getValueForFilter(factMap[c.label], filterYear, filterMonth));
+    const kvEl = document.getElementById('kv-' + c.id + '-fact');
+    const ksEl = document.getElementById('ks-' + c.id);
+    if (kvEl) kvEl.textContent = fmtMln(factV);
+    if (ksEl) ksEl.innerHTML = `Plan: ${fmtMln(planV)} · ${variancePill(-planV, -factV, true)}`;
+  });
+
+  renderCostsTable(planMap, factMap);
+  renderCostMonthChart(planMap, factMap);
+  renderCostPie(factMap);
+  renderCostsInsights(planMap, factMap);
+}
+
+const COST_STRUCTURE = [
+  { type: 'section', label: 'COST OF SALES' },
+  { type: 'main', label: 'Marginal cost of sales', exp: true },
+  { type: 'sub', label: "Tutors' Salary", planKey: "Tutors' Salary", factKey: "Tutor's salary", altFact: "Tutors' Salary", exp: true },
+  { type: 'main', label: 'Production costs', exp: true },
+  { type: 'sub', label: 'Internet and communication services', exp: true },
+  { type: 'sub', label: 'Rental of premises', exp: true },
+  { type: 'sub', label: 'Zoom subscription', exp: true },
+  { type: 'section', label: 'ADMINISTRATIVE' },
+  { type: 'main', label: 'Admin expenses', exp: true },
+  { type: 'sub', label: 'Wages and salaries', exp: true },
+  { type: 'sub', label: 'Salaries for administrative staff', exp: true },
+  { type: 'sub', label: 'Tax on Wages & Salaries', exp: true },
+  { type: 'sub', label: 'Banking services', exp: true },
+  { type: 'sub', label: 'Office expenses (cleaning, other materials)', exp: true },
+  { type: 'sub', label: 'Office refurbishment', exp: true },
+  { type: 'sub', label: 'Repair of assets', exp: true },
+  { type: 'sub', label: 'Other subscriptions', exp: true },
+  { type: 'sub', label: 'Outsourcing and other services', exp: true },
+  { type: 'section', label: 'SELLING' },
+  { type: 'main', label: 'Selling costs', exp: true },
+  { type: 'sub', label: 'Sales costs', exp: true },
+  { type: 'sub', label: 'Wages of Sales staff', exp: true },
+  { type: 'sub', label: 'Sales manager bonuses', exp: true },
+  { type: 'sub', label: 'AmoCRM', exp: true },
+  { type: 'sub', label: 'Modme', exp: true },
+  { type: 'section', label: 'MARKETING' },
+  { type: 'main', label: 'Marketing costs', exp: true },
+  { type: 'sub', label: 'Salary of marketing staff', exp: true },
+  { type: 'sub', label: 'Target', exp: true },
+  { type: 'sub', label: 'Marketing and advertising', exp: true },
+];
+
+function renderCostsTable(planMap, factMap) {
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Xarajat</th><th class="num">Plan</th><th class="num">Fact</th>' +
+    '<th class="num">Variance</th><th class="num">Var %</th></tr></thead><tbody>';
+  COST_STRUCTURE.forEach(row => {
+    if (row.type === 'section') {
+      html += `<tr class="section"><td colspan="5">${row.label}</td></tr>`;
+      return;
+    }
+    const planKey = row.planKey || row.label;
+    const factKey = row.factKey || row.label;
+    const planObj = lookupSplValue(planMap, planKey);
+    const factObj = lookupSplValue(factMap, factKey, row.altFact);
+    if (!planObj && !factObj) return;
+    const planV = Math.abs(getValueForFilter(planObj, filterYear, filterMonth));
+    const factV = Math.abs(getValueForFilter(factObj, filterYear, filterMonth));
+    if (planV === 0 && factV === 0) return;
+    const cls = row.type === 'sub' ? 'indent' : '';
+    html += `<tr class="${cls}">
+      <td>${row.label}</td>
+      <td class="num">${fmtMln(planV)}</td>
+      <td class="num">${fmtMln(factV)}</td>
+      <td class="num">${varianceVal(-planV, -factV, true)}</td>
+      <td class="num">${variancePill(-planV, -factV, true)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('costTableWrap').innerHTML = html;
+}
+
+function renderCostMonthChart(planMap, factMap) {
+  destroyChart('costMonth');
+  const labels = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+  const series = ['Marginal cost of sales', 'Admin expenses', 'Selling costs', 'Marketing costs'];
+  const colors = ['rgba(232,91,91,0.7)', 'rgba(245,166,35,0.7)', 'rgba(91,141,238,0.7)', 'rgba(155,127,232,0.7)'];
+  const datasets = series.map((s, i) => {
+    const obj = factMap[s];
+    return {
+      label: s.replace(' costs', '').replace(' expenses', ''),
+      data: obj ? obj.months.map(v => Math.round(Math.abs(v) / 1e6)) : new Array(12).fill(0),
+      backgroundColor: colors[i],
+      borderRadius: 3
+    };
+  });
+  const ctx = document.getElementById('costMonthChart');
+  if (!ctx) return;
+  charts['costMonth'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: chartOpts({ legendShow: true, yLabel: 'mln', stacked: true })
+  });
+}
+
+function renderCostPie(factMap) {
+  destroyChart('costPie');
+  const cats = [
+    { label: 'COS', val: factMap['Marginal cost of sales'] },
+    { label: 'Production', val: factMap['Production costs'] },
+    { label: 'Admin', val: factMap['Admin expenses'] },
+    { label: 'Selling', val: factMap['Selling costs'] },
+    { label: 'Marketing', val: factMap['Marketing costs'] },
+  ];
+  const data = cats.map(c => Math.abs(getValueForFilter(c.val, filterYear, filterMonth)));
+  const labels = cats.map(c => c.label);
+  const ctx = document.getElementById('costPieChart');
+  if (!ctx) return;
+  charts['costPie'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: ['rgba(232,91,91,0.8)','rgba(245,166,35,0.8)','rgba(91,141,238,0.8)','rgba(155,127,232,0.8)','rgba(46,196,182,0.8)'],
+        borderColor: '#12121a',
+        borderWidth: 2
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#8888aa', font: { size: 10 }, boxWidth: 10 } } } }
+  });
+}
+
+function renderCostsInsights(planMap, factMap) {
+  const items = [];
+  ['Marginal cost of sales','Production costs','Admin expenses','Selling costs','Marketing costs'].forEach(label => {
+    const planV = Math.abs(getValueForFilter(planMap[label], filterYear, filterMonth));
+    const factV = Math.abs(getValueForFilter(factMap[label], filterYear, filterMonth));
+    if (planV === 0 && factV === 0) return;
+    const diff = factV - planV;
+    items.push({ label, planV, factV, diff });
+  });
+  items.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+  let html = '';
+  items.forEach(it => {
+    const cls = it.factV <= it.planV ? 'i-g' : 'i-d';
+    const icon = it.factV <= it.planV ? '✅' : '⚠️';
+    const direction = it.factV <= it.planV ? 'kamroq sarf qildik' : 'plandan ortiq';
+    html += ins(cls, `${icon} ${it.label}`,
+      `Plan: ${fmtMln(it.planV)} · Fact: ${fmtMln(it.factV)} · Farq: ${it.diff >= 0 ? '+' : ''}${fmtMln(it.diff)} — ${direction}`);
+  });
+  document.getElementById('costInsights').innerHTML = html || '<div style="color:var(--muted);font-size:11px;padding:10px;">Ma\'lumot yetarli emas</div>';
+}
+
+// ══════════════════════════════════════════
+// PAGE 5: DAILY BALANCE (Cashier)
+// ══════════════════════════════════════════
+function renderBalancePage() {
+  if (!finData.cashier) {
+    ['kv-bank','kv-card','kv-cash','kv-totalbal'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = 'N/A';
+    });
     return;
   }
+  const accounts = buildAccountsMap(finData.cashier.accountsRows);
+  const cashData = buildCashierMap(finData.cashier.cashRows);
 
-  // Sarlavha qatorni topamiz
-  const headerRow = rows[0] || [];
-  const dataRows = rows.slice(1).filter(r => r && r.some(c => c !== null && c !== ''));
-
-  // Ustunlarni aniqlaymiz
-  // Cashier.xlsb "Cash Data" sheet strukturasi: Sana | Kirim | Chiqim | Balans (yoki shunga o'xshash)
-  const colMap = {};
-  headerRow.forEach((cell, i) => {
-    const s = String(cell||'').toLowerCase().trim();
-    if (s.includes('sana') || s.includes('дата') || s.includes('date')) colMap.date = i;
-    if (s.includes('kirim') || s.includes('приход') || s.includes('receipt') || s.includes('income')) colMap.income = i;
-    if (s.includes('chiqim') || s.includes('расход') || s.includes('expense') || s.includes('payment')) colMap.expense = i;
-    if (s.includes('balans') || s.includes('остаток') || s.includes('balance')) colMap.balance = i;
-    if (s.includes('izoh') || s.includes('комментарий') || s.includes('description') || s.includes('note')) colMap.note = i;
+  // KPI
+  let bank = 0, card = 0, cash = 0, total = 0;
+  accounts.accounts.forEach(a => {
+    if (a.type === 'Bank') bank += a.todayBalance;
+    else if (a.type === 'Cash') {
+      // Visa card UZS / Cash: Card / Cash: UZS — cash/card subdivision
+      if (a.name.includes('Card') || a.name.includes('Visa')) card += a.todayBalance;
+      else cash += a.todayBalance;
+    }
+    total += a.todayBalance;
   });
+  const setEl = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  setEl('kv-bank', fmtMln(bank));
+  setEl('kv-card', fmtMln(card));
+  setEl('kv-cash', fmtMln(cash));
+  setEl('kv-totalbal', fmtMln(total));
+  const balAsOf = document.getElementById('bal-asof');
+  if (balAsOf) balAsOf.textContent = `Joriy holat (${accounts.asOf || 'bugungi'})`;
 
-  // Agar ustunlar topilmasa — standart tartib
-  if (colMap.date === undefined) colMap.date = 0;
-  if (colMap.income === undefined) colMap.income = 1;
-  if (colMap.expense === undefined) colMap.expense = 2;
-  if (colMap.balance === undefined) colMap.balance = 3;
-
-  // Filterlash
-  let filtered = dataRows.filter(r => {
-    const dateVal = r[colMap.date];
-    if (!dateVal) return false;
-    const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return true; // sana bo'lmasa ham ko'rsatamiz
-    if (d.getFullYear() !== year) return false;
-    if (month !== null && d.getMonth() !== month) return false;
-    return true;
+  // Accounts table
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>#</th><th>Hisob</th><th>Tur</th>' +
+    '<th class="num">Today\'s Balance</th>' +
+    '<th class="num">Fact Balance</th>' +
+    '<th class="num">Farq</th></tr></thead><tbody>';
+  accounts.accounts.forEach((a, i) => {
+    const diff = a.todayBalance - a.factBalance;
+    html += `<tr>
+      <td style="color:var(--muted);">${i + 1}</td>
+      <td>${a.name}</td>
+      <td><span class="badge ${a.type === 'Bank' ? 'bg' : (a.type === 'Cash' ? 'bb' : 'ba')}">${a.type}</span></td>
+      <td class="num">${fmtNum(a.todayBalance)}</td>
+      <td class="num">${fmtNum(a.factBalance)}</td>
+      <td class="num">${Math.abs(diff) > 1 ? `<span class="var-neg">${fmtNum(diff)}</span>` : '—'}</td>
+    </tr>`;
   });
+  html += `<tr class="total"><td colspan="3">JAMI</td>
+    <td class="num">${fmtNum(accounts.total)}</td>
+    <td colspan="2"></td></tr>`;
+  html += '</tbody></table>';
+  document.getElementById('balAccountsWrap').innerHTML = html;
 
-  if (filtered.length === 0) filtered = dataRows.slice(0, 60); // fallback
+  // Daily balance chart (so'nggi 90 kun)
+  renderBalanceChart(cashData);
+  renderBalanceBreakChart(cashData);
+  renderRecentTransactions(cashData);
+}
 
-  // KPIs
-  let totalIn = 0, totalOut = 0, lastBal = 0;
-  filtered.forEach(r => {
-    const inc = parseFloat(String(r[colMap.income]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
-    const exp = parseFloat(String(r[colMap.expense]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
-    const bal = parseFloat(String(r[colMap.balance]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
-    totalIn += inc;
-    totalOut += exp;
-    if (bal) lastBal = bal;
+function renderBalanceChart(cashData) {
+  destroyChart('bal');
+  // So'nggi 90 kun, kunlik balans (sum running balance per day)
+  const recent = cashData.transactions
+    .filter(t => t.year === filterYear)
+    .sort((a, b) => a.date - b.date);
+  if (recent.length === 0) return;
+
+  // Kunlik agregatsiya
+  const dailyMap = {};
+  recent.forEach(t => {
+    const key = t.date.toISOString().substring(0, 10);
+    if (!dailyMap[key]) dailyMap[key] = { inflow: 0, outflow: 0, balance: t.runningBalance };
+    dailyMap[key].inflow += t.inflow;
+    dailyMap[key].outflow += t.outflow;
+    dailyMap[key].balance = t.runningBalance; // oxirgi running balance
   });
-  document.getElementById('kv-lastbal').textContent = fmtNum(lastBal);
-  document.getElementById('kv-totalin').textContent = fmtNum(totalIn);
-  document.getElementById('kv-totalout').textContent = fmtNum(totalOut);
-
-  // Balance chart
-  const balLabels = filtered.slice(-30).map(r => {
-    const d = new Date(r[colMap.date]);
-    return isNaN(d.getTime()) ? String(r[colMap.date]||'') : `${d.getDate()}-${d.getMonth()+1}`;
+  const dates = Object.keys(dailyMap).sort().slice(-90);
+  const balances = dates.map(d => Math.round(dailyMap[d].balance / 1e6));
+  const ctx = document.getElementById('balChart');
+  if (!ctx) return;
+  charts['bal'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dates.map(d => d.substring(5)),
+      datasets: [{
+        label: 'Kunlik balans (mln)',
+        data: balances,
+        borderColor: '#2eca8a',
+        backgroundColor: 'rgba(46,202,138,0.15)',
+        fill: true,
+        tension: 0.2,
+        pointRadius: 1,
+      }]
+    },
+    options: chartOpts({ legendShow: false, yLabel: 'mln' })
   });
-  const balData = filtered.slice(-30).map(r =>
-    parseFloat(String(r[colMap.balance]||'0').replace(/\s/g,'').replace(/,/g,'.')) || 0
-  );
-  renderAreaChart('balanceChart', balLabels, balData);
+}
 
-  // Table
-  let html = '<table><thead><tr>';
-  html += `<th>Sana</th>`;
-  html += `<th class="num" style="color:var(--green)">Kirim</th>`;
-  html += `<th class="num" style="color:var(--red)">Chiqim</th>`;
-  html += `<th class="num">Balans</th>`;
-  if (colMap.note !== undefined) html += `<th>Izoh</th>`;
-  html += '</tr></thead><tbody>';
+function renderBalanceBreakChart(cashData) {
+  destroyChart('balBreak');
+  // Account type bo'yicha kunlik kirim/chiqim agregatsiyasi
+  const recent = cashData.transactions
+    .filter(t => t.year === filterYear)
+    .sort((a, b) => a.date - b.date);
+  if (recent.length === 0) return;
 
-  filtered.slice().reverse().forEach(r => {
-    const dateVal = r[colMap.date];
-    const d = new Date(dateVal);
-    const dateStr = isNaN(d.getTime()) ? String(dateVal||'') : d.toLocaleDateString('uz-UZ', {day:'2-digit',month:'short',year:'numeric'});
-    const inc = parseFloat(String(r[colMap.income]||'').replace(/\s/g,'').replace(/,/g,'.')) || 0;
-    const exp = parseFloat(String(r[colMap.expense]||'').replace(/\s/g,'').replace(/,/g,'.')) || 0;
-    const bal = parseFloat(String(r[colMap.balance]||'').replace(/\s/g,'').replace(/,/g,'.')) || 0;
-
-    html += '<tr>';
-    html += `<td style="font-family:'DM Mono',monospace;font-size:10px;">${dateStr}</td>`;
-    html += `<td class="num cashier-pos">${inc ? fmtNum(inc) : '—'}</td>`;
-    html += `<td class="num cashier-neg">${exp ? fmtNum(exp) : '—'}</td>`;
-    html += `<td class="num cashier-bal ${bal >= 0 ? 'pos':'neg'}">${fmtNum(bal)}</td>`;
-    if (colMap.note !== undefined) html += `<td style="color:var(--muted);font-size:10px;">${r[colMap.note]||''}</td>`;
-    html += '</tr>';
+  const types = ['Bank UZS', 'Card', 'Cash UZS', 'Cash USD'];
+  const monthly = {};
+  recent.forEach(t => {
+    const key = `${t.year}-${String(t.month).padStart(2, '0')}`;
+    if (!monthly[key]) monthly[key] = { 'Bank UZS': 0, 'Card': 0, 'Cash UZS': 0, 'Cash USD': 0 };
+    const net = t.inflow - t.outflow;
+    if (monthly[key][t.accountType] !== undefined) {
+      monthly[key][t.accountType] += net;
+    }
   });
+  const keys = Object.keys(monthly).sort();
+  const datasets = types.map((t, i) => ({
+    label: t,
+    data: keys.map(k => Math.round(monthly[k][t] / 1e6)),
+    backgroundColor: ['rgba(46,202,138,0.7)','rgba(91,141,238,0.7)','rgba(245,166,35,0.7)','rgba(232,91,91,0.7)'][i],
+    borderRadius: 3
+  }));
+  const ctx = document.getElementById('balBreakChart');
+  if (!ctx) return;
+  charts['balBreak'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: keys.map(k => k.substring(5)), datasets },
+    options: chartOpts({ legendShow: true, yLabel: 'mln net' })
+  });
+}
 
+function renderRecentTransactions(cashData) {
+  const recent = cashData.transactions
+    .sort((a, b) => b.date - a.date)
+    .slice(0, 200);
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Sana</th><th>Hisob</th><th>Sabab</th>' +
+    '<th class="num">Kirim</th><th class="num">Chiqim</th>' +
+    '<th class="num">Balans</th></tr></thead><tbody>';
+  recent.forEach(t => {
+    html += `<tr>
+      <td style="font-size:10px;color:var(--muted);">${t.date.toLocaleDateString('uz')}</td>
+      <td style="font-size:10px;">${String(t.account).substring(0, 30)}</td>
+      <td style="font-size:10px;color:var(--muted);">${String(t.details || '').substring(0, 40)}</td>
+      <td class="num cashier-pos">${t.inflow > 0 ? fmtNum(t.inflow) : '—'}</td>
+      <td class="num cashier-neg">${t.outflow !== 0 ? fmtNum(Math.abs(t.outflow)) : '—'}</td>
+      <td class="num cashier-bal">${fmtNum(t.runningBalance)}</td>
+    </tr>`;
+  });
   html += '</tbody></table>';
   document.getElementById('cashierTableWrap').innerHTML = html;
 }
 
 // ══════════════════════════════════════════
+// PAGE 6: ANALYTICS & CEO
+// ══════════════════════════════════════════
+function renderAnalyticsPage() {
+  const planMap = finData.plan ? buildSplMap(finData.plan.splRows) : {};
+  const factMap = finData.fact ? buildSplMap(finData.fact.splRows) : {};
+
+  const setEl = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+
+  // Marginlar (Plan, Fact)
+  const planRev = getValueForFilter(planMap['Revenue'], filterYear, filterMonth);
+  const planGP = getValueForFilter(planMap['Gross profit'], filterYear, filterMonth);
+  const planEB = getValueForFilter(planMap['EBITDA'], filterYear, filterMonth);
+  const planNP = getValueForFilter(planMap['Net profit'], filterYear, filterMonth);
+  const factRev = getValueForFilter(factMap['Revenue'], filterYear, filterMonth);
+  const factGP = getValueForFilter(factMap['Gross profit'], filterYear, filterMonth);
+  const factEB = getValueForFilter(factMap['EBITDA'], filterYear, filterMonth);
+  const factNP = getValueForFilter(factMap['Net profit'], filterYear, filterMonth);
+
+  const pct = (a, b) => b !== 0 ? (a / b * 100).toFixed(1) + '%' : '—';
+  const planGM = planRev !== 0 ? (planGP / planRev * 100) : 0;
+  const planEM = planRev !== 0 ? (planEB / planRev * 100) : 0;
+  const planNM = planRev !== 0 ? (planNP / planRev * 100) : 0;
+  const factGM = factRev !== 0 ? (factGP / factRev * 100) : 0;
+  const factEM = factRev !== 0 ? (factEB / factRev * 100) : 0;
+  const factNM = factRev !== 0 ? (factNP / factRev * 100) : 0;
+  const planExec = planRev !== 0 ? (factRev / planRev * 100) : 0;
+
+  setEl('kv-gm', factGM.toFixed(1) + '%');
+  setEl('kv-em', factEM.toFixed(1) + '%');
+  setEl('kv-nm', factNM.toFixed(1) + '%');
+  setEl('kv-pe', planExec.toFixed(1) + '%');
+  setEl('ks-gm', `Plan: ${planGM.toFixed(1)}%`);
+  setEl('ks-em', `Plan: ${planEM.toFixed(1)}%`);
+  setEl('ks-nm', `Plan: ${planNM.toFixed(1)}%`);
+
+  // Moliyachi metrics jadvali
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Metrika</th><th>Plan</th><th>Fact</th><th>Izoh</th></tr></thead><tbody>';
+  const metrics = [
+    { label: 'Gross Margin %', plan: planGM.toFixed(1) + '%', fact: factGM.toFixed(1) + '%', note: 'Gross Profit / Revenue' },
+    { label: 'EBITDA Margin %', plan: planEM.toFixed(1) + '%', fact: factEM.toFixed(1) + '%', note: 'Operatsion samaradorlik' },
+    { label: 'Net Margin %', plan: planNM.toFixed(1) + '%', fact: factNM.toFixed(1) + '%', note: 'Sof foyda nisbati' },
+    { label: 'Revenue', plan: fmtMln(planRev), fact: fmtMln(factRev), note: 'Jami tushum' },
+    { label: 'Plan Execution %', plan: '100%', fact: planExec.toFixed(1) + '%', note: 'Fact/Plan tushum' },
+  ];
+  metrics.forEach(m => {
+    html += `<tr><td>${m.label}</td><td>${m.plan}</td><td><strong>${m.fact}</strong></td><td style="color:var(--muted);font-size:10px;">${m.note}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('finMetricsWrap').innerHTML = html;
+
+  // CEO metrics
+  const cosFact = Math.abs(getValueForFilter(factMap['Marginal cost of sales'], filterYear, filterMonth));
+  const admFact = Math.abs(getValueForFilter(factMap['Admin expenses'], filterYear, filterMonth));
+  const selFact = Math.abs(getValueForFilter(factMap['Selling costs'], filterYear, filterMonth));
+  const mktFact = Math.abs(getValueForFilter(factMap['Marketing costs'], filterYear, filterMonth));
+  const totalCostFact = cosFact + admFact + selFact + mktFact;
+
+  let ceoHtml = '<table class="pf-table"><thead><tr>' +
+    '<th>KPI</th><th class="num">Qiymat</th><th>Holat</th></tr></thead><tbody>';
+  const ceoItems = [
+    { l: 'Tushum (Fact)', v: fmtMln(factRev), s: factRev > 0 ? '✅' : '⚠️' },
+    { l: 'Sof Foyda (Fact)', v: fmtMln(factNP), s: factNP > 0 ? '✅' : '⚠️' },
+    { l: 'EBITDA (Fact)', v: fmtMln(factEB), s: factEB > 0 ? '✅' : '⚠️' },
+    { l: 'Plan Bajarilish %', v: planExec.toFixed(1) + '%', s: planExec >= 90 ? '✅' : (planExec >= 70 ? '🟡' : '⚠️') },
+    { l: 'Jami Xarajat', v: fmtMln(totalCostFact), s: totalCostFact < factRev ? '✅' : '⚠️' },
+    { l: 'Cost / Revenue', v: factRev > 0 ? (totalCostFact / factRev * 100).toFixed(1) + '%' : '—', s: '' },
+    { l: 'Marketing / Revenue', v: factRev > 0 ? (mktFact / factRev * 100).toFixed(1) + '%' : '—', s: '' },
+  ];
+  ceoItems.forEach(it => {
+    ceoHtml += `<tr><td>${it.l}</td><td class="num"><strong>${it.v}</strong></td><td>${it.s}</td></tr>`;
+  });
+  ceoHtml += '</tbody></table>';
+  document.getElementById('ceoMetricsWrap').innerHTML = ceoHtml;
+
+  // Avtomatik xulosalar
+  const insights = [];
+  if (planExec < 50) {
+    insights.push({ t: 'i-d', l: '⚠️ Tushum plandan ancha past', txt: `Plan bajarilishi atigi ${planExec.toFixed(1)}%. Sotuv strategiyasini qayta ko'rib chiqish kerak.` });
+  } else if (planExec < 80) {
+    insights.push({ t: 'i-w', l: '🟡 Tushum plandan past', txt: `${planExec.toFixed(1)}% bajarildi. Sotuvni jadallashtirish zarur.` });
+  } else if (planExec >= 95) {
+    insights.push({ t: 'i-g', l: '✅ Plan bajarilmoqda', txt: `${planExec.toFixed(1)}% — yaxshi natija.` });
+  }
+  if (factEB < 0) {
+    insights.push({ t: 'i-d', l: '⚠️ EBITDA salbiy', txt: `Operatsion zarar: ${fmtMln(factEB)}. Xarajatlarni kamaytirish yoki tushumni oshirish darhol kerak.` });
+  }
+  if (factGM < 30) {
+    insights.push({ t: 'i-w', l: '🟡 Past gross margin', txt: `Gross margin atigi ${factGM.toFixed(1)}%. Tutorlar maoshi va boshqa COS optimizatsiyasi kerak.` });
+  }
+  if (factNP > 0 && factNP > planNP) {
+    insights.push({ t: 'i-g', l: '✅ Sof foyda plandan yuqori', txt: `Fact net profit: ${fmtMln(factNP)} (Plan: ${fmtMln(planNP)}).` });
+  }
+  let insHtml = insights.map(i => ins(i.t, i.l, i.txt)).join('');
+  if (!insHtml) insHtml = '<div style="color:var(--muted);font-size:11px;padding:10px;">Avtomatik xulosa hozir yo\'q</div>';
+  document.getElementById('ceoInsights').innerHTML = insHtml;
+}
+
+// ══════════════════════════════════════════
 // CHART HELPERS
 // ══════════════════════════════════════════
-function buildMonthlyChartData(rows, cols, keywords) {
-  const matchRow = rows.find(r => {
-    const l = String(r[0]||'').toLowerCase();
-    return keywords.some(k => l.includes(k));
-  });
-  const labels = cols.map(c => c.label);
-  const data = cols.map(c => {
-    if (!matchRow) return 0;
-    const v = parseFloat(String(matchRow[c.idx]||'0').replace(/\s/g,'').replace(/,/g,'.'));
-    return isNaN(v) ? 0 : v;
-  });
-  return { labels, data };
-}
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
-function destroyChart(id) {
-  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-}
-
-function chartDefaults() {
+function chartOpts({ legendShow = false, yLabel = '', stacked = false } = {}) {
   return {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ labels:{ color:'#8888aa', font:{ size:10, family:'DM Sans' } } } },
-    scales:{
-      x:{ ticks:{ color:'#8888aa', font:{size:9} }, grid:{ color:'rgba(255,255,255,0.04)' } },
-      y:{ ticks:{ color:'#8888aa', font:{size:9}, callback: v => fmtNum(v,true) }, grid:{ color:'rgba(255,255,255,0.04)' } }
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: legendShow, position: 'top', labels: { color: '#8888aa', font: { size: 10 }, boxWidth: 10 } },
+      tooltip: { backgroundColor: '#1a1a26', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, titleColor: '#e8e8f0', bodyColor: '#e8e8f0' }
+    },
+    scales: {
+      x: { stacked: stacked, grid: { display: false }, ticks: { color: '#8888aa', font: { size: 9 }, maxRotation: 45, autoSkip: true } },
+      y: { stacked: stacked, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8888aa', font: { size: 9 }, callback: v => v + (yLabel ? '' : '') } }
     }
   };
 }
 
-function renderLineChart(canvasId, labels, datasets) {
-  destroyChart(canvasId);
-  const ctx = document.getElementById(canvasId)?.getContext('2d');
-  if (!ctx) return;
-  charts[canvasId] = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels,
-      datasets: datasets.map(ds => ({
-        label: ds.label, data: ds.data,
-        borderColor: ds.color, backgroundColor: ds.color+'22',
-        fill:true, tension:0.4, pointRadius:3, borderWidth:2
-      }))
-    },
-    options: chartDefaults()
-  });
-}
-
-function renderBarChart(canvasId, labels, datasets) {
-  destroyChart(canvasId);
-  const ctx = document.getElementById(canvasId)?.getContext('2d');
-  if (!ctx) return;
-  charts[canvasId] = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels,
-      datasets: datasets.map(ds => ({
-        label: ds.label, data: ds.data,
-        backgroundColor: ds.color+'99', borderColor: ds.color, borderWidth:1, borderRadius:4
-      }))
-    },
-    options: { ...chartDefaults(), scales:{ x:{ ticks:{ color:'#8888aa', font:{size:9} }, grid:{color:'rgba(255,255,255,0.04)'} }, y:{ ticks:{ color:'#8888aa', font:{size:9}, callback: v=>fmtNum(v,true) }, grid:{color:'rgba(255,255,255,0.04)'} } } }
-  });
-}
-
-function renderAreaChart(canvasId, labels, data) {
-  destroyChart(canvasId);
-  const ctx = document.getElementById(canvasId)?.getContext('2d');
-  if (!ctx) return;
-  charts[canvasId] = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels,
-      datasets:[{ label:'Balans', data, borderColor:'#2eca8a', backgroundColor:'rgba(46,202,138,0.1)', fill:true, tension:0.3, pointRadius:2, borderWidth:2 }]
-    },
-    options: chartDefaults()
-  });
-}
-
-function renderPieChart(canvasId, labels, data, colors) {
-  destroyChart(canvasId);
-  const ctx = document.getElementById(canvasId)?.getContext('2d');
-  if (!ctx) return;
-  if (!labels.length || data.every(d=>d===0)) {
-    ctx.canvas.parentElement.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:20px;text-align:center;">Ma\'lumot topilmadi</div>';
-    return;
-  }
-  charts[canvasId] = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels, datasets:[{ data, backgroundColor: colors, borderColor:'#12121a', borderWidth:2 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ color:'#8888aa', font:{size:10}, boxWidth:10 } } } }
-  });
-}
-
 // ══════════════════════════════════════════
-// UTILS
+// REFRESH
 // ══════════════════════════════════════════
-function fmtNum(n, short=false) {
-  if (n === null || n === undefined || isNaN(n)) return '—';
-  if (short) {
-    if (Math.abs(n) >= 1e12) return (n/1e12).toFixed(1)+'T';
-    if (Math.abs(n) >= 1e9) return (n/1e9).toFixed(1)+'B';
-    if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1)+'M';
-    if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(0)+'K';
-    return n.toFixed(0);
-  }
-  return n.toLocaleString('ru-RU', { minimumFractionDigits:0, maximumFractionDigits:0 });
-}
-
-async function refreshData() {
-  await loadData();
-}
+async function refreshData() { await loadData(); }
 
 // ══════════════════════════════════════════
 // INIT
