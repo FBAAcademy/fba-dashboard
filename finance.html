@@ -286,6 +286,7 @@ th.num{text-align:right;}
     <button class="nb" onclick="showPage('revenue',this)">📚 Tushum (Fanlar)</button>
     <button class="nb" onclick="showPage('costs',this)">💰 Xarajatlar</button>
     <button class="nb" onclick="showPage('balance',this)">🏦 Kunlik balans</button>
+    <button class="nb" onclick="showPage('operator',this)">👥 Operatorlar</button>
     <button class="nb" onclick="showPage('analytics',this)">⭐ Tahlil & CEO</button>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
@@ -585,7 +586,78 @@ th.num{text-align:right;}
 </div>
 
 <!-- ══════════════════════════════════════════
-     PAGE 6: ANALYTICS & CEO
+     PAGE 6: OPERATOR PERFORMANCE (yangi)
+═════════════════════════════════════════════ -->
+<div id="page-operator" class="page">
+  <div class="sh"><div class="st">Operatorlar samaradorligi — Plan vs Fact</div><div class="sl"></div></div>
+
+  <!-- Filter: Hisob turi (umumiy / 3-darsdan keyin) -->
+  <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:11px;color:var(--muted);">Hisob turi:</span>
+    <div style="display:flex;gap:6px;">
+      <button class="nb active" onclick="setOpMode('umumiy',this)" id="op-mode-umumiy">📋 Umumiy (barcha sotuv)</button>
+      <button class="nb" onclick="setOpMode('haqiqiy',this)" id="op-mode-haqiqiy">✅ Haqiqiy (3-darsdan keyin qolganlar)</button>
+    </div>
+    <span style="font-size:10px;color:var(--muted);margin-left:auto;">
+      <strong>Umumiy:</strong> Customer base'ga yozilgan barcha sotuvlar ·
+      <strong>Haqiqiy:</strong> 3-darsgacha chiqib ketganlar ayrildi
+    </span>
+  </div>
+
+  <!-- KPI cards: 4 ta operator -->
+  <div class="g4" id="opKpiRow">
+    <div class="kpi gr"><div class="kl">Nigina</div>
+      <div class="kv" id="kv-op-Nigina">—</div>
+      <div class="ks" id="ks-op-Nigina">Plan: —</div>
+    </div>
+    <div class="kpi bl"><div class="kl">Dilnura</div>
+      <div class="kv" id="kv-op-Dilnura">—</div>
+      <div class="ks" id="ks-op-Dilnura">Plan: —</div>
+    </div>
+    <div class="kpi am"><div class="kl">Gavharoy</div>
+      <div class="kv" id="kv-op-Gavharoy">—</div>
+      <div class="ks" id="ks-op-Gavharoy">Plan: —</div>
+    </div>
+    <div class="kpi pu"><div class="kl">Abdulaziz</div>
+      <div class="kv" id="kv-op-Abdulaziz">—</div>
+      <div class="ks" id="ks-op-Abdulaziz">Plan: —</div>
+    </div>
+  </div>
+
+  <!-- Operator vs Plan chart -->
+  <div class="card">
+    <div class="ct">Operatorlar — Plan vs Fact (o'quvchi soni)</div>
+    <div class="cs" id="op-chart-subtitle">Tanlangan davr</div>
+    <div style="position:relative;height:280px;"><canvas id="opChart"></canvas></div>
+  </div>
+
+  <!-- Detail table -->
+  <div class="card">
+    <div class="ct">Operatorlar bo'yicha to'liq jadval</div>
+    <div class="cs">Plan vs Fact, conversion %, lost revenue (sotilmagan o'quvchilar bahosi)</div>
+    <div style="overflow-x:auto;" id="opTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <!-- Group-level breakdown -->
+  <div class="card">
+    <div class="ct">Guruhlar bo'yicha taqsimlash (top 20 guruh)</div>
+    <div class="cs">Plan o'quvchi soni eng kop bo'lgan guruhlar — har operatorga taqsim</div>
+    <div style="overflow-x:auto;" id="opGroupTableWrap">
+      <div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div class="card">
+    <div class="ct">⚡ Operator xulosalari</div>
+    <div id="opInsights"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 7: ANALYTICS & CEO
 ═════════════════════════════════════════════ -->
 <div id="page-analytics" class="page">
   <div class="sh"><div class="st">Moliyaviy tahlil va CEO ko'rsatkichlari</div><div class="sl"></div></div>
@@ -648,22 +720,40 @@ let msalInstance = null;
 let currentPin = '';
 const PIN_LENGTH = 6;
 
+// ── FAYL UUID'lari (SharePoint Doc IDs) ──
+// Ushbu UUID'lar fayllarning to'g'ridan-to'g'ri identifikatori. Papka yo'lini bilish shart emas.
+const FILE_IDS = {
+  salesInfo:     "F91A1F79-53F0-4415-A1FF-8E18AB5CD652",  // Sales information.xlsx → Guruh Plan
+  customerBase:  "9044D467-C8DA-4953-AFE7-7B36C60FA764",  // Customer base 1.xlsb
+  courseFees:    "14EFB842-F951-4790-B5CE-3FAC46E7FE2B",  // Course fees.xlsb
+  tutorPct:      "B6335F9B-98C9-4D1E-B499-FF672897AFD6",  // Tutor's percentage.xlsb
+};
+
 // ── DATA STATE ──
-// Asosiy ma'lumotlar — 3 fayldan yuklanadi
+// 6 ta manba: 4 ta UUID orqali, 2 tasi papka qidiruvi orqali (eski usul)
 let finData = {
-  plan: null,    // Fin Model for 2026 (Plan).xlsx — SPL SFP SCF (Plan), Sales Plan
-  fact: null,    // Fin Model - (with Flexed budget).xlsb — SPL SFP SCF, Direct CASH FLOW, Revenue
-  cashier: null, // Cashier.xlsx — Cash Data, Accounts balances
+  // Yangi manbalar (UUID orqali)
+  salesInfo: null,    // Guruh Plan sheet
+  customerBase: null, // O'quvchilar bazasi (operator effekti, dropout)
+  courseFees: null,   // 5 sheet (Full course, Hybrid, ...) — narx tarixi
+  tutorPct: null,     // Percentage sheet — o'qituvchi % tarixi
+
+  // Eski manbalar (papka qidiruvi orqali — ishlamoqda)
+  fact: null,         // Fin Model - (with Flexed budget).xlsb → SPL SFP SCF, Direct CASH FLOW, Revenue
+  plan: null,         // Fin Model for 2026 (Plan).xlsx → SPL SFP SCF (Plan), Sales Plan
+  cashier: null,      // Cashier.xlsb → Cash Data, Accounts balances
 };
 let charts = {};
 let curPage = 'pl';
 
 // Joriy filter holati
 let filterYear = 2026;
-let filterMonth = 'all'; // 'all' | 1..12
+let filterMonth = 'all';
 
-// Fan tartibi (jadvallarda standartlashgan)
 const FAN_ORDER_FIN = ['FA','FR','MA','FM','PM','AA','TX','SBR','AFM','APM','BT','MSFO','DipIFR','PreDipIFR','PreMSFO','Hybrid','Exclusive'];
+
+// Operatorlar ro'yxati (Sales information dan)
+const OPERATORS = ['Nigina', 'Dilnura', 'Gavharoy', 'Abdulaziz'];
 
 // ══════════════════════════════════════════
 // AUTH FLOW — loginRedirect usuli
@@ -899,8 +989,29 @@ async function loadData() {
     const drive = await driveRes.json();
     const driveId = drive.id;
 
-    // 1. PLAN file
-    setLoadingText("Plan yuklanmoqda (Fin Model for 2026)...");
+    // ═══ 1. UUID orqali 4 ta asosiy fayl ═══
+    setLoadingText("Sales information yuklanmoqda...");
+    let salesInfoBuffer = null;
+    try { salesInfoBuffer = await fetchByDocId(token, driveId, FILE_IDS.salesInfo); }
+    catch (e) { console.warn("SalesInfo:", e); }
+
+    setLoadingText("Customer base yuklanmoqda...");
+    let custBaseBuffer = null;
+    try { custBaseBuffer = await fetchByDocId(token, driveId, FILE_IDS.customerBase); }
+    catch (e) { console.warn("CustomerBase:", e); }
+
+    setLoadingText("Course fees yuklanmoqda...");
+    let coursesBuffer = null;
+    try { coursesBuffer = await fetchByDocId(token, driveId, FILE_IDS.courseFees); }
+    catch (e) { console.warn("CourseFees:", e); }
+
+    setLoadingText("Tutor percentage yuklanmoqda...");
+    let tutorBuffer = null;
+    try { tutorBuffer = await fetchByDocId(token, driveId, FILE_IDS.tutorPct); }
+    catch (e) { console.warn("TutorPct:", e); }
+
+    // ═══ 2. Eski usul: papka qidiruvi orqali (Plan, Fact, Cashier) ═══
+    setLoadingText("Plan yuklanmoqda...");
     let planBuffer = null;
     try {
       planBuffer = await fetchExcel(token, driveId, [
@@ -909,8 +1020,7 @@ async function loadData() {
       ]);
     } catch (e) { console.warn("Plan:", e); }
 
-    // 2. FACT file
-    setLoadingText("Fact yuklanmoqda (Flexed budget)...");
+    setLoadingText("Fact yuklanmoqda...");
     let factBuffer = null;
     try {
       factBuffer = await fetchExcel(token, driveId, [
@@ -921,17 +1031,30 @@ async function loadData() {
       ]);
     } catch (e) { console.warn("Fact:", e); }
 
-    // 3. CASHIER file
     setLoadingText("Cashier yuklanmoqda...");
     let cashBuffer = null;
-    try {
-      cashBuffer = await fetchExcel(token, driveId, ["Cashier"]);
-    } catch (e) { console.warn("Cashier:", e); }
+    try { cashBuffer = await fetchExcel(token, driveId, ["Cashier"]); }
+    catch (e) { console.warn("Cashier:", e); }
 
+    // ═══ 3. Parse hammasini ═══
     setLoadingText("Ma'lumotlar tahlil qilinmoqda...");
-    finData.plan = planBuffer ? parsePlanFile(planBuffer) : null;
-    finData.fact = factBuffer ? parseFactFile(factBuffer) : null;
-    finData.cashier = cashBuffer ? parseCashierFile(cashBuffer) : null;
+    finData.salesInfo    = salesInfoBuffer ? parseSalesInfo(salesInfoBuffer) : null;
+    finData.customerBase = custBaseBuffer ? parseCustomerBase(custBaseBuffer) : null;
+    finData.courseFees   = coursesBuffer ? parseCourseFees(coursesBuffer) : null;
+    finData.tutorPct     = tutorBuffer ? parseTutorPct(tutorBuffer) : null;
+    finData.plan         = planBuffer ? parsePlanFile(planBuffer) : null;
+    finData.fact         = factBuffer ? parseFactFile(factBuffer) : null;
+    finData.cashier      = cashBuffer ? parseCashierFile(cashBuffer) : null;
+
+    // Diagnostika
+    console.log('━━━ Yuklangan fayllar ━━━');
+    console.log('  Sales info:    ', finData.salesInfo ? `✓ ${finData.salesInfo.guruhPlan?.length || 0} guruh` : '✗');
+    console.log('  Customer base: ', finData.customerBase ? `✓ ${finData.customerBase.students?.length || 0} o\'quvchi` : '✗');
+    console.log('  Course fees:   ', finData.courseFees ? `✓ ${Object.keys(finData.courseFees).length} sheet` : '✗');
+    console.log('  Tutor pct:     ', finData.tutorPct ? `✓ ${finData.tutorPct.length} qator` : '✗');
+    console.log('  Plan file:     ', finData.plan ? '✓' : '✗');
+    console.log('  Fact file:     ', finData.fact ? '✓' : '✗');
+    console.log('  Cashier:       ', finData.cashier ? '✓' : '✗');
 
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
     hideLoading();
@@ -941,6 +1064,21 @@ async function loadData() {
     alert("Xato: " + e.message);
     console.error(e);
   }
+}
+
+// ══════════════════════════════════════════
+// FETCH BY DOC ID — UUID orqali to'g'ridan-to'g'ri olish
+// ══════════════════════════════════════════
+async function fetchByDocId(token, driveId, docId) {
+  // SharePoint UUID format: F91A1F79-53F0-4415-A1FF-8E18AB5CD652
+  // Microsoft Graph format ham xuddi shunday — kichik harf bilan yoki katta harf bilan ham ishlaydi
+  const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${docId}/content?ts=${Date.now()}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache' },
+    cache: 'no-store'
+  });
+  if (!res.ok) throw new Error(`Doc ${docId} olinmadi: ${res.status}`);
+  return await res.arrayBuffer();
 }
 
 // fetchExcel — endi 1 ta nom o'rniga ro'yxatdan birinchi mosini topadi
@@ -994,6 +1132,235 @@ async function fetchExcel(token, driveId, baseNames) {
 
 // ══════════════════════════════════════════
 // EXCEL PARSERS
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// EXCEL PARSERS (yangi — UUID orqali keladigan fayllar)
+// ══════════════════════════════════════════
+
+// 1. SALES INFO → Guruh Plan sheet
+// Tuzilish: O'qituvchi, Fan, Gruppa nomi, Gruppa code, Product turi, Ochilish sana,
+//           Dars vaqti, Gruppa haqida, Nigina, Dilnura, Gavharoy, Abdulaziz,
+//           O'quvchilar soni, Nigina(Fakt), Gavharoy(Fakt), Abdulaziz(Fakt), Dilnura(Fakt),
+//           Fakt total, Kurs narxi, Jami daromad, Jami daromad (Fakt)
+function parseSalesInfo(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('SalesInfo sheets:', wb.SheetNames);
+
+  const guruhSheet = wb.SheetNames.find(s => s === 'Guruh Plan' || s.toLowerCase().includes('guruh plan'));
+  if (!guruhSheet) {
+    console.warn('Guruh Plan sheet topilmadi!');
+    return { guruhPlan: [] };
+  }
+
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[guruhSheet], { header: 1, raw: true, defval: null });
+  const guruhPlan = [];
+
+  // R1 = header, R2+ = data
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (!r[0] && !r[1]) continue; // empty row
+    const ochilish = parseAnyDate(r[5]);
+    if (!ochilish) continue;
+
+    guruhPlan.push({
+      teacher: r[0] || '',
+      fan: r[1] || '',
+      grpName: r[2] || '',
+      grpCode: r[3] || '',
+      productType: r[4] || '',
+      openingDate: ochilish,
+      year: ochilish.getFullYear(),
+      month: ochilish.getMonth() + 1,
+      lessonTime: r[6] || '',
+      groupNote: r[7] || '',
+      // Plan operatorlar
+      planNigina:    toNum(r[8]),
+      planDilnura:   toNum(r[9]),
+      planGavharoy:  toNum(r[10]),
+      planAbdulaziz: toNum(r[11]),
+      planTotal:     toNum(r[12]),
+      // Fakt operatorlar
+      factNigina:    toNum(r[13]),
+      factGavharoy:  toNum(r[14]),
+      factAbdulaziz: toNum(r[15]),
+      factDilnura:   toNum(r[16]),
+      factTotal:     toNum(r[17]),
+      // Narx va daromad
+      coursePrice:    toNum(r[18]),
+      planRevenue:    toNum(r[19]),
+      factRevenue:    toNum(r[20]),
+    });
+  }
+  return { guruhPlan };
+}
+
+// 2. CUSTOMER BASE → o'quvchilar bazasi
+// Mavjud index.html'da ishlatilgan: col 2=ID, 6=O'qituvchi, 9=Product, 10=Type,
+//                                    11=Sotuv mng, 17=Status, 18=Sabab, 21=Final_status
+function parseCustomerBase(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('CustomerBase sheets:', wb.SheetNames);
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: null });
+  const students = [];
+
+  // Birinchi 3 qator header, 4-qatordan boshlab ma'lumot (slice(3))
+  for (let i = 3; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (!r[2]) continue; // ID yo'q
+
+    students.push({
+      id: r[2],
+      teacher: r[6] || '',
+      product: r[9] || '',
+      productType: r[10] || '',
+      operator: r[11] || '',  // Sotuv mng
+      status: r[17] || '',
+      reason: r[18] || '',
+      finalStatus: r[21] || '',
+      // Boshqa muhim ustunlar
+      groupCode: r[8] || '',
+    });
+  }
+  return { students };
+}
+
+// 3. COURSE FEES → 5 sheet (Full course, Hybrid, Revision, Video Lesson, Exclusive)
+// Tuzilish: R2 header (Date, BT, MA, FA, ..., DipIFR, MSFO)
+//           R3+ — sana × narx matritsa
+// Lookup: berilgan sana uchun o'sha sana <= chegara bo'lgan eng oxirgi qator
+function parseCourseFees(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('CourseFees sheets:', wb.SheetNames);
+
+  const result = {}; // {sheetName: {fans: [], data: [{date, prices: {fan: price}}]}}
+
+  for (const sheetName of wb.SheetNames) {
+    if (sheetName === 'Comission') continue; // Comission alohida — hozircha kerak emas
+
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true, defval: null });
+    if (rows.length < 3) continue;
+
+    // R2 (index 1) — header: ['', 'Date', 'BT', 'MA', 'FA', ...]
+    const headerRow = rows[1] || [];
+    const fans = [];
+    const fanColIdx = {};
+    for (let c = 2; c < headerRow.length; c++) {
+      if (headerRow[c]) {
+        fans.push(String(headerRow[c]).trim());
+        fanColIdx[String(headerRow[c]).trim()] = c;
+      }
+    }
+
+    // R3+ — data
+    const data = [];
+    for (let i = 2; i < rows.length; i++) {
+      const r = rows[i] || [];
+      const date = parseAnyDate(r[1]);
+      if (!date) continue;
+
+      const prices = {};
+      for (const fan of fans) {
+        const v = toNum(r[fanColIdx[fan]]);
+        if (v > 0) prices[fan] = v;
+      }
+      // Faqat narxi bo'lgan qatorlarni qo'shamiz
+      if (Object.keys(prices).length > 0) {
+        data.push({ date, prices });
+      }
+    }
+    result[sheetName] = { fans, data };
+  }
+  return result;
+}
+
+// LOOKUP: berilgan productType, fan va sana uchun narxni topish
+function lookupCoursePrice(courseFees, productType, fan, ochilishSana) {
+  if (!courseFees || !productType || !fan || !ochilishSana) return 0;
+  const sheet = courseFees[productType];
+  if (!sheet) return 0;
+
+  // Sana <= ochilishSana bo'lgan eng oxirgi qatordagi narx
+  let bestPrice = 0;
+  for (const row of sheet.data) {
+    if (row.date <= ochilishSana && fan in row.prices) {
+      bestPrice = row.prices[fan];
+    }
+  }
+  return bestPrice;
+}
+
+// 4. TUTOR PERCENTAGE → Percentage sheet
+// Tuzilish: Date, Teachers, Type, BT, MA, FA, LW, PM, TX, FR, AA, FM, SBL, SBR, ...
+function parseTutorPct(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+  console.log('TutorPct sheets:', wb.SheetNames);
+
+  const pctSheet = wb.SheetNames.find(s => s === 'Percentage' || s.toLowerCase().includes('percentage'));
+  if (!pctSheet) {
+    console.warn('Percentage sheet topilmadi!');
+    return [];
+  }
+
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[pctSheet], { header: 1, raw: true, defval: null });
+  if (rows.length < 3) return [];
+
+  // R2 (index 1) — header: ['', 'Date', 'Teachers', 'Type', 'BT', 'MA', 'FA', ...]
+  const headerRow = rows[1] || [];
+  const fans = [];
+  const fanColIdx = {};
+  for (let c = 4; c < headerRow.length; c++) {
+    if (headerRow[c] && String(headerRow[c]).trim()) {
+      fans.push(String(headerRow[c]).trim());
+      fanColIdx[String(headerRow[c]).trim()] = c;
+    }
+  }
+
+  const records = [];
+  for (let i = 2; i < rows.length; i++) {
+    const r = rows[i] || [];
+    const date = parseAnyDate(r[1]);
+    const teacher = r[2];
+    const productType = r[3];
+    if (!date || !teacher || !productType) continue;
+
+    const pcts = {};
+    for (const fan of fans) {
+      const v = toNum(r[fanColIdx[fan]]);
+      if (v > 0) pcts[fan] = v;
+    }
+    if (Object.keys(pcts).length > 0) {
+      records.push({
+        date,
+        teacher: String(teacher).trim(),
+        productType: String(productType).trim(),
+        pcts
+      });
+    }
+  }
+  return records;
+}
+
+// LOOKUP: berilgan o'qituvchi, productType, fan va sana uchun foizni topish
+function lookupTutorPct(tutorPctData, teacher, productType, fan, ochilishSana) {
+  if (!tutorPctData || !teacher || !productType || !fan || !ochilishSana) return 0;
+
+  // Eng oxirgi qator (sana <= ochilishSana) o'sha o'qituvchi va product type uchun
+  let bestPct = 0;
+  for (const rec of tutorPctData) {
+    if (rec.date > ochilishSana) continue;
+    if (rec.teacher !== teacher) continue;
+    if (rec.productType !== productType) continue;
+    if (fan in rec.pcts) {
+      bestPct = rec.pcts[fan];
+    }
+  }
+  return bestPct;
+}
+
+// ══════════════════════════════════════════
+// EXCEL PARSERS (eski — saqlanadi)
 // ══════════════════════════════════════════
 
 // PLAN file: 'SPL SFP SCF (Plan)' + 'Sales Plan' sheets
@@ -1464,15 +1831,25 @@ function onFilterChange() {
 }
 
 function renderCurrentPage() {
-  if (!finData.plan && !finData.fact && !finData.cashier) return;
+  if (!finData.plan && !finData.fact && !finData.cashier && !finData.salesInfo) return;
   switch (curPage) {
     case 'pl':        renderPLPage(); break;
     case 'cf':        renderCFPage(); break;
     case 'revenue':   renderRevenuePage(); break;
     case 'costs':     renderCostsPage(); break;
     case 'balance':   renderBalancePage(); break;
+    case 'operator':  renderOperatorPage(); break;
     case 'analytics': renderAnalyticsPage(); break;
   }
+}
+
+// Operator page mode (umumiy / haqiqiy)
+let opMode = 'umumiy';
+function setOpMode(mode, btn) {
+  opMode = mode;
+  document.querySelectorAll('#op-mode-umumiy, #op-mode-haqiqiy').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (curPage === 'operator') renderOperatorPage();
 }
 
 // ══════════════════════════════════════════
@@ -2225,7 +2602,262 @@ function renderRecentTransactions(cashData) {
 }
 
 // ══════════════════════════════════════════
-// PAGE 6: ANALYTICS & CEO
+// PAGE 6: OPERATOR PERFORMANCE
+// ══════════════════════════════════════════
+
+// Customer base'dan operator effekti hisobi
+// 2 xil rejim:
+//   - 'umumiy': barcha sotuvlar (3-darsda chiqib ketganlar ham)
+//   - 'haqiqiy': 3-darsdan keyin qolganlar
+function buildOperatorStats() {
+  const stats = {};
+  for (const op of OPERATORS) {
+    stats[op] = {
+      planSold: 0,         // Plan kvota
+      factSold_umumiy: 0,  // Customer base'dan barcha
+      factSold_haqiqiy: 0, // 3-darsdan keyin qolganlar
+      groups: [],          // qaysi guruhlarga sotgan
+    };
+  }
+
+  // Plan ma'lumotlari Sales information / Guruh Plan dan
+  if (finData.salesInfo) {
+    for (const grp of finData.salesInfo.guruhPlan) {
+      if (filterYear && grp.year !== filterYear) continue;
+      if (filterMonth !== 'all' && grp.month !== filterMonth) continue;
+
+      stats['Nigina'].planSold    += grp.planNigina;
+      stats['Dilnura'].planSold   += grp.planDilnura;
+      stats['Gavharoy'].planSold  += grp.planGavharoy;
+      stats['Abdulaziz'].planSold += grp.planAbdulaziz;
+
+      stats['Nigina'].factSold_umumiy    += grp.factNigina;
+      stats['Dilnura'].factSold_umumiy   += grp.factDilnura;
+      stats['Gavharoy'].factSold_umumiy  += grp.factGavharoy;
+      stats['Abdulaziz'].factSold_umumiy += grp.factAbdulaziz;
+    }
+  }
+
+  // Haqiqiy fakt — Customer base 1 dan
+  // Status field: "1-darsgacha chiqqan", "3-darsgacha chiqqan", "Kursni yakunla...", va h.k.
+  // 3-dars filtri: hisobga olinmaydi: "1-darsgacha", "3-darsgacha"
+  if (finData.customerBase) {
+    for (const stud of finData.customerBase.students) {
+      if (!stud.operator) continue;
+      const opName = String(stud.operator).trim();
+      // Operator nomini topish (ba'zan farqli yozilgan bo'lishi mumkin)
+      const matched = OPERATORS.find(o => opName.toLowerCase().includes(o.toLowerCase()));
+      if (!matched) continue;
+
+      // 3-darsda chiqib ketganmi?
+      const status = String(stud.status || '').toLowerCase();
+      const droppedEarly = status.includes('1-dars') || status.includes('3-dars') ||
+                          status.includes('1-day') || status.includes('3-day');
+
+      if (!droppedEarly) {
+        stats[matched].factSold_haqiqiy += 1;
+      }
+    }
+  } else {
+    // Fallback: agar customer base yo'q bo'lsa, umumiy bilan tenglashtiramiz
+    for (const op of OPERATORS) {
+      stats[op].factSold_haqiqiy = stats[op].factSold_umumiy;
+    }
+  }
+
+  return stats;
+}
+
+function renderOperatorPage() {
+  const stats = buildOperatorStats();
+
+  // KPI cards
+  for (const op of OPERATORS) {
+    const s = stats[op];
+    const fact = opMode === 'umumiy' ? s.factSold_umumiy : s.factSold_haqiqiy;
+    const plan = s.planSold;
+    const pct = plan > 0 ? (fact / plan * 100) : 0;
+    const kvEl = document.getElementById('kv-op-' + op);
+    const ksEl = document.getElementById('ks-op-' + op);
+    if (kvEl) kvEl.textContent = fact + ' ta';
+    if (ksEl) {
+      const pctClass = pct >= 100 ? 'vp-good' : (pct >= 80 ? 'vp-neu' : 'vp-bad');
+      ksEl.innerHTML = `Plan: ${plan} · <span class="var-pct ${pctClass}">${pct.toFixed(0)}%</span>`;
+    }
+  }
+
+  // Subtitle
+  const periodLbl = filterMonth === 'all'
+    ? `${filterYear}-yil (yillik)`
+    : `${filterYear}-yil ${monthName(filterMonth)}`;
+  const sub = document.getElementById('op-chart-subtitle');
+  if (sub) sub.textContent = `${periodLbl} · Hisob: ${opMode === 'umumiy' ? 'Umumiy (barcha sotuv)' : 'Haqiqiy (3-darsdan keyin qolganlar)'}`;
+
+  // Chart
+  renderOperatorChart(stats);
+
+  // Detail table
+  renderOperatorTable(stats);
+
+  // Group-level table
+  renderOperatorGroupTable();
+
+  // Insights
+  renderOperatorInsights(stats);
+}
+
+function renderOperatorChart(stats) {
+  destroyChart('opChart');
+  const labels = OPERATORS;
+  const planData = labels.map(op => stats[op].planSold);
+  const factData = labels.map(op => opMode === 'umumiy' ? stats[op].factSold_umumiy : stats[op].factSold_haqiqiy);
+
+  const ctx = document.getElementById('opChart');
+  if (!ctx) return;
+  charts['opChart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Plan', data: planData, backgroundColor: 'rgba(91,141,238,0.7)', borderRadius: 4 },
+        { label: opMode === 'umumiy' ? 'Fact (umumiy)' : 'Fact (haqiqiy)', data: factData, backgroundColor: 'rgba(46,202,138,0.8)', borderRadius: 4 },
+      ]
+    },
+    options: chartOpts({ legendShow: true, yLabel: 'ta' })
+  });
+}
+
+function renderOperatorTable(stats) {
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Operator</th>' +
+    '<th class="num">Plan</th>' +
+    '<th class="num">Fact (umumiy)</th>' +
+    '<th class="num">Fact (haqiqiy)</th>' +
+    '<th class="num">Variance</th>' +
+    '<th class="num">Bajarish %</th>' +
+    '<th class="num">Lost (3-dars)</th>' +
+    '</tr></thead><tbody>';
+
+  let totP = 0, totFu = 0, totFh = 0;
+  for (const op of OPERATORS) {
+    const s = stats[op];
+    const fact = opMode === 'umumiy' ? s.factSold_umumiy : s.factSold_haqiqiy;
+    const lost = s.factSold_umumiy - s.factSold_haqiqiy;
+    const pct = s.planSold > 0 ? (fact / s.planSold * 100) : 0;
+    const pctClass = pct >= 100 ? 'vp-good' : (pct >= 80 ? 'vp-neu' : 'vp-bad');
+    totP += s.planSold; totFu += s.factSold_umumiy; totFh += s.factSold_haqiqiy;
+    html += `<tr>
+      <td style="font-weight:600;">${op}</td>
+      <td class="num">${s.planSold}</td>
+      <td class="num">${s.factSold_umumiy}</td>
+      <td class="num">${s.factSold_haqiqiy}</td>
+      <td class="num">${varianceVal(s.planSold, fact, false)}</td>
+      <td class="num"><span class="var-pct ${pctClass}">${pct.toFixed(1)}%</span></td>
+      <td class="num"><span class="var-neg">${lost > 0 ? lost : '—'}</span></td>
+    </tr>`;
+  }
+  // Total
+  const totFact = opMode === 'umumiy' ? totFu : totFh;
+  const totPct = totP > 0 ? (totFact / totP * 100) : 0;
+  const totPctClass = totPct >= 100 ? 'vp-good' : (totPct >= 80 ? 'vp-neu' : 'vp-bad');
+  html += `<tr class="total">
+    <td>JAMI</td>
+    <td class="num">${totP}</td>
+    <td class="num">${totFu}</td>
+    <td class="num">${totFh}</td>
+    <td class="num">${varianceVal(totP, totFact, false)}</td>
+    <td class="num"><span class="var-pct ${totPctClass}">${totPct.toFixed(1)}%</span></td>
+    <td class="num">${totFu - totFh > 0 ? `<span class="var-neg">${totFu - totFh}</span>` : '—'}</td>
+  </tr>`;
+  html += '</tbody></table>';
+  document.getElementById('opTableWrap').innerHTML = html;
+}
+
+function renderOperatorGroupTable() {
+  if (!finData.salesInfo) {
+    document.getElementById('opGroupTableWrap').innerHTML =
+      '<div style="color:var(--muted);font-size:11px;padding:10px;">Sales information yuklanmagan</div>';
+    return;
+  }
+
+  // Filtered groups
+  let groups = finData.salesInfo.guruhPlan;
+  if (filterYear) groups = groups.filter(g => g.year === filterYear);
+  if (filterMonth !== 'all') groups = groups.filter(g => g.month === filterMonth);
+
+  // Sort by planTotal descending, take top 20
+  const top20 = groups
+    .filter(g => g.planTotal > 0)
+    .sort((a, b) => b.planTotal - a.planTotal)
+    .slice(0, 20);
+
+  let html = '<table class="pf-table"><thead><tr>' +
+    '<th>Guruh</th><th>O\'qituvchi</th><th>Fan</th><th>Sana</th>' +
+    '<th class="num">Plan</th>' +
+    '<th class="num">Fact</th>' +
+    '<th class="num">Bajarish %</th>' +
+    '<th class="num">Niga(P/F)</th>' +
+    '<th class="num">Diln(P/F)</th>' +
+    '<th class="num">Gavh(P/F)</th>' +
+    '<th class="num">Abdul(P/F)</th>' +
+    '</tr></thead><tbody>';
+
+  for (const g of top20) {
+    const pct = g.planTotal > 0 ? (g.factTotal / g.planTotal * 100) : 0;
+    const pctClass = pct >= 100 ? 'vp-good' : (pct >= 80 ? 'vp-neu' : 'vp-bad');
+    const dateStr = g.openingDate ? g.openingDate.toLocaleDateString('uz', { month: 'short', day: 'numeric' }) : '';
+    html += `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;">${g.grpCode}</td>
+      <td style="font-size:10px;">${String(g.teacher).substring(0, 20)}</td>
+      <td>${g.fan}</td>
+      <td style="font-size:10px;color:var(--muted);">${dateStr}</td>
+      <td class="num">${g.planTotal}</td>
+      <td class="num">${g.factTotal}</td>
+      <td class="num"><span class="var-pct ${pctClass}">${pct.toFixed(0)}%</span></td>
+      <td class="num" style="font-size:10px;">${g.planNigina}/${g.factNigina}</td>
+      <td class="num" style="font-size:10px;">${g.planDilnura}/${g.factDilnura}</td>
+      <td class="num" style="font-size:10px;">${g.planGavharoy}/${g.factGavharoy}</td>
+      <td class="num" style="font-size:10px;">${g.planAbdulaziz}/${g.factAbdulaziz}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('opGroupTableWrap').innerHTML = html;
+}
+
+function renderOperatorInsights(stats) {
+  const items = [];
+  for (const op of OPERATORS) {
+    const s = stats[op];
+    const fact = opMode === 'umumiy' ? s.factSold_umumiy : s.factSold_haqiqiy;
+    const pct = s.planSold > 0 ? (fact / s.planSold * 100) : 0;
+    const lost = s.factSold_umumiy - s.factSold_haqiqiy;
+
+    let cls, icon, msg;
+    if (pct >= 110) {
+      cls = 'i-g'; icon = '⭐';
+      msg = `${op} planni ${pct.toFixed(0)}% bajardi (${fact}/${s.planSold}) — yuqori natija`;
+    } else if (pct >= 90) {
+      cls = 'i-g'; icon = '✅';
+      msg = `${op} planni ${pct.toFixed(0)}% bajardi (${fact}/${s.planSold})`;
+    } else if (pct >= 70) {
+      cls = 'i-w'; icon = '🟡';
+      msg = `${op} plandan past — ${pct.toFixed(0)}% (${fact}/${s.planSold})`;
+    } else {
+      cls = 'i-d'; icon = '⚠️';
+      msg = `${op} plandan jiddiy past — ${pct.toFixed(0)}% (${fact}/${s.planSold})`;
+    }
+    if (lost > 0 && opMode === 'haqiqiy') {
+      msg += ` · ${lost} ta o'quvchi 3-darsdan oldin chiqib ketgan`;
+    }
+    items.push({ cls, icon, op, msg });
+  }
+
+  let html = items.map(it => ins(it.cls, `${it.icon} ${it.op}`, it.msg)).join('');
+  document.getElementById('opInsights').innerHTML = html || '<div style="color:var(--muted);font-size:11px;padding:10px;">Ma\'lumot yetarli emas</div>';
+}
+
+// ══════════════════════════════════════════
+// PAGE 7: ANALYTICS & CEO
 // ══════════════════════════════════════════
 function renderAnalyticsPage() {
   const planMap = finData.plan ? buildSplMap(finData.plan.splRows) : {};
