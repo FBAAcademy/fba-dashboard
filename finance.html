@@ -340,11 +340,274 @@ const PIN_EXPIRY_DAYS = 7;
 let msalInstance = null;
 let currentPin = '';
 const PIN_LENGTH = 6;
-// ═════════════ DATA STORE ═════════════
+
+
+
+// ══════════════════════════════════════════
+// AUTH FLOW — loginRedirect usuli
+// ══════════════════════════════════════════
+async function init() {
+  msalInstance = new msal.PublicClientApplication(msalConfig);
+  await msalInstance.initialize();
+
+  // 1. Redirect dan qaytgan bo'lsa — AVVAL shu tekshiriladi
+  let redirectResult = null;
+  try {
+    redirectResult = await msalInstance.handleRedirectPromise();
+  } catch(e) {
+    console.error("Redirect xato:", e);
+    document.getElementById('msErr').textContent = "Kirish xatosi: " + (e.message || e);
+    document.getElementById('screen-ms').classList.remove('hidden');
+    return;
+  }
+
+  if (redirectResult && redirectResult.account) {
+    // Microsoft login muvaffaqiyatli — PIN ekraniga o'tamiz
+    msalInstance.setActiveAccount(redirectResult.account);
+    document.getElementById('userName').textContent = redirectResult.account.name || redirectResult.account.username;
+    document.getElementById('pinUserName').textContent =
+      "✅ " + (redirectResult.account.name || redirectResult.account.username) + " — endi maxfiy kodni kiriting.";
+    document.getElementById('screen-ms').classList.add('hidden');
+    document.getElementById('screen-pin').classList.remove('hidden');
+    initPinPad();
+    return;
+  }
+
+  // 2. PIN session tekshiramiz (avval login qilinganmi)
+  const stored = sessionStorage.getItem(PIN_STORAGE_KEY);
+  if (stored) {
+    try {
+      const obj = JSON.parse(stored);
+      if (obj.verified && Date.now() < obj.expiry) {
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+          msalInstance.setActiveAccount(accounts[0]);
+          document.getElementById('userName').textContent = accounts[0].name || accounts[0].username;
+          showMain();
+          await loadData();
+          return;
+        }
+      }
+    } catch(e) {}
+    sessionStorage.removeItem(PIN_STORAGE_KEY);
+  }
+
+  // 3. Login ekranini ko'rsatamiz
+  document.getElementById('screen-ms').classList.remove('hidden');
+}
+
+async function handleMsLogin() {
+  const errEl = document.getElementById('msErr');
+  const loadEl = document.getElementById('msLoading');
+  errEl.textContent = '';
+  loadEl.textContent = "Microsoft ga yo'naltirilmoqda...";
+  try {
+    // Eski interaction state ni tozalaymiz
+    Object.keys(sessionStorage).filter(k => k.startsWith('msal.')).forEach(k => sessionStorage.removeItem(k));
+    await msalInstance.loginRedirect(loginRequest);
+    // Bu qator ishlamaydi — sahifa redirect bo'ladi
+  } catch(e) {
+    errEl.textContent = "Kirish muvaffaqiyatsiz: " + (e.message || e);
+    loadEl.textContent = '';
+  }
+}
+
+function backToMs() {
+  currentPin = '';
+  document.getElementById('screen-pin').classList.add('hidden');
+  document.getElementById('screen-ms').classList.remove('hidden');
+  updatePinDots();
+}
+
+function fullSignOut() {
+  sessionStorage.removeItem(PIN_STORAGE_KEY);
+  document.getElementById('mainContent').style.display = 'none';
+  currentPin = '';
+  try {
+    msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.href.split('#')[0].split('?')[0] });
+  } catch(e) {
+    document.getElementById('screen-ms').classList.remove('hidden');
+  }
+}
+
+// ══════════════════════════════════════════
+// PIN HASHING (SHA-256, browser native)
+// ══════════════════════════════════════════
+async function hashPin(pin) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin + "fba_salt_2025");
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ══════════════════════════════════════════
+// AUTH FLOW
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// PIN PAD
+// ══════════════════════════════════════════
+function initPinPad() {
+  currentPin = '';
+  updatePinDots();
+  document.getElementById('pinErr').textContent = '';
+  document.getElementById('pinSuccess').textContent = '';
+
+  const numpad = document.getElementById('pinNumpad');
+  numpad.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach((k, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'pin-key' + (k === '⌫' ? ' del' : '') + (k === 0 ? ' zero' : '');
+    btn.textContent = k === '' ? '' : k;
+    if (k === '') { btn.style.visibility = 'hidden'; numpad.appendChild(btn); return; }
+    btn.onclick = () => {
+      if (k === '⌫') { currentPin = currentPin.slice(0,-1); }
+      else { if (currentPin.length < PIN_LENGTH) currentPin += k; }
+      updatePinDots();
+      if (currentPin.length === PIN_LENGTH) verifyPin();
+    };
+    numpad.appendChild(btn);
+  });
+
+  // Build dots
+  const dotsEl = document.getElementById('pinDots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < PIN_LENGTH; i++) {
+    const d = document.createElement('div');
+    d.className = 'pin-dot';
+    d.id = `dot-${i}`;
+    dotsEl.appendChild(d);
+  }
+}
+
+function updatePinDots() {
+  for (let i = 0; i < PIN_LENGTH; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    if (!dot) continue;
+    dot.classList.remove('filled','error');
+    if (i < currentPin.length) dot.classList.add('filled');
+  }
+}
+
+async function verifyPin() {
+  const errEl = document.getElementById('pinErr');
+  const okEl = document.getElementById('pinSuccess');
+  errEl.textContent = '';
+
+  const inputHash = await hashPin(currentPin);
+
+  // ⚠️ PAROL BU YERDA O'ZGARTIRILADI
+  // Yangi parol o'rnatish uchun: console.log(await hashPin('YANGI_PAROL')) → natijani PIN_CORRECT_HASH ga qo'ying
+  const PIN_CORRECT_HASH = await hashPin("133607"); // ← PAROLNI BU YERDA O'ZGARTIRING
+
+  if (inputHash === PIN_CORRECT_HASH) {
+    // Success
+    okEl.textContent = '✅ Tasdiqlandi! Yuklanmoqda...';
+    for (let i = 0; i < PIN_LENGTH; i++) {
+      const dot = document.getElementById(`dot-${i}`);
+      if (dot) { dot.classList.remove('filled'); dot.classList.add('filled'); dot.style.background = 'var(--green)'; dot.style.borderColor = 'var(--green)'; }
+    }
+    // Session ga saqlash (7 kun)
+    sessionStorage.setItem(PIN_STORAGE_KEY, JSON.stringify({
+      verified: true,
+      expiry: Date.now() + PIN_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+    }));
+    setTimeout(async () => {
+      document.getElementById('screen-pin').classList.add('hidden');
+      showMain();
+      await loadData();
+    }, 600);
+  } else {
+    // Error
+    errEl.textContent = '❌ Noto\'g\'ri kod. Qayta urinib ko\'ring.';
+    for (let i = 0; i < PIN_LENGTH; i++) {
+      const dot = document.getElementById(`dot-${i}`);
+      if (dot) { dot.classList.add('error'); }
+    }
+    setTimeout(() => {
+      currentPin = '';
+      updatePinDots();
+      for (let i = 0; i < PIN_LENGTH; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (dot) dot.classList.remove('error');
+      }
+    }, 1000);
+  }
+}
+
+function showMain() {
+  document.getElementById('mainContent').style.display = 'block';
+}
+
+// ══════════════════════════════════════════
+// TOKEN
+// ══════════════════════════════════════════
+async function getToken() {
+  const account = msalInstance.getActiveAccount();
+  if (!account) throw new Error("Login qilinmagan");
+  const result = await msalInstance.acquireTokenSilent({ ...loginRequest, account });
+  return result.accessToken;
+}
+
+// ══════════════════════════════════════════
+// LOADING UI
+// ══════════════════════════════════════════
+function showLoading(txt) {
+  document.getElementById('loadingText').textContent = txt || 'Yuklanmoqda...';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function setLoadingText(txt) { document.getElementById('loadingText').textContent = txt; }
+function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+// ══════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// EXCEL PARSERS
+// ══════════════════════════════════════════
+
+// SPL SFP SCF sheet strukturasi:
+// Row 7: header (col6=yil, col7..18=oylar, col19..22=kvartallar)
+// Row 8+: ma'lumotlar (col0=label, col6=yillik jami, col7..18=oy qiymatlari)
+// Row 117+: SCF qismi (OPERATING, INVESTING, FINANCING, CLOSING BALANCE)
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+// ── P&L RENDERER ──
+// SPL SFP SCF sheet: Row 7 = header, col6=yillik, col7..18 = Jan..Dec
+// Label col = 0, data cols = 6 (annual) + 7-18 (monthly)
+// ── CF RENDERER ──
+// SPL SFP SCF sheet, SCF qismi:
+// Row 117: header (col6=yillik, col7..18=Jan..Dec)
+// Row 118: OPENING BALANCE
+// Row 119: OPERATING ACTIVITIES  (yillik=col6, oylar=col7..18)
+// Row 183: INVESTING ACTIVITIES
+// Row 192: FINANCING ACTIVITIES
+// Row 201: Closing balance
+// ── CASHIER RENDERER ──
+// ══════════════════════════════════════════
+// CHART HELPERS
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener("load", init);
+
+
+
+// ═════════════════════════════════════════════════════════
+// V2 ADDITIONS — yangi parser/engine/render
+// ═════════════════════════════════════════════════════════
+
+// DATA STORE (replaces old finData)
 let finData = { finModel: null, cashier: null, salesInfo: null, customerBase: null };
 let charts = {};
 
-// ═════════════ MODULE: PARSERS ═════════════
 // ═══════════════════════════════════════════════════════════════════════
 // FINANCE V2 PARSERS
 // 4 ta manba fayl parser'lari
@@ -750,7 +1013,6 @@ function parseCustomerBaseV2(buffer) {
 }
 
 
-// ═════════════ MODULE: ENGINE (filter + aggregation) ═════════════
 // ═══════════════════════════════════════════════════════════════════════
 // UNIVERSAL FILTER & AGGREGATION ENGINE
 // ═══════════════════════════════════════════════════════════════════════
@@ -1220,7 +1482,6 @@ function aggregateAll(start, end) {
 }
 
 
-// ═════════════ MODULE: RENDER (7 pages) ═════════════
 // ═══════════════════════════════════════════════════════════════════════
 // FINANCE V2 RENDERERS — 7 ta sahifa
 // ═══════════════════════════════════════════════════════════════════════
@@ -1989,71 +2250,9 @@ function formatPeriod(start, end) {
 }
 
 
-// ═════════════ APP GLUE ═════════════
-
-async function loadData() {
-  showLoading("SharePoint ulanmoqda...");
-  try {
-    const token = await getToken();
-    setLoadingText("Drive topilmoqda...");
-    const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`,
-      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
-    const site = await siteRes.json();
-    const siteId = site.id;
-    const driveRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drive`,
-      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
-    const drive = await driveRes.json();
-    const driveId = drive.id;
-
-    // ── 4 ta manba parallel ──
-    setLoadingText("4 ta fayl yuklanmoqda...");
-    const [finBuf, cashBuf, salesBuf, custBuf] = await Promise.all([
-      fetchExcelV2(token, driveId, FILE_NAMES.finModel).catch(e => { console.warn('Fin Model:', e); return null; }),
-      fetchExcelV2(token, driveId, FILE_NAMES.cashier).catch(e => { console.warn('Cashier:', e); return null; }),
-      fetchExcelV2(token, driveId, FILE_NAMES.salesInfo).catch(e => { console.warn('Sales info:', e); return null; }),
-      fetchExcelV2(token, driveId, FILE_NAMES.customerBase).catch(e => { console.warn('Customer base:', e); return null; }),
-    ]);
-
-    setLoadingText("Ma'lumotlar tahlil qilinmoqda...");
-    finData.finModel    = finBuf  ? parseFinModelV2(finBuf)    : null;
-    finData.cashier     = cashBuf ? parseCashierV2(cashBuf)    : null;
-    finData.salesInfo   = salesBuf? parseSalesInfoV2(salesBuf) : null;
-    finData.customerBase= custBuf ? parseCustomerBaseV2(custBuf): null;
-
-    // Status badges
-    document.getElementById('src-fin').innerHTML = finData.finModel ?
-      `✅ Fin Model (${finData.finModel.revenue.length} rev, ${finData.finModel.journal.length} jrn)` : '❌ Fin Model';
-    document.getElementById('src-cashier').innerHTML = finData.cashier ?
-      `✅ Cashier (${finData.cashier.transactions.length} txn)` : '❌ Cashier';
-    document.getElementById('src-sales').innerHTML = finData.salesInfo ?
-      `✅ Sales info (${finData.salesInfo.groups.length} grps)` : '❌ Sales info';
-    document.getElementById('src-customer').innerHTML = finData.customerBase ?
-      `✅ Customer base (${finData.customerBase.students.length} std)` : '❌ Customer base';
-
-    // Detect data range
-    detectDataRange();
-
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('uz');
-    hideLoading();
-
-    // Build UI
-    document.getElementById('filterContainer').innerHTML = buildFilterUI();
-    document.getElementById('tabsContainer').innerHTML = buildTabs();
-    attachFilterEvents();
-    attachTabEvents();
-
-    // Initial filter (default to "2025")
-    applyPreset('2025');
-  } catch(e) {
-    hideLoading();
-    alert("Xato: " + e.message);
-    console.error(e);
-  }
-}
-
-function refreshData() { loadData(); }
-
-// ═════════════ CHART HELPERS ═════════════
+// ═════════════════════════════════════════════════════════
+// CHART HELPERS (new implementations)
+// ═════════════════════════════════════════════════════════
 
 function destroyChart(id) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
@@ -2137,6 +2336,72 @@ function renderPieChart(canvasId, labels, data, colors) {
     },
   });
 }
+
+// ═════════════════════════════════════════════════════════
+// LOAD DATA — yangi (4 ta manba)
+// ═════════════════════════════════════════════════════════
+
+async function loadData() {
+  showLoading("SharePoint ulanmoqda...");
+  try {
+    const token = await getToken();
+    setLoadingText("Drive topilmoqda...");
+    const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_HOSTNAME}:${SITE_PATH}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+    const site = await siteRes.json();
+    const siteId = site.id;
+    const driveRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drive`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+    const drive = await driveRes.json();
+    const driveId = drive.id;
+
+    setLoadingText("4 ta fayl yuklanmoqda...");
+    const [finBuf, cashBuf, salesBuf, custBuf] = await Promise.all([
+      fetchExcelV2(token, driveId, FILE_NAMES.finModel).catch(e => { console.warn('Fin Model:', e); return null; }),
+      fetchExcelV2(token, driveId, FILE_NAMES.cashier).catch(e => { console.warn('Cashier:', e); return null; }),
+      fetchExcelV2(token, driveId, FILE_NAMES.salesInfo).catch(e => { console.warn('Sales info:', e); return null; }),
+      fetchExcelV2(token, driveId, FILE_NAMES.customerBase).catch(e => { console.warn('Customer base:', e); return null; }),
+    ]);
+
+    setLoadingText("Ma'lumotlar tahlil qilinmoqda...");
+    finData.finModel    = finBuf  ? parseFinModelV2(finBuf)    : null;
+    finData.cashier     = cashBuf ? parseCashierV2(cashBuf)    : null;
+    finData.salesInfo   = salesBuf? parseSalesInfoV2(salesBuf) : null;
+    finData.customerBase= custBuf ? parseCustomerBaseV2(custBuf): null;
+
+    const sf = document.getElementById('src-fin');
+    if (sf) sf.innerHTML = finData.finModel ?
+      `✅ Fin Model (${finData.finModel.revenue.length} rev, ${finData.finModel.journal.length} jrn)` : '❌ Fin Model';
+    const sc = document.getElementById('src-cashier');
+    if (sc) sc.innerHTML = finData.cashier ?
+      `✅ Cashier (${finData.cashier.transactions.length} txn)` : '❌ Cashier';
+    const ss = document.getElementById('src-sales');
+    if (ss) ss.innerHTML = finData.salesInfo ?
+      `✅ Sales info (${finData.salesInfo.groups.length} grps)` : '❌ Sales info';
+    const scu = document.getElementById('src-customer');
+    if (scu) scu.innerHTML = finData.customerBase ?
+      `✅ Customer base (${finData.customerBase.students.length} std)` : '❌ Customer base';
+
+    detectDataRange();
+
+    const lu = document.getElementById('lastUpdate');
+    if (lu) lu.textContent = new Date().toLocaleTimeString('uz');
+    hideLoading();
+
+    document.getElementById('filterContainer').innerHTML = buildFilterUI();
+    document.getElementById('tabsContainer').innerHTML = buildTabs();
+    attachFilterEvents();
+    attachTabEvents();
+
+    applyPreset('2025');
+  } catch(e) {
+    hideLoading();
+    alert("Xato: " + e.message);
+    console.error(e);
+  }
+}
+
+async function refreshData() { await loadData(); }
 </script>
 </body>
 </html>
