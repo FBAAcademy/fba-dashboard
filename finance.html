@@ -658,24 +658,40 @@ async function fetchByDocId(token, driveId, docId) {
 }
 
 async function fetchExcelV2(token, driveId, baseName) {
-  async function searchFolder(folderId) {
+  async function searchFolder(folderId, depth = 0) {
+    if (depth > 3) return null;  // limit recursion
     const res = await fetch(
       `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children?$top=200`,
       { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     const data = await res.json();
     const items = data.value || [];
-    const match = items.find(i =>
-      i.name === baseName + '.xlsx' ||
-      i.name === baseName + '.xlsb' ||
-      i.name.startsWith(baseName)
+    
+    // Filter only Excel files (xlsx or xlsb), exclude shortcuts/links
+    const excelFiles = items.filter(i => 
+      i.file && // must be a file (not folder/shortcut)
+      i.size > 0 && // must have content
+      (i.name.endsWith('.xlsx') || i.name.endsWith('.xlsb'))
     );
+    
+    // 1) Exact match: baseName.xlsx or baseName.xlsb
+    let match = excelFiles.find(i => 
+      i.name === baseName + '.xlsx' || i.name === baseName + '.xlsb'
+    );
+    
+    // 2) StartsWith match (e.g. "Cashier" matches "Cashier.xlsb" or "Cashier 2025.xlsx")
+    if (!match) {
+      match = excelFiles.find(i => i.name.startsWith(baseName));
+    }
+    
     if (match) {
-      console.log(`✅ Found: ${match.name}`);
+      console.log(`✅ Found: ${match.name} (size: ${(match.size/1024).toFixed(0)}KB)`);
       return match.id;
     }
+    
+    // 3) Recurse into folders
     for (const item of items) {
       if (item.folder) {
-        const r = await searchFolder(item.id);
+        const r = await searchFolder(item.id, depth + 1);
         if (r) return r;
       }
     }
@@ -692,6 +708,10 @@ async function fetchExcelV2(token, driveId, baseName) {
   const fileRes = await fetch(
     `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?ts=${Date.now()}`,
     { headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache' }, cache: 'no-store' });
+  if (!fileRes.ok) {
+    console.error(`Fetch failed: ${baseName} → HTTP ${fileRes.status}`);
+    return null;
+  }
   return await fileRes.arrayBuffer();
 }
 
@@ -844,45 +864,101 @@ function parseCashierV2(buffer) {
   const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
   console.log('Cashier sheets:', wb.SheetNames);
 
-  // Cash Data sheet: data starts at row 5 (R5 has headers)
+  // Cash Data sheet — turli nomlarda bo'lishi mumkin
+  let cashSheetName = wb.SheetNames.find(s => s === 'Cash Data');
+  if (!cashSheetName) cashSheetName = wb.SheetNames.find(s => s.toLowerCase().includes('cash data'));
+  if (!cashSheetName) cashSheetName = wb.SheetNames.find(s => s.toLowerCase().includes('cash'));
+  if (!cashSheetName) cashSheetName = wb.SheetNames[0];  // fallback to first
+  console.log(`Cashier using sheet: "${cashSheetName}"`);
+
   // Headers: 1=Date, 2=Group, 4=Student/Teacher, 5=Details, 6=Division
   //          7=Account name, 12=Inflow UZS, 13=Outflow UZS, 14=Mixed
   let transactions = [];
-  if (wb.SheetNames.includes('Cash Data')) {
-    const ws = wb.Sheets['Cash Data'];
+  if (cashSheetName) {
+    const ws = wb.Sheets[cashSheetName];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
-    // Data starts where row[1] is a date
-    for (let i = 5; i < rows.length; i++) {
+    console.log(`  Rows: ${rows.length}`);
+    
+    // Auto-detect data start: look for first row with valid date
+    let dataStartRow = -1;
+    for (let i = 0; i < Math.min(rows.length, 20); i++) {
       const r = rows[i];
-      if (!r || !r[1]) continue;
-      const dt = excelDateToJS(r[1]);
-      if (!dt) continue;
-      const inflow = num(r[12]);
-      const outflow = num(r[13]);
-      if (inflow === 0 && outflow === 0) continue;
-      transactions.push({
-        date: dt,
-        year: dt.getFullYear(),
-        month: dt.getMonth() + 1,
-        group: str(r[2]),
-        student: str(r[4]),
-        details: str(r[5]),
-        division: str(r[6]),
-        account: str(r[7]),
-        inflow: inflow,
-        outflow: outflow,
-        net: inflow - outflow,
-      });
+      if (!r || r.length < 5) continue;
+      // Check if column 1 (or 0,2,3) has a date
+      for (let dc = 0; dc < 5; dc++) {
+        const v = r[dc];
+        const dt = excelDateToJS(v);
+        if (dt && dt.getFullYear() >= 2020 && dt.getFullYear() <= 2030) {
+          dataStartRow = i;
+          break;
+        }
+      }
+      if (dataStartRow >= 0) break;
+    }
+    console.log(`  Data starts at row: ${dataStartRow}`);
+    
+    if (dataStartRow >= 0) {
+      // Auto-detect column indices using header row
+      // Cashier standard: Date, Group, ..., Account, Inflow, Outflow, Currency, ...
+      let dateCol = 1, accountCol = 7, inflowCol = 12, outflowCol = 13;
+      let detailsCol = 5, divisionCol = 6, groupCol = 2, studentCol = 4;
+      
+      // Try to find header row above data start
+      for (let hr = Math.max(0, dataStartRow - 3); hr < dataStartRow; hr++) {
+        const headerRow = rows[hr];
+        if (!headerRow) continue;
+        for (let c = 0; c < headerRow.length; c++) {
+          const h = String(headerRow[c] || '').toLowerCase().trim();
+          if (h === 'date' || h.includes('sana')) dateCol = c;
+          if (h.includes('account name')) accountCol = c;
+          if (h === 'inflow (uzs)' || h === 'inflow uzs' || h === 'inflow') {
+            // Prefer UZS version
+            if (h.includes('uzs')) inflowCol = c;
+            else if (inflowCol === 12) inflowCol = c;
+          }
+          if (h === 'outflow (uzs)' || h === 'outflow uzs' || h === 'outflow') {
+            if (h.includes('uzs')) outflowCol = c;
+            else if (outflowCol === 13) outflowCol = c;
+          }
+          if (h.includes('details')) detailsCol = c;
+          if (h.includes('division')) divisionCol = c;
+          if (h === 'group' || h === 'guruh') groupCol = c;
+          if (h.includes('student/teacher') || h === 'student' || h === 'teacher') studentCol = c;
+        }
+      }
+      console.log(`  Cols: date=${dateCol}, account=${accountCol}, inflow=${inflowCol}, outflow=${outflowCol}`);
+      
+      for (let i = dataStartRow; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r) continue;
+        const dt = excelDateToJS(r[dateCol]);
+        if (!dt) continue;
+        const inflow = num(r[inflowCol]);
+        const outflow = num(r[outflowCol]);
+        if (inflow === 0 && outflow === 0) continue;
+        transactions.push({
+          date: dt,
+          year: dt.getFullYear(),
+          month: dt.getMonth() + 1,
+          group: str(r[groupCol]),
+          student: str(r[studentCol]),
+          details: str(r[detailsCol]),
+          division: str(r[divisionCol]),
+          account: str(r[accountCol]),
+          inflow: inflow,
+          outflow: outflow,
+          net: inflow - outflow,
+        });
+      }
     }
   }
 
-  // ── Accounts balances sheet (kunlik balans) ──
+  // ── Accounts balances sheet ──
   let balances = [];
-  if (wb.SheetNames.includes('Accounts balances')) {
-    const ws = wb.Sheets['Accounts balances'];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
-    // Just store all rows, render later will format
-    balances = rows;
+  const balSheetName = wb.SheetNames.find(s => s.toLowerCase().includes('account') && s.toLowerCase().includes('balance'));
+  if (balSheetName) {
+    const ws = wb.Sheets[balSheetName];
+    balances = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
   }
 
   console.log(`Cashier: ${transactions.length} transactions`);
