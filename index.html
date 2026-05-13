@@ -143,15 +143,8 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 .st-cell{display:inline-flex;align-items:center;justify-content:center;
   min-width:34px;height:22px;border-radius:4px;font-size:9px;font-weight:700;}
 .st-none{background:transparent;color:var(--muted);border:1px solid var(--border);}
-#stTableWrap table{table-layout:auto;min-width:1100px;}
 #stTableWrap table thead th{position:sticky;top:0;background:var(--bg2);z-index:5;
   padding:8px 4px;font-size:10px;border-bottom:1px solid var(--border);}
-/* Sticky columns: ID + Ism — gorizontal scrolda qotib qoladi */
-#stTableWrap table thead th.st-sticky-1{position:sticky;left:0;z-index:7;background:var(--bg2);}
-#stTableWrap table thead th.st-sticky-2{position:sticky;left:50px;z-index:7;background:var(--bg2);box-shadow:1px 0 0 var(--border);}
-#stTableWrap table tbody td.st-sticky-1{position:sticky;left:0;z-index:3;background:var(--bg2);}
-#stTableWrap table tbody td.st-sticky-2{position:sticky;left:50px;z-index:3;background:var(--bg2);box-shadow:1px 0 0 var(--border);}
-.st-row:hover td.st-sticky-1,.st-row:hover td.st-sticky-2{background:var(--bg3)!important;}
 #stTableWrap{scrollbar-width:thin;scrollbar-color:var(--border) var(--bg2);}
 #stTableWrap::-webkit-scrollbar{width:5px;height:5px;}
 #stTableWrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -373,18 +366,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <span class="flabel">O'qituvchi:</span>
     <select class="fselect" id="t-teacher-filter" onchange="renderTeachers()"><option value="all">Barchasi</option></select>
     <div class="fsep"></div>
-    <span class="flabel">Yil:</span>
-    <button class="fyb active" id="ty-all" onclick="setTY('all',this)">Barchasi</button>
-    <button class="fyb" id="ty-2024" onclick="setTY('2024',this)">2024</button>
-    <button class="fyb" id="ty-2025" onclick="setTY('2025',this)">2025</button>
-    <button class="fyb" id="ty-2026" onclick="setTY('2026',this)">2026</button>
-    <div class="fsep"></div>
-    <span class="flabel">Product:</span>
-    <button class="fyb active" id="tp-all" onclick="setTPT('all',this)">Barchasi</button>
-    <button class="fyb" id="tp-fc" onclick="setTPT('Full course',this)">Full course</button>
-    <button class="fyb" id="tp-rv" onclick="setTPT('Revision',this)">Revision</button>
-    <button class="fyb" id="tp-vl" onclick="setTPT('Video Lesson',this)">Video Lesson</button>
-    <div class="fsep"></div>
     <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer;">
       <input type="checkbox" id="t-excl-preclass" onchange="renderTeachers()" style="cursor:pointer;">
       <span>1-darsgacha chiqganlarni olib tashlash</span>
@@ -398,17 +379,20 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
   <div class="card">
     <div class="ct">O'qituvchilar — to'liq jadval</div><div class="cs">Retention bo'yicha kamayish tartibida</div>
     <table><thead><tr>
-      <th style="width:3%">#</th><th style="width:15%">O'qituvchi</th>
-      <th style="text-align:center;width:6%">Enrolled</th>
+      <th style="width:3%">#</th>
+      <th style="width:13%">O'qituvchi</th>
+      <th style="text-align:center;width:5%">Jami</th>
       <th style="text-align:center;width:5%">1-dars</th>
       <th style="text-align:center;width:5%">Stopped</th>
+      <th style="text-align:center;width:5%">In Prog.</th>
       <th style="text-align:center;width:5%">Passed</th>
-      <th style="text-align:center;width:6%">No Exam%</th>
+      <th style="text-align:center;width:5%">No Exam</th>
+      <th style="text-align:center;width:6%">No Exam %</th>
       <th style="width:9%">Retention</th>
       <th style="width:9%">Pass rate</th>
-      <th style="text-align:center;width:7%">Bayesian</th>
+      <th style="text-align:center;width:7%">Trend</th>
+      <th style="text-align:center;width:7%">Ball</th>
       <th style="text-align:center;width:8%">DARAJA</th>
-      <th style="width:8%">Trend</th>
     </tr></thead><tbody id="tTableBody"></tbody></table>
     <div style="font-size:9px;color:var(--muted);margin-top:6px;">* 1-darsgacha chiqqanlar — o'qituvchiga bog'liq emas</div>
   </div>
@@ -459,12 +443,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <button class="fyb" id="sy-2024" onclick="setSY('2024',this)">2024</button>
     <button class="fyb" id="sy-2025" onclick="setSY('2025',this)">2025</button>
     <button class="fyb" id="sy-2026" onclick="setSY('2026',this)">2026</button>
-    <div class="fsep"></div>
-    <span class="flabel">Product:</span>
-    <button class="fyb active" id="sp-all" onclick="setSPT('all',this)">Barchasi</button>
-    <button class="fyb" id="sp-fc" onclick="setSPT('Full course',this)">Full course</button>
-    <button class="fyb" id="sp-rv" onclick="setSPT('Revision',this)">Revision</button>
-    <button class="fyb" id="sp-vl" onclick="setSPT('Video Lesson',this)">Video Lesson</button>
     <div class="fsep"></div>
     <span class="flabel">O'qituvchi:</span>
     <select class="fselect" id="s-teacher-filter" onchange="renderSubjects()"><option value="all">Barchasi</option></select>
@@ -785,8 +763,8 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <table>
         <thead style="position:sticky;top:0;z-index:10;background:var(--bg2);">
           <tr>
-            <th class="st-sticky-1" style="min-width:50px;padding:8px 12px;">ID</th>
-            <th class="st-sticky-2" style="min-width:170px;">Ism Familiya</th>
+            <th style="min-width:50px;padding:8px 12px;">ID</th>
+            <th style="min-width:160px;">Ism Familiya</th>
             <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FA</th>
             <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FR</th>
             <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">MA</th>
@@ -1107,41 +1085,36 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
       AI Chuqur Tahlil
     </div>
-    <div class="modal-sub">Claude AI moliyaviy hisob-kitoblar, yo'qotishlar va strategik tavsiyalar beradi. Bir nechta bo'limni tanlash mumkin.</div>
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div style="font-size:11px;color:var(--muted);">Qaysi bo'limlarni tahlil qilish kerak? (bir nechta tanlash mumkin)</div>
-      <div style="display:flex;gap:6px;">
-        <button class="modal-sec-btn" id="aiSelectAll" onclick="aiSelectAll()" style="padding:4px 10px;font-size:10px;">Barchasini tanlash</button>
-        <button class="modal-sec-btn" id="aiClearAll" onclick="aiClearAll()" style="padding:4px 10px;font-size:10px;">Tozalash</button>
-      </div>
+    <div class="modal-sub">Claude AI moliyaviy hisob-kitoblar, yo'qotishlar va strategik tavsiyalar beradi. ~$0.03-0.08 xarajat.</div>
+    
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Qaysi bo'limni tahlil qilish kerak?</div>
+    <div class="modal-sections">
+      <button class="modal-sec-btn selected" onclick="selectSection('overview',this)">📊 Umumiy tahlil</button>
+      <button class="modal-sec-btn" onclick="selectSection('teachers',this)">👨‍🏫 O'qituvchilar</button>
+      <button class="modal-sec-btn" onclick="selectSection('subjects',this)">📚 Fanlar</button>
+      <button class="modal-sec-btn" onclick="selectSection('dropout',this)">🚪 Dropout</button>
+      <button class="modal-sec-btn" onclick="selectSection('sales',this)">💼 Sales</button>
+      <button class="modal-sec-btn" onclick="selectSection('marketing',this)">📣 Marketing</button>
     </div>
-    <div class="modal-sections" id="aiSectionsGrid">
-      <button class="modal-sec-btn selected" data-section="overview" onclick="toggleSection('overview',this)">📊 CEO Umumiy</button>
-      <button class="modal-sec-btn" data-section="teachers" onclick="toggleSection('teachers',this)">👨‍🏫 O'qituvchilar</button>
-      <button class="modal-sec-btn" data-section="subjects" onclick="toggleSection('subjects',this)">📚 Fanlar</button>
-      <button class="modal-sec-btn" data-section="dropout" onclick="toggleSection('dropout',this)">🚪 Dropout</button>
-      <button class="modal-sec-btn" data-section="rating" onclick="toggleSection('rating',this)">⭐ Rating</button>
-      <button class="modal-sec-btn" data-section="students" onclick="toggleSection('students',this)">👤 O'quvchilar</button>
-      <button class="modal-sec-btn" data-section="sales" onclick="toggleSection('sales',this)">💼 Sales</button>
-      <button class="modal-sec-btn" data-section="marketing" onclick="toggleSection('marketing',this)">📣 Marketing</button>
-      <button class="modal-sec-btn" data-section="revenue" onclick="toggleSection('revenue',this)">📉 Yo'qotish</button>
-      <button class="modal-sec-btn" data-section="ltv" onclick="toggleSection('ltv',this)">💰 LTV</button>
+    <div style="margin-bottom:16px;">
+      <button class="modal-sec-btn" id="allSectionsBtn" onclick="selectSection('all',this)" style="width:100%;text-align:center;background:var(--pdim);border-color:rgba(155,127,232,0.3);color:var(--purple);">
+        🤖 Barcha bo'limlarni tahlil qilish (To'liq hisobot)
+      </button>
     </div>
-
+    
     <div id="aiResultDiv" style="display:none;">
       <div class="ai-result-box" id="aiResultText"></div>
-      <button class="pdf-btn" onclick="downloadPdf()">📥 PDF olish (Print → Save as PDF)</button>
+      <button class="pdf-btn" onclick="downloadPdf()">📥 PDF yuklab olish</button>
     </div>
-
+    
     <div id="aiLoadingDiv" style="display:none;text-align:center;padding:20px;">
       <div style="width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
       <div style="font-size:12px;color:var(--muted);" id="loadingSubText">Claude tahlil qilmoqda... (~10-20 soniya)</div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="loadingProgress"></div>
     </div>
-
-    <div class="cost-note" id="costNote">⚡ <span id="aiSelectionInfo">1 ta bo'lim tanlandi</span> · taxminiy xarajat: <span id="aiCostInfo">~$0.05</span></div>
-
+    
+    <div class="cost-note" id="costNote">⚡ Har bir tahlil ~$0.03-0.08 · To'liq hisobot ~$0.20-0.40</div>
+    
     <div class="modal-actions" style="margin-top:16px;">
       <button class="modal-cancel" onclick="closeAiModal()">Bekor qilish</button>
       <button class="modal-run" id="runAiBtn" onclick="runAiAnalysis()">🤖 Tahlil boshlash</button>
@@ -1168,7 +1141,7 @@ let msalInstance = null;   // window.onload da yaratiladi — msal.js yuklanib b
 let snap    = null;
 let smData  = { sales: {}, marketing: {} };
 let charts  = {};
-let yF = 'all', tF = 'all', tY = 'all', tPT = 'all', sY = 'all', sPT = 'all', dY = 'all', dD = 'all';
+let yF = 'all', tF = 'all', tY = 'all', sY = 'all', dY = 'all', dD = 'all';
 let curPage = 'overview';
 
 // ── AUTH ──
@@ -1651,22 +1624,23 @@ const ANALYTICS = {
 
     const result = [];
     Object.entries(teachers).forEach(([name, rows]) => {
-      if (rows.length < 5) return;
+      // Kamida 1 ta o'quvchi bo'lsa ham ko'rsatamiz (avval 5 edi — ko'p o'qituvchi yo'qolardi)
+      if (rows.length < 1) return;
       const s = this.calcStats(rows);
       
-      // Yil kesimi
+      // Yil kesimi — kamida 1 (avval 3 edi)
       const by_year = {};
       [2024, 2025, 2026].forEach(yr => {
         const yRows = rows.filter(r => r.Year === yr);
-        if (yRows.length >= 3) by_year[yr] = this.calcStats(yRows);
+        if (yRows.length >= 1) by_year[yr] = this.calcStats(yRows);
       });
 
-      // Fan kesimi
+      // Fan kesimi — kamida 1 (avval 3 edi)
       const by_subject = {};
       const subjects = [...new Set(rows.map(r => r.Product))];
       subjects.forEach(sub => {
         const sRows = rows.filter(r => r.Product === sub);
-        if (sRows.length >= 3) by_subject[sub] = this.calcStats(sRows);
+        if (sRows.length >= 1) by_subject[sub] = this.calcStats(sRows);
       });
 
       result.push({
@@ -1725,7 +1699,8 @@ const ANALYTICS = {
       const by_year = {};
       [2024, 2025, 2026].forEach(yr => {
         const yRows = rows.filter(r => r.Year === yr);
-        if (yRows.length >= 3) by_year[yr] = this.calcStats(yRows);
+        // Pasaytirildi: 3 → 1 (kam ma'lumotli yillar ham ko'rinsin)
+        if (yRows.length >= 1) by_year[yr] = this.calcStats(yRows);
       });
       result.push({ Product: prod, ...s, by_year });
     });
@@ -2240,24 +2215,19 @@ function ins(type,label,text) { return `<div class="ins ${type}"><div class="il"
 function n(v) { return (v||0).toLocaleString(); }
 
 // ── FILTERS ──
-// Global filterlar (gYear, gMonth, tF) ni e'tiborga oladi
 function getS() {
   if (!snap) return {};
-  const norm = (d) => ({ ...d, retention_pct: d.retention_pct||d.retention||0, pass_rate_pct: d.pass_rate_pct||d.pass_rate||0, exam_entry_pct: d.exam_entry_pct||d.exam_entry||0, converted: d.converted||0 });
-
-  // Agar global filterlar (yil/oy/product) qo'llanilgan bo'lsa — raw datadan qayta hisoblaymiz
-  const gActive = gYear !== 'all' || gMonth !== 'all' || tF !== 'all';
-  if (gActive && snap.rawData) {
-    let filtered = snap.rawData;
-    if (gYear !== 'all') filtered = filtered.filter(r => r.Year == gYear);
-    if (gMonth !== 'all') filtered = filtered.filter(r => r.Month && r.Month.endsWith('-' + gMonth));
-    if (tF !== 'all') filtered = filtered.filter(r => r.Product_type === tF);
-    if (filtered.length === 0) return norm({ jami:0, stopped:0, passed:0, failed:0, no_exam:0, in_progress:0, yakunlagan:0, retention:0, pass_rate:0, exam_entry:0, converted:0 });
-    const recalc = ANALYTICS.calcSummary(filtered, new Date().toISOString().split('T')[0]);
-    return norm(recalc);
+  const s = snap.summary;
+  const norm = (d) => ({ ...d, retention_pct: d.retention_pct||d.retention||0, pass_rate_pct: d.pass_rate_pct||d.pass_rate||0, exam_entry_pct: d.exam_entry_pct||d.exam_entry||0, converted: s.converted||0 });
+  if (yF !== 'all' && tF !== 'all') {
+    const yd = snap.yearly?.[yF]; const pt = snap.product_types?.[tF];
+    if (!yd || !pt) return norm(s);
+    const ratio = s.jami > 0 ? pt.jami / s.jami : 0;
+    return norm({ jami:Math.round(yd.jami*ratio), stopped:Math.round((yd.stopped||0)*ratio), passed:Math.round((yd.passed||0)*ratio), failed:Math.round((yd.failed||0)*ratio), no_exam:Math.round((yd.no_exam||0)*ratio), in_progress:Math.round((yd.in_progress||0)*ratio), yakunlagan:Math.round((yd.yakunlagan||0)*ratio), retention:pt.retention, pass_rate:pt.pass_rate, exam_entry:pt.exam_entry });
   }
-  // Filtersiz — asosiy summary
-  return norm(snap.summary);
+  if (yF !== 'all') { const yd = snap.yearly?.[yF]; if (!yd) return norm(s); return norm({...yd}); }
+  if (tF !== 'all') { const pt = snap.product_types?.[tF]; if (!pt) return norm(s); return norm({...pt}); }
+  return norm(s);
 }
 
 // ── GLOBAL FILTER STATE ──
@@ -2320,8 +2290,7 @@ function getGlobalSnap() {
 
 function setYF(y, btn) { yF=y; ['fp-all','fp-fc','fp-rv','fp-vl','gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el && ['Barchasi','2024','2025','2026'].some(t=>el.textContent.includes(t))) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTF(t, btn) { tF=t; ['fp-all','fp-fc','fp-rv','fp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
-function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025','ty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
-function setTPT(t, btn) { tPT=t; ['tp-all','tp-fc','tp-rv','tp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
+function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
 function setRY(y, btn) { ['ry-all','ry-2024','ry-2025','ry-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderRating(); }
 function setSalesY(y, btn) { ['saly-all','saly-2024','saly-2025','saly-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderSales(); }
 function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderMarketing(); }
@@ -2330,11 +2299,9 @@ function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forE
 function renderOv() {
   if (!snap) return;
   const s = getS();
-  const MONTHS = {'01':'Yan','02':'Fev','03':'Mar','04':'Apr','05':'May','06':'Iyn','07':'Iyl','08':'Avg','09':'Sen','10':'Okt','11':'Noy','12':'Dek'};
-  const yLabel = gYear==='all' ? 'Barchasi' : gYear;
-  const mLabel = gMonth==='all' ? '' : ` · ${MONTHS[gMonth]||gMonth}`;
+  const label = yF==='all'?'Barchasi':yF;
   const tlabel = tF==='all'?'':` · ${tF}`;
-  document.getElementById('ov-title').textContent = `Asosiy ko'rsatkichlar (${yLabel}${mLabel}${tlabel})`;
+  document.getElementById('ov-title').textContent = `Asosiy ko'rsatkichlar (${label}${tlabel})`;
   document.getElementById('ov-sana').textContent = snap.summary.sana;
 
   const jami=s.jami||0, stopped=s.stopped||0, yakunlagan=s.yakunlagan||0, inp=s.in_progress||0;
@@ -2611,10 +2578,8 @@ function getFilteredTeachers() {
   const teacherF = document.getElementById('t-teacher-filter')?.value || 'all';
   const exclPreclass = document.getElementById('t-excl-preclass')?.checked || false;
 
-  // Global filter + sahifaning o'z filterlari (yil + product type) raw data ga
+  // Global filter + preclass filter qo'llash
   let rawD = getGlobalFilteredData();
-  if (tY !== 'all') rawD = rawD.filter(r => r.Year == tY);
-  if (tPT !== 'all') rawD = rawD.filter(r => r.Product_type === tPT);
   if (exclPreclass) rawD = rawD.filter(r => r.Status !== '1-darsgacha chiqqanlar');
 
   // Recalculate teachers from filtered raw data
@@ -2626,9 +2591,9 @@ function getFilteredTeachers() {
     ts = ts.filter(t => t.Oqituvchi === teacherF);
   }
 
-  // Fan filtri
+  // Fan filtri — kamida 1 (avval 3 edi)
   if (fan !== 'all') {
-    ts = ts.filter(t => t.by_subject && t.by_subject[fan] && t.by_subject[fan].jami >= 3);
+    ts = ts.filter(t => t.by_subject && t.by_subject[fan] && t.by_subject[fan].jami >= 1);
     ts = ts.map(t => {
       const fs = t.by_subject[fan];
       return {
@@ -2638,22 +2603,26 @@ function getFilteredTeachers() {
         by_subject: t.by_subject
       };
     });
-    const sub = `Fan: ${fan}`;
+    const sub = fan !== 'all' ? `Fan: ${fan}` : 'Barcha fanlar';
     const ysub = tY !== 'all' ? ` · ${tY}` : '';
-    const psub = tPT !== 'all' ? ` · ${tPT}` : '';
     const el1 = document.getElementById('t-ret-sub');
     const el2 = document.getElementById('t-pass-sub');
-    if(el1) el1.textContent = sub + ysub + psub;
-    if(el2) el2.textContent = sub + ysub + psub;
+    if(el1) el1.textContent = sub + ysub;
+    if(el2) el2.textContent = sub + ysub;
   } else {
-    const parts = [];
-    if (tY !== 'all') parts.push(`${tY}-yil`);
-    if (tPT !== 'all') parts.push(tPT);
-    const lbl = parts.length > 0 ? parts.join(' · ') : 'Barcha fanlar';
     const el1 = document.getElementById('t-ret-sub');
     const el2 = document.getElementById('t-pass-sub');
-    if(el1) el1.textContent = lbl;
-    if(el2) el2.textContent = lbl;
+    if(el1) el1.textContent = tY !== 'all' ? `${tY}-yil` : 'Barcha fanlar';
+    if(el2) el2.textContent = tY !== 'all' ? `${tY}-yil` : 'Barcha fanlar';
+  }
+
+  // Yil filtri — kamida 1 (avval 3 edi)
+  if (tY !== 'all') {
+    ts = ts.map(t => {
+      const yd = t.by_year?.[tY];
+      if (!yd || yd.jami < 1) return null;
+      return { Oqituvchi: t.Oqituvchi, ...yd, by_year: t.by_year, by_subject: t.by_subject };
+    }).filter(Boolean);
   }
 
   return ts.sort((a, b) => b.retention - a.retention);
@@ -2738,7 +2707,7 @@ function renderTeachers() {
       const subjKeys = [...new Set([...subOrder, ...Object.keys(tForSubj.by_subject)])];
       subjKeys.forEach(sub => {
         const d = tForSubj.by_subject[sub];
-        if (!d || d.jami < 2) return;
+        if (!d || d.jami < 1) return;
         tSubBody.innerHTML += `<tr>
           <td style="font-weight:600;">${sub}</td>
           <td style="text-align:center;">${n(d.jami)}</td>
@@ -2758,9 +2727,7 @@ function renderTeachers() {
   }
 
   // ── YANGI: Oylik dinamika chart ──
-  let rawD2 = getGlobalFilteredData();
-  if (tY !== 'all') rawD2 = rawD2.filter(r => r.Year == tY);
-  if (tPT !== 'all') rawD2 = rawD2.filter(r => r.Product_type === tPT);
+  const rawD2 = getGlobalFilteredData();
   const filteredForChart = teacherF !== 'all' ? rawD2.filter(r=>r.Oqituvchi===teacherF) : rawD2;
   const fanF2 = document.getElementById('t-fan-filter')?.value || 'all';
   const chartData = (fanF2!=='all') ? filteredForChart.filter(r=>r.Product===fanF2) : filteredForChart;
@@ -2798,39 +2765,17 @@ function setSY(y, btn) {
   ['sy-all','sy-2024','sy-2025','sy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   btn.classList.add('active'); renderSubjects();
 }
-function setSPT(t, btn) {
-  sPT = t;
-  ['sp-all','sp-fc','sp-rv','sp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
-  btn.classList.add('active'); renderSubjects();
-}
 function renderSubjects() {
-  if (!snap || !snap.rawData) return;
-
-  // Sahifa filterlari raw data ga
-  let rawD = getGlobalFilteredData();
-  if (sY !== 'all') rawD = rawD.filter(r => r.Year == sY);
-  if (sPT !== 'all') rawD = rawD.filter(r => r.Product_type === sPT);
-  const teacherF = document.getElementById('s-teacher-filter')?.value || 'all';
-  if (teacherF !== 'all') rawD = rawD.filter(r => r.Oqituvchi === teacherF);
-  const exclPre = document.getElementById('s-excl-preclass')?.checked || false;
-  if (exclPre) rawD = rawD.filter(r => r.Status !== '1-darsgacha chiqqanlar');
-
-  // Recalculate subjects
-  const recalc = ANALYTICS.reCalcFromFiltered(rawD);
-  let subs = recalc?.subjects || [];
-
-  // Sub label
-  const parts = [];
-  if (sY !== 'all') parts.push(`${sY}-yil`);
-  if (sPT !== 'all') parts.push(sPT);
-  if (teacherF !== 'all') parts.push(teacherF.split(' ').slice(0,2).join(' '));
-  document.getElementById('s-ret-sub').textContent = parts.length ? parts.join(' · ') : 'Fanlar kesimida';
-  if (!subs || subs.length === 0) {
-    // Bo'sh holatda chartlarni tozalash
-    dc('sRetPass'); dc('sExam'); dc('sExamTime'); dc('sNoExam');
-    const tb=document.getElementById('sTableBody'); if(tb) tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px;">Filtr natijasi bo\'sh</td></tr>';
-    return;
+  let subs = snap?.subjects || [];
+  if (sY !== 'all') {
+    subs = subs.map(s => {
+      const yd = s.by_year?.[sY];
+      if (!yd) return null;
+      return { ...s, ...yd, Product: s.Product, by_year: s.by_year };
+    }).filter(Boolean);
   }
+  document.getElementById('s-ret-sub').textContent = sY !== 'all' ? `${sY}-yil` : 'Fanlar kesimida';
+  if (!subs || subs.length === 0) return;
   dc('sRetPass');
   charts['sRetPass'] = new Chart(document.getElementById('sRetPassChart'), {
     type:'bar',
@@ -3459,18 +3404,9 @@ function renderStudents() {
     students = students.filter(function(s) { return (fanF.toUpperCase() in s.courses); });
   }
   if (statusF !== 'all') {
-    if (fanF !== 'all') {
-      // Fan tanlangan: faqat shu fanda statusF bo'lganlar qoladi
-      const fanKey = fanF.toUpperCase();
-      students = students.filter(function(s) {
-        return s.courses[fanKey] && s.courses[fanKey].status === statusF;
-      });
-    } else {
-      // Fan tanlanmagan: istalgan kursida statusF bo'lganlar
-      students = students.filter(function(s) {
-        return Object.values(s.courses).some(function(c){ return c.status === statusF; });
-      });
-    }
+    students = students.filter(function(s) {
+      return Object.values(s.courses).some(function(c){ return c.status === statusF; });
+    });
   }
   if (teacherF !== 'all') {
     students = students.filter(function(s) { return (s.teacherFull||'').includes(teacherF); });
@@ -3539,11 +3475,11 @@ function renderStudentsTable(students) {
   pageSt.forEach(function(s) {
     rows += '<tr class="st-row">';
 
-    // ID (sticky chap)
-    rows += '<td class="st-sticky-1" style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;white-space:nowrap;">' + s.id + '</td>';
+    // ID
+    rows += '<td style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;white-space:nowrap;">' + s.id + '</td>';
 
-    // ISM — to'liq (sticky chap)
-    rows += '<td class="st-sticky-2" style="font-weight:500;font-size:11px;padding:7px 10px;min-width:170px;white-space:nowrap;">' + (s.name || '—') + '</td>';
+    // ISM — to'liq
+    rows += '<td style="font-weight:500;font-size:11px;padding:7px 10px;min-width:150px;white-space:nowrap;">' + (s.name || '—') + '</td>';
 
     // Har fan uchun katak
     FAN_ORDER_ST.forEach(function(fan) {
@@ -3969,7 +3905,7 @@ function calcRevenueLost(data, avgPrice) {
     if (r.Final_status === 'No Exam') mGrp[r.Month].noExam++;
   });
   var monthlyLoss = Object.keys(mGrp).sort().slice(-18).map(function(m) {
-    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*1750000};
+    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*REVISION};
   });
   return {totalDropoutLoss:totDL, totalNoExamLoss:totNEL, totalConvLoss:totCL, total:totDL+totNEL+totCL, dropFan:dropFan, neFan:neFan, convSteps:convSteps, fanSum:fanSum, monthlyLoss:monthlyLoss, avgPrice:avgPrice};
 }
@@ -4187,6 +4123,8 @@ function showPage(id, btn) {
     if (id==='students') { populateStudentFilters(); renderStudents(); }
     if (id==='revenue') renderRevenue();
     if (id==='ltv') renderLTV();
+    if (id==='revenue') renderRevenue();
+    if (id==='ltv') renderLTV();
   }
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
@@ -4210,24 +4148,9 @@ function populateFanFilters() {
 
 // ── AI TAHLIL ──
 const FUNC_URL = "https://fba-api-bkbgbcewcmgdfcea.centralus-01.azurewebsites.net/api/analyze";
-
-// Multi-select bo'limlar — har biri ID, label va taxminiy xarajat (USD)
-const AI_SECTIONS = [
-  { key: 'overview',  label: '📊 CEO Umumiy',     cost: 0.05 },
-  { key: 'teachers',  label: '👨‍🏫 Oqituvchilar', cost: 0.06 },
-  { key: 'subjects',  label: '📚 Fanlar',          cost: 0.05 },
-  { key: 'dropout',   label: '🚪 Dropout',         cost: 0.05 },
-  { key: 'rating',    label: '⭐ Rating',          cost: 0.04 },
-  { key: 'students',  label: '👤 Oquvchilar',     cost: 0.05 },
-  { key: 'sales',     label: '💼 Sales',           cost: 0.05 },
-  { key: 'marketing', label: '📣 Marketing',       cost: 0.04 },
-  { key: 'revenue',   label: '📉 Yoqotish',       cost: 0.05 },
-  { key: 'ltv',       label: '💰 LTV',             cost: 0.05 }
-];
-
-let selectedSections = ['overview']; // default: 1 ta bo'lim tanlangan
+let selectedSection = 'overview';
 let lastAnalysis = '';
-let lastSections = ['overview'];
+let lastSection = 'overview';
 
 function showAiModal() {
   document.getElementById('aiModal').style.display = 'flex';
@@ -4235,68 +4158,20 @@ function showAiModal() {
   document.getElementById('aiLoadingDiv').style.display = 'none';
   document.getElementById('runAiBtn').disabled = false;
   document.getElementById('costNote').style.display = 'block';
-  syncAiButtonsUI();
-  updateAiCostInfo();
 }
 
 function closeAiModal() {
   document.getElementById('aiModal').style.display = 'none';
 }
 
-// Toggle: bo'limni qo'shish/olib tashlash
-function toggleSection(section, btn) {
-  const idx = selectedSections.indexOf(section);
-  if (idx >= 0) {
-    selectedSections.splice(idx, 1);
-    btn.classList.remove('selected');
-  } else {
-    selectedSections.push(section);
-    btn.classList.add('selected');
-  }
+function selectSection(section, btn) {
+  selectedSection = section;
+  document.querySelectorAll('.modal-sec-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
   document.getElementById('aiResultDiv').style.display = 'none';
-  updateAiCostInfo();
-}
-
-function aiSelectAll() {
-  selectedSections = AI_SECTIONS.map(s => s.key);
-  syncAiButtonsUI();
-  updateAiCostInfo();
-}
-
-function aiClearAll() {
-  selectedSections = [];
-  syncAiButtonsUI();
-  updateAiCostInfo();
-}
-
-// Tugmalar holatini selectedSections ga moslash
-function syncAiButtonsUI() {
-  document.querySelectorAll('#aiSectionsGrid .modal-sec-btn').forEach(b => {
-    const sec = b.getAttribute('data-section');
-    if (selectedSections.indexOf(sec) >= 0) b.classList.add('selected');
-    else b.classList.remove('selected');
-  });
-}
-
-// Xarajat va tanlash hisoblagichini yangilash
-function updateAiCostInfo() {
-  const cnt = selectedSections.length;
-  const totalCost = selectedSections.reduce((s, k) => {
-    const sec = AI_SECTIONS.find(x => x.key === k);
-    return s + (sec ? sec.cost : 0.05);
-  }, 0);
-  const infoEl = document.getElementById('aiSelectionInfo');
-  const costEl = document.getElementById('aiCostInfo');
-  if (infoEl) infoEl.textContent = cnt === 0 ? "Hech narsa tanlanmagan" : `${cnt} ta bo'lim tanlandi`;
-  if (costEl) costEl.textContent = cnt === 0 ? '~$0.00' : `~$${totalCost.toFixed(2)}`;
-
+  // Update run button text
   const runBtn = document.getElementById('runAiBtn');
-  if (runBtn) {
-    runBtn.disabled = cnt === 0;
-    if (cnt === 0)      runBtn.textContent = "Bo'lim tanlang";
-    else if (cnt === 1) runBtn.textContent = "🤖 Tahlil boshlash";
-    else                runBtn.textContent = `🤖 ${cnt} ta bo'limni tahlil qilish`;
-  }
+  if (runBtn) runBtn.textContent = section === "all" ? "Toʻliq hisobot" : "Tahlil boshlash";
 }
 
 function formatAnalysis(text) {
@@ -4321,50 +4196,60 @@ async function fetchSection(snapWithSm, section) {
 
 async function runAiAnalysis() {
   if (!snap) { alert("Avval ma'lumot yuklansin!"); return; }
-  if (!selectedSections || selectedSections.length === 0) {
-    alert("Kamida bitta bo'lim tanlang!");
-    return;
-  }
-
+  
   const btn = document.getElementById('runAiBtn');
   btn.disabled = true;
   document.getElementById('aiLoadingDiv').style.display = 'block';
   document.getElementById('aiResultDiv').style.display = 'none';
   document.getElementById('costNote').style.display = 'none';
-
+  
   const snapWithSm = { ...snap, sales: smData.sales, marketing: smData.marketing };
-
+  
   try {
-    const selectedMeta = selectedSections.map(k => AI_SECTIONS.find(s => s.key === k)).filter(Boolean);
-
-    if (selectedMeta.length === 1) {
-      // Bitta bo'lim — oddiy chaqiruv
-      const sec = selectedMeta[0];
-      const sub = document.getElementById('loadingSubText');
-      if (sub) sub.textContent = `${sec.label} tahlil qilinmoqda...`;
-      const analysis = await fetchSection(snapWithSm, sec.key);
-      lastAnalysis = analysis;
-    } else {
-      // Bir nechta bo'lim — ketma-ket
+    if (selectedSection === 'all') {
+      // Barcha bo'limlarni ketma-ket tahlil qilish
+      const sections = [
+        { key: 'overview', label: '📊 Umumiy tahlil' },
+        { key: "teachers", label: "O\u02BBqituvchilar" },
+        { key: 'subjects', label: '📚 Fanlar' },
+        { key: 'dropout', label: '🚪 Dropout' },
+        { key: 'sales', label: '💼 Sales' },
+        { key: 'marketing', label: '📣 Marketing' }
+      ];
+      
       let fullReport = '';
-      for (let i = 0; i < selectedMeta.length; i++) {
-        const sec = selectedMeta[i];
+      
+      for (let i = 0; i < sections.length; i++) {
+        const sec = sections[i];
         const prog = document.getElementById('loadingProgress');
         const sub = document.getElementById('loadingSubText');
-        if (prog) prog.textContent = `${i+1}/${selectedMeta.length} — ${sec.label}`;
+        if (prog) prog.textContent = `${i+1}/${sections.length} — ${sec.label}`;
         if (sub) sub.textContent = 'Claude tahlil qilmoqda...';
+        
         const analysis = await fetchSection(snapWithSm, sec.key);
-        fullReport += `\n\n${'='.repeat(60)}\n${sec.label.toUpperCase()}\n${'='.repeat(60)}\n\n${analysis}`;
-      }
-      lastAnalysis = fullReport.trim();
-    }
+        fullReport += `
 
-    lastSections = [...selectedSections];
+${'='.repeat(60)}
+${sec.label.toUpperCase()}
+${'='.repeat(60)}
+
+${analysis}`;
+      }
+      
+      lastAnalysis = fullReport;
+      lastSection = 'all';
+      
+    } else {
+      const analysis = await fetchSection(snapWithSm, selectedSection);
+      lastAnalysis = analysis;
+      lastSection = selectedSection;
+    }
+    
     document.getElementById('aiResultText').innerHTML = formatAnalysis(lastAnalysis);
     document.getElementById('aiResultDiv').style.display = 'block';
     document.getElementById('aiLoadingDiv').style.display = 'none';
     btn.disabled = false;
-
+    
   } catch(e) {
     document.getElementById('aiLoadingDiv').style.display = 'none';
     document.getElementById('costNote').style.display = 'block';
@@ -4374,49 +4259,33 @@ async function runAiAnalysis() {
 }
 
 function downloadPdf() {
-  if (!lastAnalysis) { alert("Avval tahlil oling!"); return; }
-
+  if (!lastAnalysis) return;
+  
   const sectionNames = {
-    overview:  'CEO Umumiy Tahlil',
-    teachers:  "O'qituvchilar Tahlili",
-    subjects:  'Fanlar Tahlili',
-    dropout:   'Dropout Tahlili',
-    rating:    'Rating Tahlili',
-    students:  "O'quvchilar Tahlili",
-    sales:     'Sales Tahlili',
+    overview: 'Umumiy Tahlil',
+    teachers: "O'qituvchilar Tahlili",
+    subjects: 'Fanlar Tahlili',
+    dropout: 'Dropout Tahlili',
+    sales: 'Sales Tahlili',
     marketing: 'Marketing Tahlili',
-    revenue:   "Yo'qotish Tahlili",
-    ltv:       'LTV Tahlili'
+    all: "To'liq Professional Hisobot"
   };
-
-  // Multi-select holati: bir nechta bo'lim bo'lsa — birlashgan hisobot
-  let secName, fileSlug;
-  if (lastSections && lastSections.length > 1) {
-    secName = `Birlashgan Hisobot (${lastSections.length} bo'lim)`;
-    fileSlug = 'multi_' + lastSections.length + 'sections';
-  } else if (lastSections && lastSections.length === 1) {
-    secName = sectionNames[lastSections[0]] || 'Tahlil';
-    fileSlug = lastSections[0];
-  } else {
-    secName = 'Tahlil';
-    fileSlug = 'report';
-  }
-
-  // Markdown → HTML konvertatsiya
+  
+  const secName = sectionNames[lastSection] || sectionNames[selectedSection] || 'Tahlil';
+  
+  // Convert markdown to HTML
   let body = lastAnalysis;
-
-  // Tables (markdown | -> html)
+  
+  // Tables
   const tableLines = body.split('\n');
   let inTable = false, tableHtml = '', result = [], isFirstRow = true;
   tableLines.forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-      // Separator row (---|---|---) ni o'tkazib yuborish
-      if (trimmed.replace(/[|\-: ]/g, '').trim() === '') return;
+    if (line.startsWith('|') && line.endsWith('|')) {
+      if (line.replace(/[|\-: ]/g,'').trim() === '') return;
       if (!inTable) { inTable = true; isFirstRow = true; tableHtml = '<table>'; }
-      const cells = trimmed.split('|').filter(c => c.trim().length > 0);
+      const cells = line.split('|').filter(c => c.trim());
       const tag = isFirstRow ? 'th' : 'td';
-      tableHtml += '<tr>' + cells.map(c => '<' + tag + '>' + c.trim() + '</' + tag + '>').join('') + '</tr>';
+      tableHtml += '<tr>' + cells.map(c => '<'+tag+'>'+c.trim()+'</'+tag+'>').join('') + '</tr>';
       isFirstRow = false;
     } else {
       if (inTable) { result.push(tableHtml + '</table>'); tableHtml = ''; inTable = false; isFirstRow = true; }
@@ -4425,50 +4294,36 @@ function downloadPdf() {
   });
   if (tableHtml) result.push(tableHtml + '</table>');
   body = result.join('\n');
+  body = body.replace(/### ([^\n]+)/g,'<h3>$1</h3>');
+  body = body.replace(/## ([^\n]+)/g,'<h2>$1</h2>');
+  body = body.replace(/# ([^\n]+)/g,'<h1>$1</h1>');
+  body = body.replace(/[*][*]([^*]+)[*][*]/g,'<strong>$1</strong>');
+  body = body.replace(/\n\n/g,'</p><p>');
+  body = body.replace(/\n/g,'<br>');
 
-  // Markdown headers va bold
-  body = body.replace(/### ([^\n]+)/g, '<h3>$1</h3>');
-  body = body.replace(/## ([^\n]+)/g, '<h2>$1</h2>');
-  body = body.replace(/# ([^\n]+)/g, '<h1>$1</h1>');
-  body = body.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  // Section divider (===... lines) — qalin bo'lim ajratuvchi
-  body = body.replace(/={20,}/g, '<hr style="border:none;border-top:2px solid #1a5c3a;margin:20px 0;">');
-  // Paragraflar
-  body = body.replace(/\n\n+/g, '</p><p>');
-  body = body.replace(/\n/g, '<br>');
-
-  const dateStr = new Date().toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'});
+  const dateStr = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
   const genStr = new Date().toLocaleString();
 
-  const htmlContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FBA Academy — ' + secName + '</title><style>' +
+  const htmlContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FBA Academy - ' + secName + '</title><style>' +
     '*{box-sizing:border-box;margin:0;padding:0;}' +
-    '@page{size:A4;margin:15mm;}' +
     'body{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:20px 30px;color:#1a1a2e;line-height:1.7;font-size:13px;}' +
-    '.header{background:linear-gradient(135deg,#0a2e1a,#1a5c3a);color:white;padding:24px 28px;border-radius:12px;margin-bottom:28px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+    '.header{background:linear-gradient(135deg,#0a2e1a,#1a5c3a);color:white;padding:24px 28px;border-radius:12px;margin-bottom:28px;}' +
     '.logo{font-size:22px;font-weight:700;color:#2eca8a;margin-bottom:8px;}' +
     '.header h1{color:white;font-size:18px;margin:4px 0;}' +
-    '.header p{color:rgba(255,255,255,0.85);font-size:12px;}' +
-    '.badge{display:inline-block;background:rgba(46,202,138,0.25);color:#a8f5cd;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:8px;}' +
-    'h1{color:#1a5c3a;font-size:17px;border-bottom:2px solid #1a5c3a;padding-bottom:8px;margin:24px 0 14px;page-break-after:avoid;}' +
-    'h2{color:#1a5c3a;font-size:15px;margin:20px 0 10px;page-break-after:avoid;}' +
-    'h3{color:#2d7a52;font-size:13px;margin:16px 0 8px;font-weight:600;page-break-after:avoid;}' +
+    '.header p{color:rgba(255,255,255,0.7);font-size:12px;}' +
+    '.badge{display:inline-block;background:rgba(46,202,138,0.2);color:#2eca8a;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:8px;}' +
+    'h1{color:#1a5c3a;font-size:17px;border-bottom:2px solid #1a5c3a;padding-bottom:8px;margin:24px 0 14px;}' +
+    'h2{color:#1a5c3a;font-size:15px;margin:20px 0 10px;}' +
+    'h3{color:#2d7a52;font-size:13px;margin:16px 0 8px;font-weight:600;}' +
     'p{margin:6px 0;}' +
     'strong{color:#c44d00;font-weight:600;}' +
-    'table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;page-break-inside:avoid;}' +
+    'table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}' +
     'th,td{border:1px solid #dde;padding:7px 10px;text-align:left;}' +
     'th{background:#e8f0e8;font-weight:600;color:#1a5c3a;}' +
     'tr:nth-child(even) td{background:#f8faf8;}' +
     '.footer{margin-top:32px;padding-top:14px;border-top:1px solid #dde;font-size:11px;color:#888;display:flex;justify-content:space-between;}' +
-    '.print-controls{position:fixed;top:10px;right:10px;background:#1a5c3a;color:white;padding:10px 14px;border-radius:8px;font-size:13px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);}' +
-    '.print-controls button{background:#2eca8a;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:Arial,sans-serif;}' +
-    '.print-controls button:hover{background:#28b378;}' +
-    '@media print{.print-controls{display:none !important;}}' +
+    '@media print{.header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}' +
     '</style></head><body>' +
-    '<div class="print-controls">' +
-      '<span>📄 PDF qilib saqlash uchun:</span>' +
-      '<button onclick="window.print()">🖨️ Print / Save as PDF</button>' +
-      '<button onclick="window.close()" style="background:#888;">✕</button>' +
-    '</div>' +
     '<div class="header">' +
     '<div class="logo">FBA Academy</div>' +
     '<h1>Professional Analytics Report</h1>' +
@@ -4477,19 +4332,18 @@ function downloadPdf() {
     '</div>' +
     '<p>' + body + '</p>' +
     '<div class="footer"><span>FBA Academy Analytics Dashboard</span><span>Generated: ' + genStr + '</span></div>' +
-    '<script>setTimeout(function(){window.print();},500);<\/script>' +
     '</body></html>';
 
-  // Yangi oynada ochish — brauzer print dialogi avtomatik chiqadi,
-  // foydalanuvchi "Save as PDF" ni tanlaydi
-  const printWin = window.open('', '_blank');
-  if (!printWin) {
-    alert("Pop-up bloklanyapti! Brauzer sozlamalaridan ushbu sayt uchun pop-up ga ruxsat bering.");
-    return;
-  }
-  printWin.document.open();
-  printWin.document.write(htmlContent);
-  printWin.document.close();
+  // Download as HTML file (PDF orqali brauzerda print qilsa bo'ladi)
+  const blob = new Blob([htmlContent], {type: 'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'FBA_Analytics_' + (lastSection||'report') + '_' + new Date().toISOString().split('T')[0] + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 
