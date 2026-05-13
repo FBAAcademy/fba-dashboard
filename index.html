@@ -381,20 +381,21 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <table><thead><tr>
       <th style="width:3%">#</th>
       <th style="width:13%">O'qituvchi</th>
-      <th style="text-align:center;width:5%">Jami</th>
-      <th style="text-align:center;width:5%">1-dars</th>
+      <th style="text-align:center;width:4%">Jami</th>
+      <th style="text-align:center;width:4%">1-dars</th>
       <th style="text-align:center;width:5%">Stopped</th>
       <th style="text-align:center;width:5%">In Prog.</th>
+      <th style="text-align:center;width:5%">Finished</th>
       <th style="text-align:center;width:5%">Passed</th>
       <th style="text-align:center;width:5%">No Exam</th>
       <th style="text-align:center;width:6%">No Exam %</th>
       <th style="width:9%">Retention</th>
       <th style="width:9%">Pass rate</th>
-      <th style="text-align:center;width:7%">Trend</th>
-      <th style="text-align:center;width:7%">Ball</th>
-      <th style="text-align:center;width:8%">DARAJA</th>
+      <th style="text-align:center;width:6%">Trend</th>
+      <th style="text-align:center;width:5%">Ball</th>
+      <th style="text-align:center;width:7%">DARAJA</th>
     </tr></thead><tbody id="tTableBody"></tbody></table>
-    <div style="font-size:9px;color:var(--muted);margin-top:6px;">* 1-darsgacha chiqqanlar — o'qituvchiga bog'liq emas</div>
+    <div style="font-size:9px;color:var(--muted);margin-top:6px;">* 1-darsgacha chiqqanlar — o'qituvchiga bog'liq emas · Finished = Passed + Failed + No Exam (kursni yakunlagan)</div>
   </div>
   <div class="card">
     <div class="ct">2024 vs 2025 taqqoslash</div><div class="cs">Trend ko'rsatkichlari</div>
@@ -2667,6 +2668,7 @@ function renderTeachers() {
       '<td style="text-align:center;color:var(--amber);font-size:10px;">' + (preCnt||'—') + '</td>' +
       '<td style="text-align:center;color:var(--red);">' + n(t.stopped) + '</td>' +
       '<td style="text-align:center;color:var(--blue);">' + n(t.in_progress||0) + '</td>' +
+      '<td style="text-align:center;color:var(--teal);font-weight:600;">' + n(t.yakunlagan||0) + '</td>' +
       '<td style="text-align:center;color:var(--green);">' + n(t.passed) + '</td>' +
       '<td style="text-align:center;color:var(--muted);">' + n(t.no_exam) + '</td>' +
       '<td style="text-align:center;color:' + noExCol + ';font-weight:600;">' + noExamPct + '%</td>' +
@@ -3126,21 +3128,34 @@ function renderDropout() {
     dTeacherBody.innerHTML = '';
     Object.entries(tGrps)
       .filter(([_,rows])=>rows.length>=3)
-      .sort((a,b)=>{ const aD=a[1].filter(r=>r.Final_status==='Stopped').length/Math.max(a[1].length,1); const bD=b[1].filter(r=>r.Final_status==='Stopped').length/Math.max(b[1].length,1); return bD-aD; })
+      .sort((a,b)=>{
+        // "Boshqa guruhga o'tdi" ni chiqaramiz — O'qituvchilar bo'limi bilan mos kelishi uchun
+        const aEnr = a[1].filter(r=>!r.boshqaGuruh).length;
+        const bEnr = b[1].filter(r=>!r.boshqaGuruh).length;
+        const aStp = a[1].filter(r=>r.Final_status==='Stopped' && !r.boshqaGuruh).length;
+        const bStp = b[1].filter(r=>r.Final_status==='Stopped' && !r.boshqaGuruh).length;
+        const aD = aEnr>0 ? aStp/aEnr : 0;
+        const bD = bEnr>0 ? bStp/bEnr : 0;
+        return bD-aD;
+      })
       .forEach(([teacher, rows]) => {
-        const stopped = rows.filter(r=>r.Final_status==='Stopped');
+        // ── O'qituvchilar bo'limi bilan bir xil mantiq: "Boshqa guruhga o'tdi" chiqarilmaydi ──
+        const enrolled = rows.filter(r=>!r.boshqaGuruh);                          // Enrolled = jami - boshqaGuruh
+        const stoppedRaw = rows.filter(r=>r.Final_status==='Stopped');             // Hamma stopped (info uchun)
+        const stopped = stoppedRaw.filter(r=>!r.boshqaGuruh);                      // Stopped clean = boshqaGuruh chiqarilgan
         const pre1 = stopped.filter(r=>(r.Status||'').includes('1-darsgacha')).length;
         const pre3 = stopped.filter(r=>(r.Status||'').includes('3-darsgacha')).length;
         const in1m = stopped.filter(r=>(r.Status||'').includes('1-oyda')).length;
         const in2m = stopped.filter(r=>(r.Status||'').includes('2-oyda')).length;
-        const drpPct = rows.length>0?Math.round(stopped.length/rows.length*100):0;
+        // Dropout % = stopped (clean) / enrolled (clean) — endi retention bilan mos: dropout = 100 - retention
+        const drpPct = enrolled.length>0 ? Math.round(stopped.length/enrolled.length*100) : 0;
         const rc = {};
         stopped.forEach(r=>{ if(r.Sabab) rc[r.Sabab]=(rc[r.Sabab]||0)+1; });
         const topR = Object.entries(rc).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
         const rS = topR.length>18?topR.substring(0,18)+'...':topR;
         dTeacherBody.innerHTML += '<tr>' +
           '<td style="font-weight:500;font-size:11px;">' + teacher.split(' ').slice(0,2).join(' ') + '</td>' +
-          '<td style="text-align:center;">' + n(rows.length) + '</td>' +
+          '<td style="text-align:center;">' + n(enrolled.length) + '</td>' +
           '<td style="text-align:center;color:var(--amber);">' + (pre1||'—') + '</td>' +
           '<td style="text-align:center;color:var(--amber);">' + (pre3||'—') + '</td>' +
           '<td style="text-align:center;color:var(--red);">' + (in1m||'—') + '</td>' +
