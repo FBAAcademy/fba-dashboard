@@ -738,12 +738,13 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
             <td style="font-weight:600;padding:10px;color:var(--amber);">4️⃣ Tajriba</td>
             <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">10</td>
             <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
-              n = yakunlagan o'quvchilar soni<br>
-              <span style="color:var(--text);font-size:9px;">O'qituvchining ish hajmi va ishonchliligi</span>
+              ball = min(10, floor(n / 40) × 2)<br>
+              <span style="color:var(--text);font-size:9px;">n = yakunlagan o'quvchilar · Har 40 o'quvchi uchun 2 ball</span>
             </td>
             <td style="font-size:10px;padding:10px;">
-              ≥ 100 → <b style="color:var(--green)">10</b> · ≥ 30 → 7 · ≥ 10 → 4<br>
-              <b style="color:var(--muted)">&lt; 10 → Beta (rating yo'q)</b>
+              <b style="color:var(--red)">&lt; 40 → 0</b> · ≥ 40 → 2 · ≥ 80 → 4 · ≥ 120 → 6<br>
+              ≥ 160 → 8 · ≥ 200 → <b style="color:var(--green)">10</b> (max)<br>
+              <span style="color:var(--muted);font-size:9px;">n &lt; 10 → Beta (rating yo'q)</span>
             </td>
           </tr>
           
@@ -815,12 +816,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
         <b>1. Pass:</b> bayPass = (30×70 + 50×72)/80 = 71.3% → FA B daraja (≥64%) → <b>25</b><br>
         <b>2. Ret:</b> 55% → <b>18</b><br>
         <b>3. Entry:</b> 30% → <b>18</b><br>
-        <b>4. Tajriba:</b> 100 yakunlagan → <b>10</b><br>
+        <b>4. Tajriba:</b> 100 yakunlagan → floor(100/40)×2 = <b>4</b><br>
         <b>5. Trend:</b> +5% → <b>4</b><br>
         <br>
-        <b style="color:var(--green);">JAMI:</b> 25 + 18 + 18 + 10 + 4 = <b style="font-size:14px;color:var(--green);">75</b> → <b style="color:var(--green);">🥇 Senior</b>
+        <b style="color:var(--green);">JAMI:</b> 25 + 18 + 18 + 4 + 4 = <b style="font-size:14px;color:var(--green);">69</b> → <b style="color:var(--blue);">🥈 Mid</b>
         <br><br>
-        <span style="color:var(--muted);font-size:10px;">Pass rate = imtihonga kirganlardan o'tganlar (Passed / (Passed + Failed)). "No Exam" Exam Entry ballida hisoblanadi. Agar Boliyeva MA fanini ham o'qitsa, MA bo'yicha alohida ball bo'ladi (jadvalda alohida qator).</span>
+        <span style="color:var(--muted);font-size:10px;">Pass rate = imtihonga kirganlardan o'tganlar (Passed / (Passed + Failed)). "No Exam" Exam Entry ballida hisoblanadi. Tajriba: max ball (10) uchun ≥ 200 yakunlagan kerak. Agar Boliyeva MA fanini ham o'qitsa, MA bo'yicha alohida ball bo'ladi.</span>
       </div>
     </div>
     
@@ -3716,12 +3717,11 @@ function renderRating() {
     return 0;
   }
   
-  // 4) TAJRIBA (10 ball)
+  // 4) TAJRIBA (10 ball) — har 40 o'quvchi uchun 2 ball
+  // <40: 0 · 40-79: 2 · 80-119: 4 · 120-159: 6 · 160-199: 8 · 200+: 10
   function calcExpBall(n) {
-    if (n >= 100) return 10;
-    if (n >= 30) return 7;
-    if (n >= 10) return 4;
-    return 0;
+    if (n < 40) return 0;
+    return Math.min(10, Math.floor(n / 40) * 2);
   }
   
   // 5) TREND (5 ball)
