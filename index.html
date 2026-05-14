@@ -219,9 +219,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 
 <!-- OVERVIEW -->
 <div id="page-overview" class="page active">
-  <!-- GLOBAL FILTER BAR -->
+  <!-- CEO BO'LIMI FILTER (faqat shu sahifaga ta'sir qiladi) -->
   <div class="fbar" id="global-fbar">
-    <span class="flabel" style="color:var(--green);font-weight:600;">GLOBAL:</span>
+    <span class="flabel" style="color:var(--green);font-weight:600;">CEO FILTER:</span>
     <span class="flabel">Yil:</span>
     <button class="fyb active" id="gfy-all"  onclick="setGY('all',this)">Barchasi</button>
     <button class="fyb" id="gfy-2024" onclick="setGY('2024',this)">2024</button>
@@ -2258,20 +2258,23 @@ function getS() {
 }
 
 // ── GLOBAL FILTER STATE ──
-let gYear = 'all'; // Global yil filtri
-let gMonth = 'all'; // Global oy filtri
+// CEO (overview) sahifa filteri — boshqa sahifalarga ta'sir qilmaydi
+let gYear = 'all';   // CEO bo'limidagi yil filtri (faqat CEO sahifaga ta'sir qiladi)
+let gMonth = 'all';  // CEO bo'limidagi oy filtri (faqat CEO sahifaga ta'sir qiladi)
 
 function setGY(y, btn) {
   gYear = y;
   ['gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   btn.classList.add('active');
   updateGFLabel();
-  renderCurrentPage();
+  // FAQAT CEO sahifani render qilamiz — boshqa sahifalarga ta'sir qilmaydi
+  if (curPage === 'overview') renderOv();
 }
 function setGM(val) {
   gMonth = val;
   updateGFLabel();
-  renderCurrentPage();
+  // FAQAT CEO sahifani render qilamiz — boshqa sahifalarga ta'sir qilmaydi
+  if (curPage === 'overview') renderOv();
 }
 function updateGFLabel() {
   const lbl = document.getElementById('gf-label');
@@ -2282,7 +2285,7 @@ function updateGFLabel() {
   lbl.textContent = [yLabel, mLabel].filter(Boolean).join(' — ') || 'Barchasi';
 }
 
-// Global filterni snapshot ga qo'llash
+// CEO filter — faqat CEO sahifaga ta'sir qiladi (boshqa joylarda ishlatilmaydi)
 function applyGlobalFilter(data) {
   if (!data) return data;
   let filtered = data;
@@ -2595,11 +2598,10 @@ function populateDropoutFilters() {
 }
 
 function getGlobalFilteredData() {
+  // FAQAT raw ma'lumotni qaytaradi — CEO filter (gYear/gMonth) BOSHQA sahifalarga ta'sir QILMAYDI
+  // Har sahifaning o'z filteri bor (t-fan-filter, d-fan-filter, va h.k.)
   if (!snap || !snap.rawData) return [];
-  let data = snap.rawData;
-  if (gYear !== 'all') data = data.filter(r => r.Year == gYear);
-  if (gMonth !== 'all') data = data.filter(r => r.Month && r.Month.endsWith('-' + gMonth));
-  return data;
+  return snap.rawData;
 }
 
 function getFilteredTeachers() {
