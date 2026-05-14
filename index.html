@@ -624,21 +624,210 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <button class="fyb" id="ry-2025" onclick="setRY('2025',this)">2025</button>
     <button class="fyb" id="ry-2026" onclick="setRY('2026',this)">2026</button>
   </div>
-  <div class="sh"><div class="st">Tutor rating tizimi</div><div class="sl"></div></div>
+  <div class="sh"><div class="st">Tutor reyting tizimi · Quality-Focused</div><div class="sl"></div></div>
   <div class="g3">
-    <div class="kpi bl"><div class="kl">Block 1 — Exam natijasi</div><div class="kv" style="font-size:18px;">45 ball</div><div class="ks">Pass rate (25) + Exam entry (8) + Reserved (12)</div></div>
-    <div class="kpi gr"><div class="kl">Block 2 — Retention</div><div class="kv" style="font-size:18px;">30 ball</div><div class="ks">Retention (15) + Flexquiz (10) + Davomat (5)</div></div>
-    <div class="kpi pu"><div class="kl">Block 3 — Feedback</div><div class="kv" style="font-size:18px;">25 ball</div><div class="ks">5 ta savol x 5 ball (kutilmoqda)</div></div>
+    <div class="kpi bl"><div class="kl">1. SERTIFIKATLAR</div><div class="kv" style="font-size:18px;">30 ball</div><div class="ks">Bayesian Pass × Fan globalPR</div></div>
+    <div class="kpi gr"><div class="kl">2. RETENTION</div><div class="kv" style="font-size:18px;">30 ball</div><div class="ks">Kursni saqlab qolish</div></div>
+    <div class="kpi pu"><div class="kl">3. EXAM ENTRY</div><div class="kv" style="font-size:18px;">25 ball</div><div class="ks">No Exam % past — sifat</div></div>
+  </div>
+  <div class="g2" style="margin-top:8px;">
+    <div class="kpi am"><div class="kl">4. TAJRIBA</div><div class="kv" style="font-size:18px;">10 ball</div><div class="ks">Yakunlagan o'quvchilar soni</div></div>
+    <div class="kpi te"><div class="kl">5. TREND</div><div class="kv" style="font-size:18px;">5 ball</div><div class="ks">O'tgan yil bilan o'zgarish</div></div>
   </div>
   <div class="card">
-    <div class="ct">O'qituvchi rating jadvali</div><div class="cs">Pass(25) + Entry(8) + Retention(15) = 48 ball max · Block 3 kutilmoqda</div>
+    <div class="ct">O'qituvchi reyting jadvali</div>
+    <div class="cs" id="rSub">Pass(30) + Ret(30) + Entry(25) + Tajriba(10) + Trend(5) = 100 ball · Fan kesimida globalPR · Bayesian B=50 · Min 40 o'quvchi</div>
     <table><thead><tr>
-      <th style="width:3%">#</th><th style="width:20%">O'qituvchi</th>
-      <th style="text-align:center;width:9%">Pass /25</th><th style="text-align:center;width:9%">Entry /8</th>
-      <th style="text-align:center;width:9%">B1 /33</th><th style="text-align:center;width:9%">Ret /15</th>
-      <th style="text-align:center;width:9%">B2 /15</th><th style="text-align:center;width:11%">Jami /48</th>
-      <th style="text-align:center;width:8%">Daraja</th><th style="text-align:center;width:7%">Trend</th>
+      <th style="width:3%">#</th>
+      <th style="width:16%">O'qituvchi</th>
+      <th style="text-align:center;width:6%">Fan</th>
+      <th style="text-align:center;width:5%">n</th>
+      <th style="text-align:center;width:8%" title="Sertifikatlar — Bayesian Pass Rate fan kesimida">Pass /30</th>
+      <th style="text-align:center;width:8%" title="Retention — kursni saqlab qolish">Ret /30</th>
+      <th style="text-align:center;width:8%" title="Exam Entry — imtihonga olib chiqish">Entry /25</th>
+      <th style="text-align:center;width:7%" title="Tajriba — yakunlagan o'quvchilar soni">Tajriba /10</th>
+      <th style="text-align:center;width:7%" title="Trend — o'tgan yil bilan farq">Trend /5</th>
+      <th style="text-align:center;width:10%">JAMI /100</th>
+      <th style="text-align:center;width:10%">DARAJA</th>
     </tr></thead><tbody id="rBody"></tbody></table>
+    <div style="font-size:9px;color:var(--muted);margin-top:6px;">
+      * Bayesian formula: bayPass = (n × pr + 50 × fanGlobalPR) / (n + 50) · Fan koeffitsienti Pass+Entry ballariga qo'llanadi · n &lt; 10 → Beta (rating yo'q)
+    </div>
+  </div>
+  <!-- Avtomatik tavsiyalar -->
+  <div class="card" id="rRecommendCard" style="margin-top:14px;">
+    <div class="ct">🎯 Avtomatik tavsiyalar</div>
+    <div class="cs">Har bir o'qituvchi uchun aniq harakat rejasi</div>
+    <div id="rRecommendBody" style="display:flex;flex-direction:column;gap:10px;padding:8px 0;"></div>
+  </div>
+  
+  <!-- ═══════════════════════════════════════════════════════
+       RATING HISOBLASH TARTIB QOIDALARI
+  ═══════════════════════════════════════════════════════ -->
+  <div class="card" style="margin-top:14px;">
+    <div class="ct">📐 Rating hisoblash tartib qoidalari</div>
+    <div class="cs">Quality-Focused Rating tizimi · 100 ball · 5 ta ko'rsatkich</div>
+    
+    <!-- Umumiy formula -->
+    <div style="background:rgba(46,202,138,0.06);border-left:3px solid var(--green);padding:12px 16px;border-radius:6px;margin:14px 0;">
+      <div style="font-weight:600;font-size:12px;color:var(--green);margin-bottom:8px;">📊 Umumiy formula</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text);line-height:1.7;">
+        JAMI = (Pass + Entry) × FanKoeff + Retention + Tajriba + Trend
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;">
+        Fan koeffitsienti faqat Pass va Entry ballariga qo'llanadi (fan murakkabligini hisobga olish uchun)
+      </div>
+    </div>
+    
+    <!-- 5 komponent jadval -->
+    <div style="overflow-x:auto;">
+      <table style="font-size:11px;width:100%;">
+        <thead><tr>
+          <th style="text-align:left;padding:8px 10px;background:var(--card2);">Ko'rsatkich</th>
+          <th style="text-align:center;padding:8px;background:var(--card2);">Maks ball</th>
+          <th style="text-align:left;padding:8px;background:var(--card2);">Formula</th>
+          <th style="text-align:left;padding:8px;background:var(--card2);">Chegaralar</th>
+        </tr></thead>
+        <tbody>
+          <!-- 1. PASS -->
+          <tr style="border-bottom:1px solid var(--bd);">
+            <td style="font-weight:600;padding:10px;color:var(--blue);">1️⃣ Sertifikatlar (Pass)</td>
+            <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">30</td>
+            <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
+              bayPass = (n × pr + 50 × fanGlobalPR) / (n + 50)<br>
+              <span style="color:var(--text);font-size:9px;">n = yakunlagan o'quvchilar · pr = haqiqiy pass rate · fanGlobalPR = shu fan akademik o'rtacha</span>
+            </td>
+            <td style="font-size:10px;padding:10px;">
+              <b>ACCA daraja:</b><br>
+              A daraja → 30 · B → 25 · C → 18 · D → 10 · E → 5 · <b style="color:var(--red)">F → 0</b><br>
+              <span style="color:var(--muted);font-size:9px;">Har fan uchun A daraja chegarasi farq qiladi (FA: 74%, DipIFR: 55%, va h.k.)</span>
+            </td>
+          </tr>
+          
+          <!-- 2. RETENTION -->
+          <tr style="border-bottom:1px solid var(--bd);">
+            <td style="font-weight:600;padding:10px;color:var(--green);">2️⃣ Retention</td>
+            <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">30</td>
+            <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
+              ret = (jami − stopped) / jami × 100<br>
+              <span style="color:var(--text);font-size:9px;">"Boshqa guruhga o'tdi" chiqarilgan · O'quvchini saqlash qobiliyati</span>
+            </td>
+            <td style="font-size:10px;padding:10px;">
+              ≥ 70% → <b style="color:var(--green)">30</b> · ≥ 65% → 26 · ≥ 60% → 22<br>
+              ≥ 55% → 18 · ≥ 50% → 14 · <b style="color:var(--red)">&lt; 50% → 0</b>
+            </td>
+          </tr>
+          
+          <!-- 3. ENTRY -->
+          <tr style="border-bottom:1px solid var(--bd);">
+            <td style="font-weight:600;padding:10px;color:#9b7fe8;">3️⃣ Exam Entry</td>
+            <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">25</td>
+            <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
+              entry = (Passed + Failed) / yakunlagan × 100<br>
+              <span style="color:var(--text);font-size:9px;">yakunlagan = Passed + Failed + No Exam · O'quvchini imtihonga olib chiqish</span>
+            </td>
+            <td style="font-size:10px;padding:10px;">
+              ≥ 45% → <b style="color:var(--green)">25</b> · ≥ 35% → 22 · ≥ 28% → 18<br>
+              ≥ 22% → 14 · ≥ 18% → 10 · ≥ 15% → 5 · <b style="color:var(--red)">&lt; 15% → 0</b>
+            </td>
+          </tr>
+          
+          <!-- 4. TAJRIBA -->
+          <tr style="border-bottom:1px solid var(--bd);">
+            <td style="font-weight:600;padding:10px;color:var(--amber);">4️⃣ Tajriba</td>
+            <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">10</td>
+            <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
+              n = yakunlagan o'quvchilar soni<br>
+              <span style="color:var(--text);font-size:9px;">O'qituvchining ish hajmi va ishonchliligi</span>
+            </td>
+            <td style="font-size:10px;padding:10px;">
+              ≥ 100 → <b style="color:var(--green)">10</b> · ≥ 30 → 7 · ≥ 10 → 4<br>
+              <b style="color:var(--muted)">&lt; 10 → Beta (rating yo'q)</b>
+            </td>
+          </tr>
+          
+          <!-- 5. TREND -->
+          <tr style="border-bottom:1px solid var(--bd);">
+            <td style="font-weight:600;padding:10px;color:#2ec4b6;">5️⃣ Trend</td>
+            <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">5</td>
+            <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
+              diff = bu_yil_pass − o'tgan_yil_pass<br>
+              <span style="color:var(--text);font-size:9px;">O'qituvchining yil sayin yaxshilanishi</span>
+            </td>
+            <td style="font-size:10px;padding:10px;">
+              ≥ +10% → <b style="color:var(--green)">5</b> · ≥ +5% → 4 · ≥ +2% → 3<br>
+              ≥ −2% → 2 · ≥ −5% → 1 · <b style="color:var(--red)">&lt; −5% → 0</b><br>
+              <span style="color:var(--muted);font-size:9px;">Ma'lumot yo'q → 2 (neutral)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Fan koeffitsienti -->
+    <div style="background:rgba(91,141,238,0.06);border-left:3px solid var(--blue);padding:12px 16px;border-radius:6px;margin:14px 0;">
+      <div style="font-weight:600;font-size:12px;color:var(--blue);margin-bottom:8px;">🎓 Fan koeffitsienti (murakkablikni hisobga olish)</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;font-family:'DM Mono',monospace;">
+        <span><b>FA</b>: 1.00</span>
+        <span><b>BT</b>: 1.05</span>
+        <span><b>MA, LW</b>: 1.10</span>
+        <span><b>FR, FM</b>: 1.15</span>
+        <span><b>PM, AA, TX</b>: 1.20</span>
+        <span><b>SBR, SBL</b>: 1.25</span>
+        <span><b>AFM/APM/ATX/AAA</b>: 1.25</span>
+        <span><b>DipIFR</b>: 1.30</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;">
+        Koeffitsient faqat <b>Pass + Entry</b> ballariga qo'llanadi (Retention, Tajriba, Trend mustaqil).
+        Asosiy fan = o'qituvchining eng ko'p o'quvchili fani.
+      </div>
+    </div>
+    
+    <!-- Daraja -->
+    <div style="background:rgba(245,166,35,0.06);border-left:3px solid var(--amber);padding:12px 16px;border-radius:6px;margin:14px 0;">
+      <div style="font-weight:600;font-size:12px;color:var(--amber);margin-bottom:10px;">🏆 Daraja chegaralari</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px;">
+        <span style="background:#ffd70022;color:#ffd700;padding:4px 10px;border-radius:8px;font-weight:600;">🏆 Expert: 85-100</span>
+        <span style="background:#2eca8a22;color:#2eca8a;padding:4px 10px;border-radius:8px;font-weight:600;">🥇 Senior: 70-84</span>
+        <span style="background:#5b8dee22;color:#5b8dee;padding:4px 10px;border-radius:8px;font-weight:600;">🥈 Mid: 55-69</span>
+        <span style="background:#f5a62322;color:#f5a623;padding:4px 10px;border-radius:8px;font-weight:600;">🥉 Junior: 40-54</span>
+        <span style="background:#e85b5b22;color:#e85b5b;padding:4px 10px;border-radius:8px;font-weight:600;">⚠️ Review: &lt; 40</span>
+        <span style="background:#64748b22;color:#64748b;padding:4px 10px;border-radius:8px;font-weight:600;">ⓘ Beta: n &lt; 10</span>
+      </div>
+    </div>
+    
+    <!-- Adolat mexanizmlari -->
+    <div style="background:rgba(46,196,182,0.06);border-left:3px solid #2ec4b6;padding:12px 16px;border-radius:6px;margin:14px 0;">
+      <div style="font-weight:600;font-size:12px;color:#2ec4b6;margin-bottom:8px;">⚖️ Adolat mexanizmlari</div>
+      <ul style="margin:0;padding-left:18px;font-size:11px;color:var(--text);line-height:1.7;">
+        <li><b>Bayesian tuzatish:</b> Kam o'quvchili o'qituvchi haqiqatdan ortiq baholanmaydi. "1 ta o'quvchiga 100% Pass" reyting bo'la olmaydi.</li>
+        <li><b>Fan kesimida globalPR:</b> DipIFR o'qituvchisi DipIFR akademik o'rtacha bilan taqqoslanadi (FA o'rtacha bilan emas). Min 40 o'quvchi shart, aks holda akademiya umumiy o'rtacha ishlatiladi.</li>
+        <li><b>Fan koeffitsienti:</b> Murakkab fan o'qituvchilari (DipIFR, SBR) past pass rate olsa, koeffitsient bilan tuzatiladi.</li>
+        <li><b>Vaznli o'rtacha:</b> O'qituvchi bir nechta fan o'qitsa, har fan alohida Bayesian hisoblanadi, keyin n bo'yicha vaznli o'rtacha olinadi.</li>
+        <li><b>Beta status:</b> n &lt; 10 bo'lgan o'qituvchilar reyting tushmaydi (monitoring rejimida).</li>
+      </ul>
+    </div>
+    
+    <!-- Misol -->
+    <div style="background:rgba(155,127,232,0.06);border-left:3px solid #9b7fe8;padding:12px 16px;border-radius:6px;margin:14px 0;">
+      <div style="font-weight:600;font-size:12px;color:#9b7fe8;margin-bottom:8px;">📝 Real misol — Boliyeva Shoira (FA fani)</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text);line-height:1.8;">
+        <b>Ma'lumot:</b> n = 100 · pass = 70% · ret = 55% · entry = 20% · trend = +5%<br>
+        <b>fanGlobalPR (FA):</b> 72% · <b>fanCoeff (FA):</b> 1.00<br>
+        <br>
+        <b>1. Pass:</b> bayPass = (100×70 + 50×72)/150 = 70.7% → FA B daraja (≥64%) → <b>25</b><br>
+        <b>2. Ret:</b> 55% → <b>18</b><br>
+        <b>3. Entry:</b> 20% → <b>10</b><br>
+        <b>4. Tajriba:</b> 100 → <b>10</b><br>
+        <b>5. Trend:</b> +5% → <b>4</b><br>
+        <br>
+        <b style="color:var(--green);">JAMI:</b> (25+10) × 1.00 + 18 + 10 + 4 = <b style="font-size:14px;color:var(--green);">67</b> → <b style="color:var(--blue);">🥈 Mid</b>
+      </div>
+    </div>
+    
+    <div style="font-size:10px;color:var(--muted);margin-top:10px;text-align:center;">
+      * Filterlar (Fan, Yil) reyting jadvalini moslashtiradi · Yangi ma'lumot kelganda formula avtomatik qayta hisoblanadi
+    </div>
   </div>
 </div>
 
@@ -1165,7 +1354,7 @@ let msalInstance = null;   // window.onload da yaratiladi — msal.js yuklanib b
 let snap    = null;
 let smData  = { sales: {}, marketing: {} };
 let charts  = {};
-let yF = 'all', tF = 'all', tY = 'all', sY = 'all', dY = 'all', dD = 'all';
+let yF = 'all', tF = 'all', tY = 'all', sY = 'all', dY = 'all', dD = 'all', rY = 'all';
 let curPage = 'overview';
 
 // ── AUTH ──
@@ -2321,7 +2510,7 @@ function getGlobalSnap() {
 function setYF(y, btn) { yF=y; ['fp-all','fp-fc','fp-rv','fp-vl','gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el && ['Barchasi','2024','2025','2026'].some(t=>el.textContent.includes(t))) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTF(t, btn) { tF=t; ['fp-all','fp-fc','fp-rv','fp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
-function setRY(y, btn) { ['ry-all','ry-2024','ry-2025','ry-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderRating(); }
+function setRY(y, btn) { rY=y; ['ry-all','ry-2024','ry-2025','ry-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderRating(); }
 function setSalesY(y, btn) { ['saly-all','saly-2024','saly-2025','saly-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderSales(); }
 function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderMarketing(); }
 
@@ -3377,50 +3566,360 @@ function renderDropout() {
 
 function renderRating() {
   if (!snap) return;
-  // Fan bo'yicha pass rate kriteriyalari (ACCA global + 5%)
-  const PASS_CRITERIA = {"BT": {"A": 92, "B": 80, "C": 70, "D": 60, "E": 50}, "MA": {"A": 72, "B": 62, "C": 52, "D": 42, "E": 35}, "FA": {"A": 74, "B": 64, "C": 54, "D": 44, "E": 35}, "LW": {"A": 74, "B": 64, "C": 54, "D": 44, "E": 35}, "PM": {"A": 48, "B": 40, "C": 33, "D": 27, "E": 20}, "TX": {"A": 59, "B": 50, "C": 42, "D": 35, "E": 28}, "FR": {"A": 56, "B": 48, "C": 40, "D": 33, "E": 26}, "AA": {"A": 50, "B": 43, "C": 36, "D": 29, "E": 22}, "FM": {"A": 53, "B": 45, "C": 38, "D": 31, "E": 24}, "SBL": {"A": 56, "B": 48, "C": 40, "D": 33, "E": 26}, "SBR": {"A": 54, "B": 46, "C": 39, "D": 32, "E": 25}, "AFM": {"A": 50, "B": 42, "C": 35, "D": 28, "E": 21}, "APM": {"A": 42, "B": 35, "C": 29, "D": 23, "E": 18}, "ATX": {"A": 54, "B": 46, "C": 39, "D": 32, "E": 25}, "AAA": {"A": 43, "B": 36, "C": 30, "D": 24, "E": 18}, "DipIFR": {"A": 55, "B": 47, "C": 40, "D": 33, "E": 26}, "default": {"A": 55, "B": 47, "C": 40, "D": 33, "E": 26}};
   
-  function getPassCriteria(subject) {
-    return PASS_CRITERIA[subject] || PASS_CRITERIA['default'];
+  // ═══════════════════════════════════════════════════════════════
+  // QUALITY-FOCUSED RATING TIZIMI (100 ball)
+  // 1. Sertifikatlar (30) — Bayesian Pass × Fan globalPR
+  // 2. Retention (30) — kursni saqlash
+  // 3. Exam Entry (25) — imtihonga olib chiqish
+  // 4. Tajriba (10) — yakunlagan o'quvchilar soni
+  // 5. Trend (5) — o'tgan yil bilan o'zgarish
+  // ═══════════════════════════════════════════════════════════════
+  
+  // ── Fan filterni to'ldiramiz (faqat bo'sh bo'lsa) ──
+  const rFanSel = document.getElementById('r-fan-filter');
+  if (rFanSel && rFanSel.options.length <= 1) {
+    const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
+    fans.forEach(f => { 
+      const opt = document.createElement('option'); 
+      opt.value = f; 
+      opt.textContent = f; 
+      rFanSel.appendChild(opt); 
+    });
+  }
+  // ── Fan bo'yicha ACCA kriteriyalari (Bayesian Pass uchun) ──
+  const PASS_CRITERIA = {"BT":{"A":92,"B":80,"C":70,"D":60,"E":50},"MA":{"A":72,"B":62,"C":52,"D":42,"E":35},"FA":{"A":74,"B":64,"C":54,"D":44,"E":35},"LW":{"A":74,"B":64,"C":54,"D":44,"E":35},"PM":{"A":48,"B":40,"C":33,"D":27,"E":20},"TX":{"A":59,"B":50,"C":42,"D":35,"E":28},"FR":{"A":56,"B":48,"C":40,"D":33,"E":26},"AA":{"A":50,"B":43,"C":36,"D":29,"E":22},"FM":{"A":53,"B":45,"C":38,"D":31,"E":24},"SBL":{"A":56,"B":48,"C":40,"D":33,"E":26},"SBR":{"A":54,"B":46,"C":39,"D":32,"E":25},"AFM":{"A":50,"B":42,"C":35,"D":28,"E":21},"APM":{"A":42,"B":35,"C":29,"D":23,"E":18},"ATX":{"A":54,"B":46,"C":39,"D":32,"E":25},"AAA":{"A":43,"B":36,"C":30,"D":24,"E":18},"DipIFR":{"A":55,"B":47,"C":40,"D":33,"E":26},"default":{"A":55,"B":47,"C":40,"D":33,"E":26}};
+  
+  // ── Fan koeffitsientlari (murakkablik) ──
+  const FAN_COEFF = {"FA":1.00,"BT":1.05,"MA":1.10,"FR":1.15,"FM":1.15,"PM":1.20,"AA":1.20,"TX":1.20,"LW":1.10,"SBR":1.25,"SBL":1.25,"AFM":1.25,"APM":1.25,"ATX":1.25,"AAA":1.25,"DipIFR":1.30,"default":1.10};
+  
+  // ── Konstantalar ──
+  const B = 50;                  // Bayesian ishonch konstantasi
+  const MIN_N_FAN_GPR = 40;      // Fan globalPR minimum o'quvchi
+  const MIN_N_RATING = 10;       // Reyting minimum o'quvchi (n<10 → Beta)
+  
+  // ── Filterlar ──
+  const fanFilter = document.getElementById('r-fan-filter')?.value || 'all';
+  const yearFilter = rY;  // 'all', '2024', '2025', '2026'
+  
+  // ── Raw data ni filterlash ──
+  const rawData = snap.rawData || [];
+  let filtered = rawData;
+  if (yearFilter !== 'all') {
+    filtered = filtered.filter(r => r.Year == yearFilter);
+  }
+  // Fan filter — bu reyting jadvalida ko'rinadigan o'qituvchilarni filterlash
+  // (fan globalPR esa filterlangan year bo'yicha barcha fanlar uchun hisoblanadi)
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 1: Akademiya umumiy globalPR (fallback uchun)
+  // ═══════════════════════════════════════════════════════════════
+  const FINAL_STATUSES = ['Passed', 'Failed', 'No Exam'];
+  const akademGlobal = (() => {
+    let passed = 0, finished = 0;
+    filtered.forEach(r => {
+      if (!r.Final_status) return;
+      if (r.Final_status === 'Passed') passed++;
+      if (FINAL_STATUSES.includes(r.Final_status)) finished++;
+    });
+    return finished > 0 ? (passed / finished) * 100 : 55;
+  })();
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 2: Fan kesimida globalPR (yetarli ma'lumot bo'lsa)
+  // ═══════════════════════════════════════════════════════════════
+  const fanGlobalPR = {};
+  const fanStats = {};
+  filtered.forEach(r => {
+    if (!r.Product || !r.Final_status) return;
+    if (!fanStats[r.Product]) fanStats[r.Product] = { passed: 0, finished: 0 };
+    if (r.Final_status === 'Passed') fanStats[r.Product].passed++;
+    if (FINAL_STATUSES.includes(r.Final_status)) fanStats[r.Product].finished++;
+  });
+  Object.entries(fanStats).forEach(([fan, d]) => {
+    if (d.finished >= MIN_N_FAN_GPR) {
+      fanGlobalPR[fan] = (d.passed / d.finished) * 100;
+    } else {
+      // Yetarli ma'lumot yo'q → akademiya o'rtacha (fallback)
+      fanGlobalPR[fan] = akademGlobal;
+    }
+  });
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 3: Har o'qituvchi uchun ma'lumot to'plash
+  // ═══════════════════════════════════════════════════════════════
+  // Filterlangan ma'lumot bo'yicha o'qituvchilarni qayta hisoblash
+  const recalcSnap = ANALYTICS.reCalcFromFiltered(filtered);
+  let teachers = recalcSnap?.teachers || [];
+  
+  // Trend uchun: tanlangan yildan oldingi yilning ma'lumotini olamiz
+  // yearFilter='all' bo'lsa: 2024 vs 2025 trend
+  // yearFilter='2025' bo'lsa: 2024 vs 2025 trend
+  // yearFilter='2026' bo'lsa: 2025 vs 2026 trend
+  const curYr = yearFilter === 'all' ? null : parseInt(yearFilter);
+  let prevYr = null;
+  if (curYr) {
+    prevYr = curYr - 1;
   }
   
-  function cPb(pr, subject) {
-    const c = getPassCriteria(subject);
-    if(pr>=c.A) return 25;
-    if(pr>=c.B) return 20;
-    if(pr>=c.C) return 15;
-    if(pr>=c.D) return 10;
-    if(pr>=c.E) return 5;
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 4: Helper funksiyalar — ball hisoblash
+  // ═══════════════════════════════════════════════════════════════
+  
+  // 1) SERTIFIKATLAR (30 ball) — Bayesian Pass × Fan kriteriya
+  function calcPassBall(bayPass, mainFan) {
+    const c = PASS_CRITERIA[mainFan] || PASS_CRITERIA['default'];
+    if (bayPass >= c.A) return 30;
+    if (bayPass >= c.B) return 25;
+    if (bayPass >= c.C) return 18;
+    if (bayPass >= c.D) return 10;
+    if (bayPass >= c.E) return 5;
     return 0;
   }
-  function cEb(e){if(e>=90)return 8;if(e>=70)return 6;if(e>=50)return 4;if(e>=30)return 2;return 0;}
-  function cRb(r){if(r>=85)return 15;if(r>=75)return 12;if(r>=65)return 9;if(r>=55)return 6;if(r>=45)return 3;return 0;}
-  function gBadge(p){if(p>=85)return'<span class="badge bg">A</span>';if(p>=70)return'<span class="badge bb">B</span>';if(p>=55)return'<span class="badge ba">C</span>';return'<span class="badge br">D</span>';}
-  // O'qituvchining asosiy fanini topish
-  const rated=(snap.teachers||[]).filter(t=>t.jami>=20).map(t=>{
-    // O'qituvchining eng ko'p dars bergan fani
-    const mainSubject = Object.entries(t.by_subject||{})
-      .sort((a,b)=>b[1].jami-a[1].jami)[0]?.[0] || 'default';
-    const pb_=cPb(t.pass_rate, mainSubject),eb_=cEb(t.exam_entry),b1=pb_+eb_,rb_=cRb(t.retention),b2=rb_,total=b1+b2;
-    const y24r=t.by_year?.['2024']?.retention,y25r=t.by_year?.['2025']?.retention;
-    const tr=y24r&&y25r?(y25r-y24r>2?'<span style="color:var(--green)">+</span>':y25r-y24r<-2?'<span style="color:var(--red)">-</span>':'<span style="color:var(--muted)">~</span>'):'<span style="color:var(--muted)">-</span>';
-    return{...t,mainSubject,pb_,eb_,b1,rb_,b2,total,tr};
-  }).sort((a,b)=>b.total-a.total);
-  const tbody=document.getElementById('rBody'); tbody.innerHTML='';
-  rated.forEach((t,i)=>{
-    tbody.innerHTML+=`<tr>
+  
+  // 2) RETENTION (30 ball) — realistik chegaralar (50% dan past = 0)
+  function calcRetBall(ret) {
+    if (ret >= 70) return 30;
+    if (ret >= 65) return 26;
+    if (ret >= 60) return 22;
+    if (ret >= 55) return 18;
+    if (ret >= 50) return 14;
+    return 0;  // < 50% — jiddiy muammo
+  }
+  
+  // 3) EXAM ENTRY (25 ball) — yangi: 45% top, 15% past = 0
+  // Formula: (Passed + Failed) / yakunlagan × 100
+  function calcEntryBall(entry) {
+    if (entry >= 45) return 25;
+    if (entry >= 35) return 22;
+    if (entry >= 28) return 18;
+    if (entry >= 22) return 14;
+    if (entry >= 18) return 10;
+    if (entry >= 15) return 5;
+    return 0;  // < 15% — jiddiy muammo, ball yo'q
+  }
+  
+  // 4) TAJRIBA (10 ball) — sodda
+  function calcExpBall(n) {
+    if (n >= 100) return 10;
+    if (n >= 30) return 7;
+    if (n >= 10) return 4;
+    return 0;
+  }
+  
+  // 5) TREND (5 ball) — pass_rate farq
+  function calcTrendBall(curPr, prevPr) {
+    if (curPr == null || prevPr == null) return 2;  // neutral
+    const diff = curPr - prevPr;
+    if (diff >= 10) return 5;
+    if (diff >= 5) return 4;
+    if (diff >= 2) return 3;
+    if (diff >= -2) return 2;
+    if (diff >= -5) return 1;
+    return 0;
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 5: Har o'qituvchini hisoblash
+  // ═══════════════════════════════════════════════════════════════
+  const rated = teachers.map(t => {
+    // Asosiy fan (eng ko'p o'quvchili)
+    const subjEntries = Object.entries(t.by_subject || {});
+    const mainFan = subjEntries.sort((a,b) => (b[1].jami||0) - (a[1].jami||0))[0]?.[0] || 'default';
+    
+    // ── Bayesian Pass — VAZNLI O'RTACHA har fan bo'yicha ──
+    let weightedBayPass = 0;
+    let totalN = 0;
+    subjEntries.forEach(([fan, sub]) => {
+      const n = sub.yakunlagan || 0;
+      if (n === 0) return;
+      const fanPR = fanGlobalPR[fan] || akademGlobal;
+      const subBayPass = (n * (sub.pass_rate || 0) + B * fanPR) / (n + B);
+      weightedBayPass += n * subBayPass;
+      totalN += n;
+    });
+    const bayPass = totalN > 0 ? weightedBayPass / totalN : 0;
+    
+    // ── Trend hisoblash ──
+    let curYrPr = null, prevYrPr = null;
+    if (curYr && t.by_year?.[curYr]) curYrPr = t.by_year[curYr].pass_rate;
+    if (prevYr && t.by_year?.[prevYr]) prevYrPr = t.by_year[prevYr].pass_rate;
+    // "All" tanlanganda: 2024 vs 2025 (asosiy)
+    if (!curYr) {
+      const y24 = t.by_year?.['2024']?.pass_rate;
+      const y25 = t.by_year?.['2025']?.pass_rate;
+      const y26 = t.by_year?.['2026']?.pass_rate;
+      // Eng yangi 2 yilni olamiz
+      if (y25 != null && y26 != null) { curYrPr = y26; prevYrPr = y25; }
+      else if (y24 != null && y25 != null) { curYrPr = y25; prevYrPr = y24; }
+    }
+    
+    // ── 5 ta ball ──
+    const passBall = calcPassBall(bayPass, mainFan);
+    const retBall = calcRetBall(t.retention || 0);
+    const entryBall = calcEntryBall(t.exam_entry || 0);
+    const expBall = calcExpBall(t.yakunlagan || 0);
+    const trendBall = calcTrendBall(curYrPr, prevYrPr);
+    
+    // ── Fan koeffitsienti (Pass + Entry ballariga) ──
+    const fanCoeff = FAN_COEFF[mainFan] || FAN_COEFF['default'];
+    // Boshqa ballarga qo'llanmaydi
+    const adjPassEntry = (passBall + entryBall) * fanCoeff;
+    const total = adjPassEntry + retBall + expBall + trendBall;
+    const totalRounded = Math.round(total * 10) / 10;
+    
+    // ── Daraja ──
+    const nv = t.yakunlagan || 0;
+    let tier, tierColor;
+    if (nv < MIN_N_RATING) {
+      tier = 'Beta'; tierColor = '#64748b';
+    } else if (totalRounded >= 85) { tier = 'Expert'; tierColor = '#ffd700'; }
+    else if (totalRounded >= 70) { tier = 'Senior'; tierColor = '#2eca8a'; }
+    else if (totalRounded >= 55) { tier = 'Mid'; tierColor = '#5b8dee'; }
+    else if (totalRounded >= 40) { tier = 'Junior'; tierColor = '#f5a623'; }
+    else { tier = 'Review'; tierColor = '#e85b5b'; }
+    
+    // ── Trend ko'rsatish ──
+    const trArrow = (curYrPr != null && prevYrPr != null) 
+      ? (curYrPr - prevYrPr > 2 ? '<span style="color:var(--green)">↑</span>' 
+        : curYrPr - prevYrPr < -2 ? '<span style="color:var(--red)">↓</span>' 
+        : '<span style="color:var(--muted)">→</span>')
+      : '<span style="color:var(--muted)">—</span>';
+    
+    return {
+      ...t,
+      mainFan, fanCoeff,
+      bayPass: Math.round(bayPass * 10) / 10,
+      passBall, retBall, entryBall, expBall, trendBall,
+      adjPassEntry: Math.round(adjPassEntry * 10) / 10,
+      total: totalRounded,
+      tier, tierColor,
+      trArrow,
+      curYrPr, prevYrPr
+    };
+  });
+  
+  // ── Fan filterni qo'llash ──
+  let displayed = rated;
+  if (fanFilter !== 'all') {
+    displayed = displayed.filter(t => t.mainFan === fanFilter);
+  }
+  
+  // ── Saralash: jami ball bo'yicha ──
+  displayed.sort((a, b) => b.total - a.total);
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 6: Jadval render
+  // ═══════════════════════════════════════════════════════════════
+  const tbody = document.getElementById('rBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  displayed.forEach((t, i) => {
+    const isBeta = t.tier === 'Beta';
+    const ballCol = t.total >= 70 ? 'var(--green)' : t.total >= 55 ? 'var(--blue)' : t.total >= 40 ? 'var(--amber)' : 'var(--red)';
+    
+    tbody.innerHTML += `<tr ${isBeta ? 'style="opacity:0.6;"' : ''}>
       <td style="color:var(--muted);font-family:'DM Mono',monospace;">${i+1}</td>
       <td style="font-size:11px;font-weight:500;">${t.Oqituvchi}</td>
-      <td style="text-align:center;" title="Kriteriya: ${getPassCriteria(t.mainSubject).A}%">${rb(t.pb_,25)}</td>
-      <td style="text-align:center;">${rb(t.eb_,8)}</td>
-      <td style="text-align:center;font-weight:600;">${rb(t.b1,33)}</td>
-      <td style="text-align:center;">${rb(t.rb_,15)}</td>
-      <td style="text-align:center;font-weight:600;">${rb(t.b2,15)}</td>
-      <td style="text-align:center;"><span style="font-size:15px;font-weight:600;font-family:'DM Mono',monospace;">${t.total}</span><span style="font-size:10px;color:var(--muted)">/48</span></td>
-      <td style="text-align:center;">${gBadge(Math.round(t.total/48*100))}</td>
-      <td style="text-align:center;">${t.tr}</td>
+      <td style="text-align:center;font-size:10px;color:var(--muted);" title="Koeff: ${t.fanCoeff}">${t.mainFan}</td>
+      <td style="text-align:center;font-size:10px;color:var(--muted);">${t.yakunlagan||0}</td>
+      <td style="text-align:center;" title="Bayesian Pass: ${t.bayPass}% (haqiqiy ${t.pass_rate}%, fan o'rtacha ${Math.round(fanGlobalPR[t.mainFan]||akademGlobal)}%)">${rb(t.passBall, 30)}</td>
+      <td style="text-align:center;" title="Retention: ${t.retention}%">${rb(t.retBall, 30)}</td>
+      <td style="text-align:center;" title="Exam Entry: ${t.exam_entry}%">${rb(t.entryBall, 25)}</td>
+      <td style="text-align:center;" title="${t.yakunlagan||0} ta yakunlagan o'quvchi">${rb(t.expBall, 10)}</td>
+      <td style="text-align:center;" title="${t.prevYrPr != null && t.curYrPr != null ? 'Trend: ' + t.prevYrPr + '% → ' + t.curYrPr + '%' : 'Trend ma\'lumoti yo\'q'}">${rb(t.trendBall, 5)} ${t.trArrow}</td>
+      <td style="text-align:center;">
+        <span style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:${ballCol};">${t.total}</span>
+        <span style="font-size:10px;color:var(--muted)">/100</span>
+      </td>
+      <td style="text-align:center;">
+        <span style="background:${t.tierColor}22;color:${t.tierColor};padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;">${t.tier}</span>
+      </td>
     </tr>`;
   });
+  
+  if (displayed.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px;">Filter natijasi bo\'sh</td></tr>';
+  }
+  
+  // ── Sub-title yangilash ──
+  const rSubEl = document.getElementById('rSub');
+  if (rSubEl) {
+    const parts = [];
+    if (yearFilter !== 'all') parts.push(`${yearFilter}-yil`);
+    if (fanFilter !== 'all') parts.push(`Fan: ${fanFilter}`);
+    const filterTxt = parts.length ? ' (' + parts.join(' · ') + ')' : '';
+    const fanGPRCount = Object.keys(fanGlobalPR).filter(f => fanStats[f]?.finished >= MIN_N_FAN_GPR).length;
+    rSubEl.textContent = `${displayed.length} ta o'qituvchi${filterTxt} · Akademiya o'rtacha pass: ${Math.round(akademGlobal)}% · Fan globalPR aniqlangan: ${fanGPRCount} ta fan`;
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 7: Avtomatik tavsiyalar
+  // ═══════════════════════════════════════════════════════════════
+  const recommendBody = document.getElementById('rRecommendBody');
+  if (!recommendBody) return;
+  recommendBody.innerHTML = '';
+  
+  // Tavsiyalarni guruhlash
+  const groups = {
+    expert: displayed.filter(t => t.tier === 'Expert'),
+    senior: displayed.filter(t => t.tier === 'Senior'),
+    review: displayed.filter(t => t.tier === 'Review'),
+    weakPoints: []  // har o'qituvchining zaif tomoni
+  };
+  
+  // Mid/Junior uchun aniq zaif tomonni topish
+  displayed.filter(t => t.tier === 'Mid' || t.tier === 'Junior').forEach(t => {
+    const issues = [];
+    if (t.retention < 55) issues.push({ type: 'retention', msg: `Retention ${t.retention}% — birinchi 3 darsda jalb qilish ustida ishlash` });
+    if (t.exam_entry < 60) issues.push({ type: 'entry', msg: `Exam Entry ${t.exam_entry}% — o'quvchilarni imtihonga tayyorlash kerak (mock testlar)` });
+    if (t.bayPass < 50) issues.push({ type: 'pass', msg: `Bayesian Pass ${t.bayPass}% — fan bo'yicha qo'shimcha treninglar zarur` });
+    if (issues.length > 0) {
+      groups.weakPoints.push({ teacher: t, issues });
+    }
+  });
+  
+  // Render
+  function recBlock(title, color, icon, items) {
+    if (items.length === 0) return '';
+    let html = `<div style="background:${color}10;border-left:3px solid ${color};padding:10px 14px;border-radius:6px;">
+      <div style="font-weight:600;font-size:12px;color:${color};margin-bottom:6px;">${icon} ${title}</div>
+      <div style="font-size:11px;color:var(--text);">${items.join('<br>')}</div>
+    </div>`;
+    return html;
+  }
+  
+  if (groups.expert.length > 0) {
+    recommendBody.innerHTML += recBlock(
+      `Top performerlar (${groups.expert.length} ta)`, '#ffd700', '🏆',
+      groups.expert.map(t => `<b>${t.Oqituvchi}</b> (${t.total}/100) — boshqa o'qituvchilarga namuna, mentor bo'lib bera oladi`)
+    );
+  }
+  if (groups.senior.length > 0) {
+    recommendBody.innerHTML += recBlock(
+      `Senior darajadagilar (${groups.senior.length} ta)`, '#2eca8a', '🥇',
+      groups.senior.map(t => `<b>${t.Oqituvchi}</b> (${t.total}/100) — barqaror sifat, davom etsin`)
+    );
+  }
+  if (groups.weakPoints.length > 0) {
+    const items = groups.weakPoints.map(g => 
+      `<b>${g.teacher.Oqituvchi}</b> (${g.teacher.total}/100): ${g.issues.map(i => i.msg).join(' · ')}`
+    );
+    recommendBody.innerHTML += recBlock(
+      `E'tibor talab qiladiganlar (${groups.weakPoints.length} ta)`, '#f5a623', '⚠️',
+      items
+    );
+  }
+  if (groups.review.length > 0) {
+    recommendBody.innerHTML += recBlock(
+      `Jiddiy muammo — Review (${groups.review.length} ta)`, '#e85b5b', '🔴',
+      groups.review.map(t => `<b>${t.Oqituvchi}</b> (${t.total}/100) — qayta tayyorlash yoki boshqa rolga o'tkazish tavsiya`)
+    );
+  }
+  if (recommendBody.innerHTML === '') {
+    recommendBody.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">Tavsiya generatsiyasi uchun ma\'lumot yetarli emas</div>';
+  }
 }
 
 // ── SALES ──
