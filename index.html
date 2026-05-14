@@ -1305,8 +1305,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <button class="modal-sec-btn" onclick="selectSection('teachers',this)">👨‍🏫 O'qituvchilar</button>
       <button class="modal-sec-btn" onclick="selectSection('subjects',this)">📚 Fanlar</button>
       <button class="modal-sec-btn" onclick="selectSection('dropout',this)">🚪 Dropout</button>
+      <button class="modal-sec-btn" onclick="selectSection('rating',this)">⭐ Rating</button>
+      <button class="modal-sec-btn" onclick="selectSection('students',this)">👤 O'quvchilar</button>
       <button class="modal-sec-btn" onclick="selectSection('sales',this)">💼 Sales</button>
       <button class="modal-sec-btn" onclick="selectSection('marketing',this)">📣 Marketing</button>
+      <button class="modal-sec-btn" onclick="selectSection('revenue',this)">📉 Yo'qotish</button>
+      <button class="modal-sec-btn" onclick="selectSection('ltv',this)">💰 LTV</button>
     </div>
     <div style="margin-bottom:16px;">
       <button class="modal-sec-btn" id="allSectionsBtn" onclick="selectSection('all',this)" style="width:100%;text-align:center;background:var(--pdim);border-color:rgba(155,127,232,0.3);color:var(--purple);">
@@ -4712,13 +4716,20 @@ function calcRevenueLost(data, avgPrice) {
 }
 
 function renderRevenue() {
-  if (!snap || !snap.rawData) return;
-  var avgPrice = parseInt((document.getElementById('rv-price')||{}).value || '3500000');
-  var fanF = (document.getElementById('rv-fan')||{}).value || 'all';
-  var rawD = snap.rawData || [];
-  if (rvYear !== 'all') rawD = rawD.filter(function(r){ return r.Year == rvYear; });
-  if (fanF !== 'all') rawD = rawD.filter(function(r){ return r.Product === fanF; });
-  var rv = calcRevenueLost(rawD, avgPrice);
+  try {
+    if (!snap || !snap.rawData) {
+      console.warn('renderRevenue: snap yo\'q yoki rawData yo\'q');
+      return;
+    }
+    console.log('renderRevenue: boshlanmoqda, rawData =', snap.rawData.length, 'ta yozuv');
+    
+    var avgPrice = parseInt((document.getElementById('rv-price')||{}).value || '3500000');
+    var fanF = (document.getElementById('rv-fan')||{}).value || 'all';
+    var rawD = snap.rawData || [];
+    if (rvYear !== 'all') rawD = rawD.filter(function(r){ return r.Year == rvYear; });
+    if (fanF !== 'all') rawD = rawD.filter(function(r){ return r.Product === fanF; });
+    var rv = calcRevenueLost(rawD, avgPrice);
+    console.log('renderRevenue: calcRevenueLost OK', rv);
 
   var g = function(id){ return document.getElementById(id); };
   var totSt  = rv.fanSum.reduce(function(s,f){ return s+f.stopped; }, 0);
@@ -4883,6 +4894,22 @@ function renderRevenue() {
         '</tr>';
     });
   }
+  console.log('renderRevenue: muvaffaqiyatli tugadi');
+  } catch (e) {
+    console.error('renderRevenue XATO:', e.message, e.stack);
+    // Foydalanuvchiga xato ko'rsatish
+    var pageEl = document.getElementById('page-revenue');
+    if (pageEl) {
+      var errDiv = document.getElementById('rv-err-box');
+      if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'rv-err-box';
+        errDiv.style.cssText = 'background:rgba(232,91,91,0.1);border:1px solid var(--red);padding:14px;border-radius:8px;margin:20px;color:var(--red);font-size:12px;';
+        pageEl.insertBefore(errDiv, pageEl.firstChild);
+      }
+      errDiv.innerHTML = '<b>⚠️ Yo\'qotish sahifasi yuklanmadi</b><br>Xato: ' + e.message + '<br><br>F12 → Console oching va to\'liq xatoni ko\'ring.';
+    }
+  }
 }
 
 function renderMarketing() {
@@ -5004,11 +5031,15 @@ async function runAiAnalysis() {
       // Barcha bo'limlarni ketma-ket tahlil qilish
       const sections = [
         { key: 'overview', label: '📊 Umumiy tahlil' },
-        { key: "teachers", label: "O\u02BBqituvchilar" },
+        { key: "teachers", label: "👨‍🏫 O'qituvchilar" },
         { key: 'subjects', label: '📚 Fanlar' },
         { key: 'dropout', label: '🚪 Dropout' },
+        { key: 'rating', label: '⭐ Rating' },
+        { key: 'students', label: "👤 O'quvchilar" },
         { key: 'sales', label: '💼 Sales' },
-        { key: 'marketing', label: '📣 Marketing' }
+        { key: 'marketing', label: '📣 Marketing' },
+        { key: 'revenue', label: '📉 Yo\'qotish' },
+        { key: 'ltv', label: '💰 LTV' }
       ];
       
       let fullReport = '';
@@ -5060,8 +5091,12 @@ function downloadPdf() {
     teachers: "O'qituvchilar Tahlili",
     subjects: 'Fanlar Tahlili',
     dropout: 'Dropout Tahlili',
+    rating: 'Rating Tahlili',
+    students: "O'quvchilar Tahlili",
     sales: 'Sales Tahlili',
     marketing: 'Marketing Tahlili',
+    revenue: "Yo'qotish Tahlili",
+    ltv: 'LTV Tahlili',
     all: "To'liq Professional Hisobot"
   };
   
