@@ -619,10 +619,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <select class="fselect" id="r-fan-filter" onchange="renderRating()"><option value="all">Barcha fanlar</option></select>
     <div class="fsep"></div>
     <span class="flabel">Yil:</span>
-    <button class="fyb active" id="ry-all" onclick="setRY('all',this)">Barchasi</button>
-    <button class="fyb" id="ry-2024" onclick="setRY('2024',this)">2024</button>
-    <button class="fyb" id="ry-2025" onclick="setRY('2025',this)">2025</button>
-    <button class="fyb" id="ry-2026" onclick="setRY('2026',this)">2026</button>
+    <span id="r-year-buttons" style="display:inline-flex;gap:6px;flex-wrap:wrap;">
+      <button class="fyb active" id="ry-all" onclick="setRY('all',this)">Barchasi (2024+)</button>
+    </span>
   </div>
   <div class="sh"><div class="st">Tutor reyting tizimi · Quality-Focused</div><div class="sl"></div></div>
   <div class="g3">
@@ -2510,7 +2509,16 @@ function getGlobalSnap() {
 function setYF(y, btn) { yF=y; ['fp-all','fp-fc','fp-rv','fp-vl','gfy-all','gfy-2024','gfy-2025','gfy-2026'].forEach(id=>{ const el=document.getElementById(id); if(el && ['Barchasi','2024','2025','2026'].some(t=>el.textContent.includes(t))) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTF(t, btn) { tF=t; ['fp-all','fp-fc','fp-rv','fp-vl'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderOv(); }
 function setTY(y, btn) { tY=y; ['ty-all','ty-2024','ty-2025'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderTeachers(); }
-function setRY(y, btn) { rY=y; ['ry-all','ry-2024','ry-2025','ry-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderRating(); }
+function setRY(y, btn) {
+  rY = y;
+  // Yil tugmalardan active class olib tashlash (dynamic)
+  const yearBtns = document.getElementById('r-year-buttons');
+  if (yearBtns) {
+    yearBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  }
+  btn.classList.add('active');
+  renderRating();
+}
 function setSalesY(y, btn) { ['saly-all','saly-2024','saly-2025','saly-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderSales(); }
 function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); }); btn.classList.add('active'); renderMarketing(); }
 
@@ -2799,9 +2807,24 @@ function populateRatingFilters() {
       opt.textContent = f; 
       rFanSel.appendChild(opt); 
     });
-    // Saqlangan qiymatni qaytarish
     if (curVal && curVal !== 'all') rFanSel.value = curVal;
     console.log('Rating Fan filter populated:', fans.length, 'fans');
+  }
+  
+  // Rating Yil tugmalari — 2024+ dynamic
+  const yearBtns = document.getElementById('r-year-buttons');
+  if (yearBtns && yearBtns.querySelectorAll('button').length <= 1) {
+    const RATING_START_YEAR = 2024;
+    const allYears = [...new Set((snap.rawData||[]).map(r => r.Year).filter(y => y && y >= RATING_START_YEAR))].sort();
+    allYears.forEach(y => {
+      const btn = document.createElement('button');
+      btn.className = 'fyb';
+      btn.id = 'ry-' + y;
+      btn.textContent = y;
+      btn.onclick = function() { setRY(String(y), this); };
+      yearBtns.appendChild(btn);
+    });
+    console.log('Rating Year buttons populated:', allYears);
   }
 }
 
@@ -3621,9 +3644,14 @@ function renderRating() {
   const yearFilter = rY;
   
   // ── Raw data ni filterlash ──
+  // "Barchasi" → 2024-yildan boshlab (2021-2023 chiqariladi)
+  // Aniq yil (2024, 2025, 2026) → faqat shu yil
+  const RATING_START_YEAR = 2024;
   const rawData = snap.rawData || [];
   let filtered = rawData;
-  if (yearFilter !== 'all') {
+  if (yearFilter === 'all') {
+    filtered = filtered.filter(r => r.Year && r.Year >= RATING_START_YEAR);
+  } else {
     filtered = filtered.filter(r => r.Year == yearFilter);
   }
   
@@ -3894,9 +3922,10 @@ function renderRating() {
   const rSubEl = document.getElementById('rSub');
   if (rSubEl) {
     const parts = [];
-    if (yearFilter !== 'all') parts.push(yearFilter + '-yil');
+    if (yearFilter === 'all') parts.push('2024-yildan boshlab');
+    else parts.push(yearFilter + '-yil');
     if (fanFilter !== 'all') parts.push('Fan: ' + fanFilter);
-    const filterTxt = parts.length ? ' (' + parts.join(' · ') + ')' : '';
+    const filterTxt = ' (' + parts.join(' · ') + ')';
     const fanGPRCount = Object.keys(fanGlobalPR).filter(f => fanStats[f] && fanStats[f].examTakers >= MIN_N_FAN_GPR).length;
     rSubEl.textContent = displayed.length + ' ta yozuv' + filterTxt + ' · Akademiya o\'rtacha pass: ' + Math.round(akademGlobal) + '% · ' + fanGPRCount + ' ta fan globalPR aniqlangan · Har o\'qituvchi-fan kombinatsiyasi alohida ratingda';
   }
