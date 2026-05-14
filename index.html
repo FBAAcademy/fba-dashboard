@@ -4710,7 +4710,9 @@ function calcRevenueLost(data, avgPrice) {
     if (r.Final_status === 'No Exam') mGrp[r.Month].noExam++;
   });
   var monthlyLoss = Object.keys(mGrp).sort().slice(-18).map(function(m) {
-    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*REVISION};
+    // Revision narxi o'rtacha 1.5M (Foundation fanlari), Skill+Professional 2M
+    var avgRevPrice = 1500000;
+    return {month:m, dropoutLoss:mGrp[m].stopped*avgPrice, noExamLoss:mGrp[m].noExam*avgRevPrice};
   });
   return {totalDropoutLoss:totDL, totalNoExamLoss:totNEL, totalConvLoss:totCL, total:totDL+totNEL+totCL, dropFan:dropFan, neFan:neFan, convSteps:convSteps, fanSum:fanSum, monthlyLoss:monthlyLoss, avgPrice:avgPrice};
 }
