@@ -398,14 +398,19 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <div style="font-size:9px;color:var(--muted);margin-top:6px;">* 1-darsgacha chiqqanlar — o'qituvchiga bog'liq emas · Finished = Passed + Failed + No Exam (kursni yakunlagan)</div>
   </div>
   <div class="card">
-    <div class="ct">2024 vs 2025 taqqoslash</div><div class="cs">Trend ko'rsatkichlari</div>
-    <table><thead><tr>
-      <th style="width:20%">O'qituvchi</th>
-      <th style="text-align:center;width:13%">2024 Ret.</th><th style="text-align:center;width:13%">2025 Ret.</th>
-      <th style="text-align:center;width:10%">Trend</th>
-      <th style="text-align:center;width:13%">2024 Pass</th><th style="text-align:center;width:13%">2025 Pass</th>
-      <th style="text-align:center;width:9%">2024 n</th><th style="text-align:center;width:9%">2025 n</th>
-    </tr></thead><tbody id="tYearBody"></tbody></table>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+      <div>
+        <div class="ct">Yillar bo'yicha taqqoslash</div>
+        <div class="cs" id="tYearSub">Tanlangan 2 yil orasidagi trend</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="flabel">Yil A:</span>
+        <select id="tYearA" class="fselect" onchange="renderTeachers()"></select>
+        <span class="flabel">vs Yil B:</span>
+        <select id="tYearB" class="fselect" onchange="renderTeachers()"></select>
+      </div>
+    </div>
+    <table><thead id="tYearHead"></thead><tbody id="tYearBody"></tbody></table>
   </div>
   <!-- Yangi: O'qituvchi bo'yicha fan kesimi jadvali -->
   <div class="card" id="t-subject-card">
@@ -477,36 +482,47 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div>
         <div class="ct">Yillar taqqoslash</div>
-        <div class="cs">Ikkita yilni tanlang va solishtiring</div>
+        <div class="cs" id="sCompSub">Ikkita yilni tanlang va solishtiring</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <span style="font-size:11px;color:var(--muted);">Yil 1:</span>
-        <select class="fselect" id="sCompY1" onchange="renderSubjects()">
-          <option value="2024">2024</option>
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-        </select>
-        <span style="font-size:11px;color:var(--muted);">Yil 2:</span>
-        <select class="fselect" id="sCompY2" onchange="renderSubjects()">
-          <option value="2024">2024</option>
-          <option value="2025" selected>2025</option>
-          <option value="2026">2026</option>
-        </select>
+        <span style="font-size:11px;color:var(--muted);">Yil A:</span>
+        <select class="fselect" id="sCompY1" onchange="renderSubjects()"></select>
+        <span style="font-size:11px;color:var(--muted);">Yil B:</span>
+        <select class="fselect" id="sCompY2" onchange="renderSubjects()"></select>
       </div>
     </div>
     <table><thead><tr>
       <th style="width:10%">Fan</th>
-      <th style="text-align:center;width:10%" id="sY1RetH">2024 Ret.</th>
-      <th style="text-align:center;width:10%" id="sY2RetH">2025 Ret.</th>
+      <th style="text-align:center;width:10%" id="sY1RetH">Ret A</th>
+      <th style="text-align:center;width:10%" id="sY2RetH">Ret B</th>
       <th style="text-align:center;width:8%">Trend</th>
-      <th style="text-align:center;width:10%" id="sY1PassH">2024 Pass</th>
-      <th style="text-align:center;width:10%" id="sY2PassH">2025 Pass</th>
-      <th style="text-align:center;width:10%" id="sY1EntH">2024 Entry</th>
-      <th style="text-align:center;width:10%" id="sY2EntH">2025 Entry</th>
-      <th style="text-align:center;width:10%" id="sY1nH">2024 n</th>
-      <th style="text-align:center;width:10%" id="sY2nH">2025 n</th>
+      <th style="text-align:center;width:10%" id="sY1PassH">Pass A</th>
+      <th style="text-align:center;width:10%" id="sY2PassH">Pass B</th>
+      <th style="text-align:center;width:10%" id="sY1EntH">Entry A</th>
+      <th style="text-align:center;width:10%" id="sY2EntH">Entry B</th>
+      <th style="text-align:center;width:10%" id="sY1nH">n A</th>
+      <th style="text-align:center;width:10%" id="sY2nH">n B</th>
     </tr></thead><tbody id="sYearBody"></tbody></table>
   </div>
+  <!-- Fan x O'qituvchi matritsasi (alohida katta blokda) -->
+  <div class="card" style="margin-top:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+      <div>
+        <div class="ct">Fan × O'qituvchi matritsasi</div>
+        <div class="cs" id="sMatrixSub">Har bir o'qituvchining har bir fandagi pass rate va o'quvchilar soni</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">Fan:</span>
+        <select class="fselect" id="sMatrixFan" onchange="renderSubjects()"><option value="all">Barchasi</option></select>
+        <span style="font-size:11px;color:var(--muted);">O'qituvchi:</span>
+        <select class="fselect" id="sMatrixTeacher" onchange="renderSubjects()"><option value="all">Barchasi</option></select>
+        <span style="font-size:11px;color:var(--muted);">Yil:</span>
+        <select class="fselect" id="sMatrixYear" onchange="renderSubjects()"><option value="all">Barchasi</option></select>
+      </div>
+    </div>
+    <div id="sTeacherMatrix" style="overflow-x:auto;"></div>
+  </div>
+
   <!-- Yangi: Fan kesimida oylik oqim -->
   <div class="g2">
     <div class="card">
@@ -515,9 +531,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       <div style="position:relative;height:220px;"><canvas id="sNoExamChart"></canvas></div>
     </div>
     <div class="card">
-      <div class="ct">Fan × O'qituvchi matritsasi</div>
-      <div class="cs">Tanlangan fan bo'yicha har o'qituvchining natijasi</div>
-      <div id="sTeacherMatrix" style="overflow-x:auto;"></div>
+      <div class="ct">Fan bo'yicha umumiy ko'rsatkichlar</div>
+      <div class="cs">Tezkor ko'rinish</div>
+      <div style="position:relative;height:220px;"><canvas id="sOverviewChart"></canvas></div>
     </div>
   </div>
 
@@ -528,6 +544,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
 <!-- DROPOUT -->
 <div id="page-dropout" class="page">
   <div class="fbar">
+    <span class="flabel">Yil:</span>
+    <button class="fyb active" id="dy-all" onclick="setDY('all',this)">Barchasi</button>
+    <button class="fyb" id="dy-2024" onclick="setDY('2024',this)">2024</button>
+    <button class="fyb" id="dy-2025" onclick="setDY('2025',this)">2025</button>
+    <button class="fyb" id="dy-2026" onclick="setDY('2026',this)">2026</button>
+    <div class="fsep"></div>
     <span class="flabel">Fan:</span>
     <select class="fselect" id="d-fan-filter" onchange="renderDropout()"><option value="all">Barcha fanlar</option></select>
     <div class="fsep"></div>
@@ -761,36 +783,37 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
       </div>
     </div>
     <div style="overflow-x:auto;max-height:600px;overflow-y:auto;" id="stTableWrap">
-      <table>
+      <table style="border-collapse:separate;border-spacing:0;">
         <thead style="position:sticky;top:0;z-index:10;background:var(--bg2);">
           <tr>
-            <th style="min-width:50px;padding:8px 12px;">ID</th>
-            <th style="min-width:160px;">Ism Familiya</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FA</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FR</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">MA</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">FM</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">PM</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">AA</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">TX</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">SBR</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">AFM</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">APM</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">BT</th>
-            <th style="text-align:center;min-width:48px;padding:6px 4px;font-size:10px;">DipIFR</th>
+            <th style="min-width:60px;padding:8px 10px;">ID</th>
+            <th style="min-width:200px;max-width:240px;padding:8px 12px;">Ism Familiya</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">FA</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">FR</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">MA</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">FM</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">PM</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">AA</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">TX</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">SBR</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">AFM</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">APM</th>
+            <th style="text-align:center;min-width:50px;padding:6px 4px;font-size:10px;">BT</th>
+            <th style="text-align:center;min-width:55px;padding:6px 4px;font-size:10px;">DipIFR</th>
             <th style="text-align:center;min-width:55px;">Jami</th>
             <th style="text-align:center;min-width:55px;">Passed</th>
-            <th style="min-width:120px;">O'qituvchi</th>
+            <th style="min-width:130px;">O'qituvchi</th>
           </tr>
         </thead>
         <tbody id="stTableBody"></tbody>
       </table>
     </div>
-    <div id="st-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border);">
+    <div id="st-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border);flex-wrap:wrap;gap:8px;">
       <span id="st-page-info" style="font-size:11px;color:var(--muted);"></span>
-      <div style="display:flex;gap:6px;">
+      <div style="display:flex;gap:6px;align-items:center;">
         <button class="fyb" id="st-prev" onclick="stChangePage(-1)">← Oldingi</button>
         <button class="fyb" id="st-next" onclick="stChangePage(1)">Keyingi →</button>
+        <button class="fyb" id="st-showall" onclick="stToggleShowAll()" style="margin-left:8px;background:var(--card2);">📋 Hammasini ko'rsat</button>
       </div>
     </div>
   </div>
@@ -2218,16 +2241,19 @@ function n(v) { return (v||0).toLocaleString(); }
 // ── FILTERS ──
 function getS() {
   if (!snap) return {};
-  const s = snap.summary;
+  // Global filter (gYear, gMonth) ni snap ga qo'llaymiz
+  const globalSnap = getGlobalSnap();
+  const s = globalSnap?.summary || snap.summary;
   const norm = (d) => ({ ...d, retention_pct: d.retention_pct||d.retention||0, pass_rate_pct: d.pass_rate_pct||d.pass_rate||0, exam_entry_pct: d.exam_entry_pct||d.exam_entry||0, converted: s.converted||0 });
   if (yF !== 'all' && tF !== 'all') {
-    const yd = snap.yearly?.[yF]; const pt = snap.product_types?.[tF];
+    const yd = globalSnap?.yearly?.[yF] || snap.yearly?.[yF];
+    const pt = globalSnap?.product_types?.[tF] || snap.product_types?.[tF];
     if (!yd || !pt) return norm(s);
     const ratio = s.jami > 0 ? pt.jami / s.jami : 0;
     return norm({ jami:Math.round(yd.jami*ratio), stopped:Math.round((yd.stopped||0)*ratio), passed:Math.round((yd.passed||0)*ratio), failed:Math.round((yd.failed||0)*ratio), no_exam:Math.round((yd.no_exam||0)*ratio), in_progress:Math.round((yd.in_progress||0)*ratio), yakunlagan:Math.round((yd.yakunlagan||0)*ratio), retention:pt.retention, pass_rate:pt.pass_rate, exam_entry:pt.exam_entry });
   }
-  if (yF !== 'all') { const yd = snap.yearly?.[yF]; if (!yd) return norm(s); return norm({...yd}); }
-  if (tF !== 'all') { const pt = snap.product_types?.[tF]; if (!pt) return norm(s); return norm({...pt}); }
+  if (yF !== 'all') { const yd = globalSnap?.yearly?.[yF] || snap.yearly?.[yF]; if (!yd) return norm(s); return norm({...yd}); }
+  if (tF !== 'all') { const pt = globalSnap?.product_types?.[tF] || snap.product_types?.[tF]; if (!pt) return norm(s); return norm({...pt}); }
   return norm(s);
 }
 
@@ -2299,11 +2325,14 @@ function setMktY(y, btn) { ['mkty-all','mkty-2024','mkty-2025','mkty-2026'].forE
 // ── OVERVIEW ──
 function renderOv() {
   if (!snap) return;
+  // Global filter (gYear, gMonth) ni qo'llaymiz — CEO sahifasidagi barcha jadvallarga ta'sir qilsin
+  const gSnap = getGlobalSnap() || snap;
   const s = getS();
   const label = yF==='all'?'Barchasi':yF;
   const tlabel = tF==='all'?'':` · ${tF}`;
-  document.getElementById('ov-title').textContent = `Asosiy ko'rsatkichlar (${label}${tlabel})`;
-  document.getElementById('ov-sana').textContent = snap.summary.sana;
+  const gYrLbl = gYear === 'all' ? '' : ` · Yil: ${gYear}`;
+  document.getElementById('ov-title').textContent = `Asosiy ko'rsatkichlar (${label}${tlabel}${gYrLbl})`;
+  document.getElementById('ov-sana').textContent = (gSnap.summary || snap.summary).sana;
 
   const jami=s.jami||0, stopped=s.stopped||0, yakunlagan=s.yakunlagan||0, inp=s.in_progress||0;
   const passed=s.passed||0, failed=s.failed||0, noexam=s.no_exam||0, conv=s.converted||0;
@@ -2325,7 +2354,7 @@ function renderOv() {
   setEl('ov-ret',     ret + '%');
   setEl('ov-passrate',pr + '%');
   setEl('ov-drprate', drp + '%');
-  setEl('ov-sana',    snap.summary.sana || '--');
+  setEl('ov-sana',    gSnap.summary.sana || '--');
   setEl('ov-pr',      'Passed/' + n(yakunlagan) + ' yakunlagan');
   setEl('ov-pr2',     n(passed) + ' ta (' + pr + '%)');
   setEl('ov-drp-cnt', n(stopped) + ' ta stopped');
@@ -2347,8 +2376,8 @@ function renderOv() {
   }
 
   // Yo'qotish/oy (revenue dan)
-  if (snap && snap.revenueLost) {
-    var rl = snap.revenueLost;
+  if (snap && gSnap.revenueLost) {
+    var rl = gSnap.revenueLost;
     var mosCount = Math.max((rl.monthlyLoss || []).length, 1);
     var lpm = Math.round(rl.total / mosCount);
     var lpmStr = lpm >= 1e9 ? (lpm/1e9).toFixed(1) + ' mlrd' : Math.round(lpm/1e6) + ' mln';
@@ -2375,7 +2404,7 @@ function renderOv() {
     {key:'Video Lesson', dot:'#f5a623'}
   ];
   ptList.forEach(({key, dot}) => {
-    const d = snap.product_types?.[key] || {};
+    const d = gSnap.product_types?.[key] || {};
     if (!d.jami) return;
     ptSec.innerHTML += `<div class="tc">
       <div class="tt"><span style="width:8px;height:8px;border-radius:50%;background:${dot};display:inline-block;flex-shrink:0;"></span>${key}</div>
@@ -2391,7 +2420,7 @@ function renderOv() {
 
   // Charts
   dc('yearly');
-  const yr = snap.yearly || {};
+  const yr = gSnap.yearly || {};
   const yrL = Object.keys(yr);
   charts['yearly'] = new Chart(document.getElementById('yearlyChart'), {
     type:'bar',
@@ -2403,7 +2432,7 @@ function renderOv() {
   });
 
   dc('monthly');
-  const monthly = snap.monthly || [];
+  const monthly = gSnap.monthly || [];
   charts['monthly'] = new Chart(document.getElementById('monthlyChart'), {
     data:{labels:monthly.map(m=>{const oy=m.Oy||m.oy||''; return oy.length>=7?oy.substring(0,7):'';}),datasets:[
       {type:'bar',label:'Yangi',data:monthly.map(m=>m.jami),backgroundColor:'rgba(91,141,238,0.35)',yAxisID:'y'},
@@ -2413,7 +2442,7 @@ function renderOv() {
   });
 
   // ── PULSE ──
-  const pulse = snap.pulse || {};
+  const pulse = gSnap.pulse || {};
   const pulseSec = document.getElementById('pulse-section');
   if (pulseSec) {
     pulseSec.innerHTML = `
@@ -2424,7 +2453,7 @@ function renderOv() {
   }
 
   // ── FUNNEL ──
-  const funnel = snap.funnel || {};
+  const funnel = gSnap.funnel || {};
   const funnelViz = document.getElementById('funnel-viz');
   if (funnelViz && funnel.fanOrder) {
     const fd = funnel.fanData || {};
@@ -2459,7 +2488,7 @@ function renderOv() {
 
   // ── COHORT CHART ──
   dc('cohort');
-  const cohorts = snap.cohorts || [];
+  const cohorts = gSnap.cohorts || [];
   if (cohorts.length > 0) {
     const cLabels = cohorts.map(c => c.oy.substring(0,7));
     charts['cohort'] = new Chart(document.getElementById('cohortChart'), {
@@ -2631,19 +2660,46 @@ function getFilteredTeachers() {
 
 function renderTeachers() {
   const ts = getFilteredTeachers();
+
+  // Bar oxirida foiz ko'rsatish uchun plugin
+  const valLabelPlugin = {
+    id: 'valLabel',
+    afterDatasetsDraw(chart) {
+      const {ctx, data, scales:{x,y}} = chart;
+      ctx.save();
+      ctx.fillStyle = '#cfd5e2';
+      ctx.font = '600 10px "DM Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, i) => {
+          const val = ds.data[i];
+          if (val == null) return;
+          const xPos = bar.x + 4;
+          const yPos = bar.y;
+          ctx.fillText(val + '%', xPos, yPos);
+        });
+      });
+      ctx.restore();
+    }
+  };
+
   dc('tRet');
   const sR = [...ts].filter(t=>t.jami>=20).sort((a,b)=>a.retention-b.retention);
   charts['tRet'] = new Chart(document.getElementById('tRetChart'), {
     type:'bar',
     data:{labels:sR.map(t=>{const p=t.Oqituvchi.split(' ');return p[0]+(p[1]?' '+p[1][0]+'.':'');}),datasets:[{data:sR.map(t=>t.retention),backgroundColor:sR.map(t=>retC(t.retention)),borderRadius:4,borderSkipped:false}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:110,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}},layout:{padding:{right:30}}},
+    plugins:[valLabelPlugin]
   });
   dc('tPass');
   const sP = [...ts].filter(t=>t.jami>=20).sort((a,b)=>a.pass_rate-b.pass_rate);
   charts['tPass'] = new Chart(document.getElementById('tPassChart'), {
     type:'bar',
     data:{labels:sP.map(t=>{const p=t.Oqituvchi.split(' ');return p[0]+(p[1]?' '+p[1][0]+'.':'');}),datasets:[{data:sP.map(t=>t.pass_rate),backgroundColor:sP.map(t=>passC(t.pass_rate)),borderRadius:4,borderSkipped:false}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:110,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}},layout:{padding:{right:30}}},
+    plugins:[valLabelPlugin]
   });
   const tbody = document.getElementById('tTableBody');
   tbody.innerHTML = '';
@@ -2679,19 +2735,62 @@ function renderTeachers() {
       '<td style="text-align:center"><span style="background:' + (t.tierColor||'#64748b') + '22;color:' + (t.tierColor||'#64748b') + ';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;white-space:nowrap">' + (t.tier||'--') + '</span></td>' +
       '</tr>';
   });
+  // ── YILLAR TAQQOSLASH (dynamic, har 2 yil) ──
+  // Ma'lumotdagi barcha yillarni avtomatik aniqlaymiz
+  const allYearsSet = new Set();
+  (snap.teachers||[]).forEach(t => {
+    if (t.by_year) Object.keys(t.by_year).forEach(y => { if (y && y !== 'undefined') allYearsSet.add(y); });
+  });
+  const availableYears = [...allYearsSet].sort();
+
+  // Dropdown'larni to'ldiramiz (faqat bo'sh bo'lsa)
+  const yASel = document.getElementById('tYearA');
+  const yBSel = document.getElementById('tYearB');
+  if (yASel && yASel.options.length === 0 && availableYears.length > 0) {
+    availableYears.forEach(y => {
+      yASel.innerHTML += `<option value="${y}">${y}</option>`;
+      yBSel.innerHTML += `<option value="${y}">${y}</option>`;
+    });
+    // Default: birinchi va oxirgi yil
+    yASel.value = availableYears[0];
+    yBSel.value = availableYears[availableYears.length - 1];
+  }
+
+  const yA = yASel?.value || availableYears[0] || '2024';
+  const yB = yBSel?.value || availableYears[availableYears.length - 1] || '2025';
+
+  // Header dynamic
+  const yHead = document.getElementById('tYearHead');
+  if (yHead) {
+    yHead.innerHTML = `<tr>
+      <th style="width:20%">O'qituvchi</th>
+      <th style="text-align:center;width:13%">${yA} Ret.</th>
+      <th style="text-align:center;width:13%">${yB} Ret.</th>
+      <th style="text-align:center;width:10%">Trend</th>
+      <th style="text-align:center;width:13%">${yA} Pass</th>
+      <th style="text-align:center;width:13%">${yB} Pass</th>
+      <th style="text-align:center;width:9%">${yA} n</th>
+      <th style="text-align:center;width:9%">${yB} n</th>
+    </tr>`;
+  }
+  const tYearSubEl = document.getElementById('tYearSub');
+  if (tYearSubEl) tYearSubEl.textContent = `${yA} vs ${yB} taqqoslash · ${availableYears.length} yil ma'lumoti mavjud`;
+
   const yb = document.getElementById('tYearBody');
   yb.innerHTML = '';
   (snap.teachers||[]).forEach(t => {
-    const y24=t.by_year?.['2024'], y25=t.by_year?.['2025'];
+    const yAd = t.by_year?.[yA], yBd = t.by_year?.[yB];
+    // Agar har ikkala yilda ham ma'lumot bo'lmasa, o'qituvchini ko'rsatmaymiz
+    if (!yAd && !yBd) return;
     yb.innerHTML += `<tr>
       <td style="font-weight:500;font-size:11px;">${t.Oqituvchi}</td>
-      <td style="text-align:center;">${y24?pb(y24.retention):'-'}</td>
-      <td style="text-align:center;">${y25?pb(y25.retention):'-'}</td>
-      <td style="text-align:center;">${trendH(y24?.retention,y25?.retention)}</td>
-      <td style="text-align:center;">${y24?pb(y24.pass_rate):'-'}</td>
-      <td style="text-align:center;">${y25?pb(y25.pass_rate):'-'}</td>
-      <td style="text-align:center;color:var(--muted);">${y24?.jami||'-'}</td>
-      <td style="text-align:center;color:var(--muted);">${y25?.jami||'-'}</td>
+      <td style="text-align:center;">${yAd?pb(yAd.retention):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="text-align:center;">${yBd?pb(yBd.retention):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="text-align:center;">${(yAd&&yBd)?trendH(yAd.retention,yBd.retention):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="text-align:center;">${yAd?pb(yAd.pass_rate):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="text-align:center;">${yBd?pb(yBd.pass_rate):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="text-align:center;color:var(--muted);">${yAd?.jami||'—'}</td>
+      <td style="text-align:center;color:var(--muted);">${yBd?.jami||'—'}</td>
     </tr>`;
   });
   // ── YANGI: O'qituvchi bo'yicha fan kesimi ──
@@ -2815,12 +2914,30 @@ function renderSubjects() {
       <td>${pb(s.pass_rate)}</td>
     </tr>`;
   });
+  // Dynamic year dropdowns (sCompY1, sCompY2)
+  const allYrSet = new Set();
+  (snap.subjects||[]).forEach(s => {
+    if (s.by_year) Object.keys(s.by_year).forEach(y => { if (y && y !== 'undefined') allYrSet.add(y); });
+  });
+  const availYrs = [...allYrSet].sort();
+  const cy1Sel = document.getElementById('sCompY1');
+  const cy2Sel = document.getElementById('sCompY2');
+  if (cy1Sel && cy1Sel.options.length === 0 && availYrs.length > 0) {
+    availYrs.forEach(y => {
+      cy1Sel.innerHTML += `<option value="${y}">${y}</option>`;
+      cy2Sel.innerHTML += `<option value="${y}">${y}</option>`;
+    });
+    cy1Sel.value = availYrs[0];
+    cy2Sel.value = availYrs[availYrs.length-1];
+  }
+
   // Dynamic year comparison
-  const cy1 = document.getElementById('sCompY1')?.value || '2024';
-  const cy2 = document.getElementById('sCompY2')?.value || '2025';
-  ['sY1RetH','sY1PassH','sY1EntH','sY1nH'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=cy1+' Ret./Pass/Entry/n'.split('/')[['sY1RetH','sY1PassH','sY1EntH','sY1nH'].indexOf(id)]; });
+  const cy1 = document.getElementById('sCompY1')?.value || availYrs[0] || '2024';
+  const cy2 = document.getElementById('sCompY2')?.value || availYrs[availYrs.length-1] || '2025';
   ['sY1RetH','sY1PassH','sY1EntH','sY1nH'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=cy1+[' Ret.',' Pass',' Entry',' n'][i]; });
   ['sY2RetH','sY2PassH','sY2EntH','sY2nH'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=cy2+[' Ret.',' Pass',' Entry',' n'][i]; });
+  const sCompSubEl = document.getElementById('sCompSub');
+  if (sCompSubEl) sCompSubEl.textContent = `${cy1} vs ${cy2} · ${availYrs.length} yil ma'lumoti mavjud`;
   
   const yb=document.getElementById('sYearBody'); yb.innerHTML='';
   const allSubs = snap?.subjects || [];
@@ -2876,39 +2993,104 @@ function renderSubjects() {
     });
   }
 
-  // Fan x Oqituvchi matritsasi
+  // Fan x Oqituvchi matritsasi — alohida katta jadval, 3 ta filter
   const sMatrix = document.getElementById('sTeacherMatrix');
   if (sMatrix && snap && snap.rawData) {
     let rawM = getGlobalFilteredData();
     const sExclM = document.getElementById('s-excl-preclass') && document.getElementById('s-excl-preclass').checked;
     if (sExclM) rawM = rawM.filter(function(r){ return r.Status !== '1-darsgacha chiqqanlar'; });
-    const sTF = (document.getElementById('s-teacher-filter') && document.getElementById('s-teacher-filter').value) || 'all';
-    if (sTF !== 'all') rawM = rawM.filter(function(r){ return r.Oqituvchi === sTF; });
-    if (sY !== 'all') rawM = rawM.filter(function(r){ return r.Year == sY; });
+
+    // Filter dropdownlarni to'ldiramiz
+    const allFansAll = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
+    const allTeachAll = [...new Set((snap.rawData||[]).map(r=>r.Oqituvchi).filter(Boolean))].sort();
+    const allYrsAll = [...new Set((snap.rawData||[]).map(r=>r.Year).filter(Boolean))].sort();
+
+    const mFanSel = document.getElementById('sMatrixFan');
+    const mTSel = document.getElementById('sMatrixTeacher');
+    const mYSel = document.getElementById('sMatrixYear');
+    if (mFanSel && mFanSel.options.length <= 1) {
+      allFansAll.forEach(f => mFanSel.innerHTML += `<option value="${f}">${f}</option>`);
+    }
+    if (mTSel && mTSel.options.length <= 1) {
+      allTeachAll.forEach(t => mTSel.innerHTML += `<option value="${t}">${t}</option>`);
+    }
+    if (mYSel && mYSel.options.length <= 1) {
+      allYrsAll.forEach(y => mYSel.innerHTML += `<option value="${y}">${y}</option>`);
+    }
+
+    const mFanV = mFanSel?.value || 'all';
+    const mTV = mTSel?.value || 'all';
+    const mYV = mYSel?.value || 'all';
+
+    if (mFanV !== 'all') rawM = rawM.filter(r => r.Product === mFanV);
+    if (mTV !== 'all') rawM = rawM.filter(r => r.Oqituvchi === mTV);
+    if (mYV !== 'all') rawM = rawM.filter(r => r.Year == mYV);
+
     const matFans = [...new Set(rawM.map(function(r){ return r.Product; }).filter(Boolean))].sort();
-    const matTs = [...new Set(rawM.map(function(r){ return r.Oqituvchi; }).filter(Boolean))].sort().slice(0,10);
+    const matTs = [...new Set(rawM.map(function(r){ return r.Oqituvchi; }).filter(Boolean))].sort();
+
+    const sMatrixSubEl = document.getElementById('sMatrixSub');
+    if (sMatrixSubEl) {
+      const parts = [];
+      if (mYV !== 'all') parts.push(`${mYV}-yil`);
+      if (mFanV !== 'all') parts.push(`Fan: ${mFanV}`);
+      if (mTV !== 'all') parts.push(`O'qituvchi: ${mTV}`);
+      const filterTxt = parts.length ? ` (${parts.join(' · ')})` : '';
+      sMatrixSubEl.textContent = `${matTs.length} ta o'qituvchi × ${matFans.length} ta fan${filterTxt}`;
+    }
+
     if (matFans.length > 0 && matTs.length > 0) {
-      let mHtml = '<div style="overflow-x:auto;"><table style="font-size:10px;width:100%;"><thead><tr><th style="min-width:100px;padding:4px 6px;">O&amp;#39;qituvchi</th>';
-      matFans.forEach(function(f){ mHtml += '<th style="text-align:center;min-width:55px;padding:4px 3px;">' + f + '</th>'; });
+      let mHtml = '<table style="font-size:11px;width:100%;border-collapse:collapse;"><thead><tr>';
+      mHtml += '<th style="text-align:left;min-width:140px;padding:8px 10px;background:var(--card2);border-bottom:2px solid var(--bd);font-size:11px;color:var(--muted);">O\'qituvchi \\ Fan</th>';
+      matFans.forEach(function(f){ mHtml += '<th style="text-align:center;min-width:70px;padding:8px 4px;background:var(--card2);border-bottom:2px solid var(--bd);font-size:11px;color:var(--muted);">' + f + '</th>'; });
+      mHtml += '<th style="text-align:center;min-width:60px;padding:8px 4px;background:var(--card2);border-bottom:2px solid var(--bd);font-size:11px;color:var(--muted);">JAMI</th>';
       mHtml += '</tr></thead><tbody>';
+
       matTs.forEach(function(t) {
-        mHtml += '<tr><td style="font-weight:500;font-size:10px;padding:5px 6px;">' + t.split(' ').slice(0,2).join(' ') + '</td>';
+        const tRows = rawM.filter(r => r.Oqituvchi === t);
+        const tTotal = tRows.length;
+        const tPassed = tRows.filter(r => r.Final_status === 'Passed').length;
+        const tFin = tRows.filter(r => r.Final_status !== 'In Progress').length;
+        const tPR = tFin > 0 ? Math.round(tPassed/tFin*100) : 0;
+
+        mHtml += '<tr style="border-bottom:1px solid var(--bd);">';
+        mHtml += '<td style="font-weight:500;font-size:11px;padding:7px 10px;">' + t + '</td>';
         matFans.forEach(function(f) {
           const rows = rawM.filter(function(r){ return r.Oqituvchi===t && r.Product===f; });
-          if (rows.length < 2) { mHtml += '<td style="text-align:center;color:var(--muted);padding:5px;">—</td>'; return; }
+          if (rows.length < 1) { mHtml += '<td style="text-align:center;color:var(--muted);padding:7px 4px;font-size:10px;">—</td>'; return; }
           const passed = rows.filter(function(r){ return r.Final_status==='Passed'; }).length;
           const fin = rows.filter(function(r){ return r.Final_status!=='In Progress'; }).length;
           const pr = fin>0?Math.round(passed/fin*100):0;
           const col = pr>=50?'var(--green)':pr>=20?'var(--amber)':'var(--red)';
-          mHtml += '<td style="text-align:center;color:' + col + ';font-weight:600;font-size:10px;padding:5px;">' + pr + '%<br><span style="font-size:8px;color:var(--muted);">' + rows.length + '</span></td>';
+          mHtml += '<td style="text-align:center;color:' + col + ';font-weight:600;font-size:11px;padding:7px 4px;">' + pr + '%<br><span style="font-size:9px;color:var(--muted);font-weight:400;">(' + rows.length + ')</span></td>';
         });
+        // JAMI column
+        const tCol = tPR>=50?'var(--green)':tPR>=20?'var(--amber)':'var(--red)';
+        mHtml += '<td style="text-align:center;color:' + tCol + ';font-weight:700;font-size:12px;padding:7px 4px;background:rgba(255,255,255,0.02);">' + tPR + '%<br><span style="font-size:9px;color:var(--muted);font-weight:500;">(' + tTotal + ')</span></td>';
         mHtml += '</tr>';
       });
-      mHtml += '</tbody></table></div>';
+      mHtml += '</tbody></table>';
+      mHtml += '<div style="font-size:10px;color:var(--muted);margin-top:8px;">' +
+        '* Foiz = Passed / (Passed + Failed + No Exam) · Qavs ichida = o\'quvchilar soni' +
+        '</div>';
       sMatrix.innerHTML = mHtml;
     } else {
-      sMatrix.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">Filtr natijalari bo\'sh</div>';
+      sMatrix.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:30px;text-align:center;">Filter natijalari bo\'sh</div>';
     }
+  }
+
+  // Fan bo'yicha umumiy chart (eski Fan × O'qituvchi joyiga)
+  dc('sOverview');
+  const sOvCtx = document.getElementById('sOverviewChart');
+  if (sOvCtx && subs && subs.length > 0) {
+    charts['sOverview'] = new Chart(sOvCtx, {
+      type:'bar',
+      data:{labels:subs.map(s=>s.Product),datasets:[
+        {label:'Retention',data:subs.map(s=>s.retention||0),backgroundColor:'rgba(46,202,138,0.7)',borderRadius:4,borderSkipped:false},
+        {label:'Pass rate',data:subs.map(s=>s.pass_rate||0),backgroundColor:'rgba(91,141,238,0.7)',borderRadius:4,borderSkipped:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:function(v){return v+'%';}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+    });
   }
 }
 
@@ -3120,6 +3302,7 @@ function renderDropout() {
     let rawForD = getGlobalFilteredData();
     const dFanV = document.getElementById('d-fan-filter')?.value || 'all';
     const dTeacherV = document.getElementById('d-teacher-filter')?.value || 'all';
+    if (dY !== 'all') rawForD = rawForD.filter(r=>r.Year == dY);
     if (dFanV !== 'all') rawForD = rawForD.filter(r=>r.Product===dFanV);
     if (dTeacherV !== 'all') rawForD = rawForD.filter(r=>r.Oqituvchi===dTeacherV);
     if (dD !== 'all') rawForD = rawForD.filter(r=>(r.Status||'').includes(dD));
@@ -3174,6 +3357,7 @@ function renderDropout() {
   if (dMonthCtx && snap?.rawData) {
     let rawM = getGlobalFilteredData();
     const dFanM2 = document.getElementById('d-fan-filter')?.value || 'all';
+    if (dY !== 'all') rawM = rawM.filter(r=>r.Year == dY);
     if (dFanM2 !== 'all') rawM = rawM.filter(r=>r.Product===dFanM2);
     const mGrp = {};
     rawM.forEach(r=>{ if(r.Month){if(!mGrp[r.Month])mGrp[r.Month]=[];mGrp[r.Month].push(r);} });
@@ -3340,7 +3524,8 @@ function renderSales() {
 // ════════════════════════════════════════
 let stYear = 'all';
 let stPage = 0;
-const ST_PAGE_SIZE = 50;
+let ST_PAGE_SIZE = 100;  // 50 → 100 (kamroq sahifa, ko'proq ma'lumot bir sahifada)
+let stShowAll = false;   // "Hammasini ko'rsat" rejimi
 let stAllStudents = [];
 const FAN_ORDER_ST = ['FA','FR','MA','FM','PM','AA','TX','SBR','AFM','APM','BT','DipIFR'];
 const STATUS_STYLE_ST = {
@@ -3382,8 +3567,20 @@ function populateStudentFilters() {
 }
 
 function stChangePage(dir) {
+  if (stShowAll) return; // hammasini ko'rsatish rejimida pagination ishlamaydi
   const maxPage = Math.max(0, Math.ceil(stAllStudents.length / ST_PAGE_SIZE) - 1);
   stPage = Math.max(0, Math.min(stPage + dir, maxPage));
+  renderStudentsTable(stAllStudents);
+}
+
+function stToggleShowAll() {
+  // Foydalanuvchini ogohlantirish — agar ko'p ma'lumot bo'lsa, brauzerga yuk bo'lishi mumkin
+  if (!stShowAll && stAllStudents.length > 2000) {
+    const ok = confirm("Diqqat: " + stAllStudents.length + " ta o'quvchi ko'rsatiladi. Brauzer biroz sekinlashishi mumkin. Davom etamizmi?");
+    if (!ok) return;
+  }
+  stShowAll = !stShowAll;
+  stPage = 0;
   renderStudentsTable(stAllStudents);
 }
 
@@ -3466,17 +3663,33 @@ function renderStudentsTable(students) {
   const total    = students.length;
   const maxPage  = Math.max(0, Math.ceil(total / ST_PAGE_SIZE) - 1);
   stPage         = Math.min(stPage, maxPage);
-  const pageSt   = students.slice(stPage * ST_PAGE_SIZE, (stPage+1) * ST_PAGE_SIZE);
+  // Agar "Hammasini ko'rsat" rejimi yoqilgan bo'lsa, barchasini ko'rsatamiz
+  const pageSt   = stShowAll ? students : students.slice(stPage * ST_PAGE_SIZE, (stPage+1) * ST_PAGE_SIZE);
 
   // Pagination info
   const countEl = document.getElementById('st-count-label');
-  if (countEl) countEl.textContent = n(total) + ' ta o&#39;quvchi  ·  ' + (stPage+1) + '/' + (maxPage+1) + ' sahifa';
+  if (countEl) {
+    if (stShowAll) {
+      countEl.textContent = n(total) + ' ta o&#39;quvchi  ·  HAMMASI ko\'rsatilmoqda';
+    } else {
+      countEl.textContent = n(total) + ' ta o&#39;quvchi  ·  ' + (stPage+1) + '/' + (maxPage+1) + ' sahifa';
+    }
+  }
   const prevBtn = document.getElementById('st-prev');
   const nextBtn = document.getElementById('st-next');
   const infoEl  = document.getElementById('st-page-info');
-  if (prevBtn) prevBtn.disabled = stPage === 0;
-  if (nextBtn) nextBtn.disabled = stPage >= maxPage;
-  if (infoEl)  infoEl.textContent = (stPage*ST_PAGE_SIZE+1) + '-' + Math.min((stPage+1)*ST_PAGE_SIZE, total) + ' / ' + n(total);
+  if (prevBtn) prevBtn.disabled = stShowAll || stPage === 0;
+  if (nextBtn) nextBtn.disabled = stShowAll || stPage >= maxPage;
+  if (infoEl) {
+    if (stShowAll) {
+      infoEl.textContent = '1-' + n(total) + ' (hammasi)';
+    } else {
+      infoEl.textContent = (stPage*ST_PAGE_SIZE+1) + '-' + Math.min((stPage+1)*ST_PAGE_SIZE, total) + ' / ' + n(total);
+    }
+  }
+  // "Hammasini ko'rsat" tugmasi label
+  const showAllBtn = document.getElementById('st-showall');
+  if (showAllBtn) showAllBtn.textContent = stShowAll ? '📄 Sahifalarga qaytish' : '📋 Hammasini ko\'rsat';
 
   const tbody = document.getElementById('stTableBody');
   if (!tbody) return;
@@ -3493,8 +3706,8 @@ function renderStudentsTable(students) {
     // ID
     rows += '<td style="font-family:DM Mono,monospace;font-size:10px;color:var(--muted);padding:7px 10px;white-space:nowrap;">' + s.id + '</td>';
 
-    // ISM — to'liq
-    rows += '<td style="font-weight:500;font-size:11px;padding:7px 10px;min-width:150px;white-space:nowrap;">' + (s.name || '—') + '</td>';
+    // ISM — to'liq, lekin ortiqcha bo'lsa ellipsis bilan
+    rows += '<td style="font-weight:500;font-size:11px;padding:7px 12px;min-width:200px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (s.name || '') + '">' + (s.name || '—') + '</td>';
 
     // Har fan uchun katak
     FAN_ORDER_ST.forEach(function(fan) {
@@ -4120,15 +4333,8 @@ function renderMarketing() {
 
 // ── PAGE ──
 // curPage — yuqorida e'lon qilingan
-function renderCurrentPage() {
-  if(curPage==='overview') renderOv();
-  else if(curPage==='teachers') renderTeachers();
-  else if(curPage==='subjects') renderSubjects();
-  else if(curPage==='dropout') renderDropout();
-  else if(curPage==='rating') renderRating();
-  else if(curPage==='sales') renderSales();
-  else if(curPage==='marketing') renderMarketing();
-}
+// NOTE: renderCurrentPage allaqachon yuqorida belgilangan (qator ~2269)
+// Bu yerda DUBLIKAT YO'Q — students, revenue (Yo'qotish), ltv u yerda bor
 
 function showPage(id, btn) {
   if (snap?.rawData) {
