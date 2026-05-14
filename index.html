@@ -694,8 +694,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
             <td style="font-weight:600;padding:10px;color:var(--blue);">1️⃣ Sertifikatlar (Pass)</td>
             <td style="text-align:center;font-weight:700;font-size:14px;font-family:'DM Mono',monospace;">30</td>
             <td style="font-size:10px;color:var(--muted);padding:10px;font-family:'DM Mono',monospace;">
+              pass_rate = Passed / (Passed + Failed) × 100<br>
               bayPass = (n × pr + 50 × fanGlobalPR) / (n + 50)<br>
-              <span style="color:var(--text);font-size:9px;">n = yakunlagan o'quvchilar · pr = haqiqiy pass rate · fanGlobalPR = shu fan akademik o'rtacha</span>
+              <span style="color:var(--text);font-size:9px;">n = imtihonga kirganlar (Passed + Failed) · pr = haqiqiy pass rate · fanGlobalPR = shu fan akademik o'rtacha</span>
             </td>
             <td style="font-size:10px;padding:10px;">
               <b>ACCA daraja:</b><br>
@@ -804,18 +805,22 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,0.0
     <div style="background:rgba(155,127,232,0.06);border-left:3px solid #9b7fe8;padding:12px 16px;border-radius:6px;margin:14px 0;">
       <div style="font-weight:600;font-size:12px;color:#9b7fe8;margin-bottom:8px;">📝 Real misol — Boliyeva Shoira × FA fani</div>
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text);line-height:1.8;">
-        <b>Ma'lumot:</b> n = 100 · pass_rate = 70% · retention = 55% · entry = 20% · trend = +5%<br>
+        <b>Ma'lumot:</b><br>
+        · 100 ta yakunlagan (Passed + Failed + No Exam)<br>
+        · 30 ta imtihonga kirgan (Passed + Failed) — bayPass uchun bazis<br>
+        · 21 ta Passed → pass_rate = 21/30 = <b>70%</b><br>
+        · retention = 55% · exam_entry = 30% · trend = +5%<br>
         <b>fanGlobalPR (FA):</b> 72%<br>
         <br>
-        <b>1. Pass:</b> bayPass = (100×70 + 50×72)/150 = 70.7% → FA B daraja (≥64%) → <b>25</b><br>
+        <b>1. Pass:</b> bayPass = (30×70 + 50×72)/80 = 71.3% → FA B daraja (≥64%) → <b>25</b><br>
         <b>2. Ret:</b> 55% → <b>18</b><br>
-        <b>3. Entry:</b> 20% → <b>10</b><br>
-        <b>4. Tajriba:</b> 100 → <b>10</b><br>
+        <b>3. Entry:</b> 30% → <b>18</b><br>
+        <b>4. Tajriba:</b> 100 yakunlagan → <b>10</b><br>
         <b>5. Trend:</b> +5% → <b>4</b><br>
         <br>
-        <b style="color:var(--green);">JAMI:</b> 25 + 18 + 10 + 10 + 4 = <b style="font-size:14px;color:var(--green);">67</b> → <b style="color:var(--blue);">🥈 Mid</b>
+        <b style="color:var(--green);">JAMI:</b> 25 + 18 + 18 + 10 + 4 = <b style="font-size:14px;color:var(--green);">75</b> → <b style="color:var(--green);">🥇 Senior</b>
         <br><br>
-        <span style="color:var(--muted);font-size:10px;">Agar Boliyeva MA fanini ham o'qitsa, MA bo'yicha alohida ball bo'ladi (jadvalda alohida qator).</span>
+        <span style="color:var(--muted);font-size:10px;">Pass rate = imtihonga kirganlardan o'tganlar (Passed / (Passed + Failed)). "No Exam" Exam Entry ballida hisoblanadi. Agar Boliyeva MA fanini ham o'qitsa, MA bo'yicha alohida ball bo'ladi (jadvalda alohida qator).</span>
       </div>
     </div>
     
@@ -2485,7 +2490,7 @@ function renderCurrentPage() {
   else if (p==='teachers') { populateTeacherFilters(); renderTeachers(); }
   else if (p==='subjects') { populateSubjectTeacherFilter(); renderSubjects(); }
   else if (p==='dropout') { populateDropoutFilters(); renderDropout(); }
-  else if (p==='rating') renderRating();
+  else if (p==='rating') { populateRatingFilters(); renderRating(); }
   else if (p==='sales') renderSales();
   else if (p==='marketing') renderMarketing();
   else if (p==='students') renderStudents();
@@ -2777,6 +2782,25 @@ function populateDropoutFilters() {
   if (rFanSel && rFanSel.options.length <= 1) {
     const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
     fans.forEach(f => { const opt=document.createElement('option'); opt.value=f; opt.textContent=f; rFanSel.appendChild(opt); });
+  }
+}
+
+function populateRatingFilters() {
+  if (!snap || !snap.rawData) return;
+  // Rating Fan filtri
+  const rFanSel = document.getElementById('r-fan-filter');
+  if (rFanSel && rFanSel.options.length <= 1) {
+    const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
+    const curVal = rFanSel.value;
+    fans.forEach(f => { 
+      const opt = document.createElement('option'); 
+      opt.value = f; 
+      opt.textContent = f; 
+      rFanSel.appendChild(opt); 
+    });
+    // Saqlangan qiymatni qaytarish
+    if (curVal && curVal !== 'all') rFanSel.value = curVal;
+    console.log('Rating Fan filter populated:', fans.length, 'fans');
   }
 }
 
@@ -3564,16 +3588,23 @@ function renderRating() {
   // 5. Trend (5) — o'tgan yil bilan o'zgarish
   // ═══════════════════════════════════════════════════════════════
   
-  // ── Fan filterni to'ldiramiz (faqat bo'sh bo'lsa) ──
+  // ── Fan filterni to'ldiramiz (har gal — current value saqlangan holda) ──
   const rFanSel = document.getElementById('r-fan-filter');
-  if (rFanSel && rFanSel.options.length <= 1) {
+  if (rFanSel && snap.rawData) {
     const fans = [...new Set((snap.rawData||[]).map(r=>r.Product).filter(Boolean))].sort();
-    fans.forEach(f => { 
-      const opt = document.createElement('option'); 
-      opt.value = f; 
-      opt.textContent = f; 
-      rFanSel.appendChild(opt); 
-    });
+    if (rFanSel.options.length <= 1 && fans.length > 0) {
+      // Saqlangan qiymatni eslab qolamiz
+      const savedValue = rFanSel.value;
+      fans.forEach(f => { 
+        const opt = document.createElement('option'); 
+        opt.value = f; 
+        opt.textContent = f; 
+        rFanSel.appendChild(opt); 
+      });
+      // Saqlangan qiymatni qaytaramiz
+      if (savedValue && savedValue !== 'all') rFanSel.value = savedValue;
+      console.log('Rating Fan filter populated:', fans.length, 'fans');
+    }
   }
   
   // ── Fan bo'yicha ACCA kriteriyalari (Bayesian Pass uchun) ──
@@ -3597,32 +3628,37 @@ function renderRating() {
   
   // ═══════════════════════════════════════════════════════════════
   // STEP 1: Akademiya umumiy globalPR (fallback uchun)
+  // Pass rate = imtihonga kirganlardan o'tganlar (Passed / (Passed + Failed))
   // ═══════════════════════════════════════════════════════════════
   const FINAL_STATUSES = ['Passed', 'Failed', 'No Exam'];
   const akademGlobal = (() => {
-    let passed = 0, finished = 0;
+    let passedCnt = 0, examTakersCnt = 0;
     filtered.forEach(r => {
       if (!r.Final_status) return;
-      if (r.Final_status === 'Passed') passed++;
-      if (FINAL_STATUSES.includes(r.Final_status)) finished++;
+      if (r.Final_status === 'Passed') { passedCnt++; examTakersCnt++; }
+      else if (r.Final_status === 'Failed') { examTakersCnt++; }
     });
-    return finished > 0 ? (passed / finished) * 100 : 55;
+    return examTakersCnt > 0 ? (passedCnt / examTakersCnt) * 100 : 55;
   })();
   
   // ═══════════════════════════════════════════════════════════════
   // STEP 2: Fan kesimida globalPR (har fan uchun alohida)
   // ═══════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 2: Fan kesimida globalPR (har fan uchun alohida)
+  // Pass rate = imtihonga kirganlardan o'tganlar (Passed / (Passed + Failed))
+  // ═══════════════════════════════════════════════════════════════
   const fanGlobalPR = {};
   const fanStats = {};
   filtered.forEach(r => {
     if (!r.Product || !r.Final_status) return;
-    if (!fanStats[r.Product]) fanStats[r.Product] = { passed: 0, finished: 0 };
-    if (r.Final_status === 'Passed') fanStats[r.Product].passed++;
-    if (FINAL_STATUSES.includes(r.Final_status)) fanStats[r.Product].finished++;
+    if (!fanStats[r.Product]) fanStats[r.Product] = { passed: 0, examTakers: 0 };
+    if (r.Final_status === 'Passed') { fanStats[r.Product].passed++; fanStats[r.Product].examTakers++; }
+    else if (r.Final_status === 'Failed') { fanStats[r.Product].examTakers++; }
   });
   Object.entries(fanStats).forEach(([fan, d]) => {
-    if (d.finished >= MIN_N_FAN_GPR) {
-      fanGlobalPR[fan] = (d.passed / d.finished) * 100;
+    if (d.examTakers >= MIN_N_FAN_GPR) {
+      fanGlobalPR[fan] = (d.passed / d.examTakers) * 100;
     } else {
       fanGlobalPR[fan] = akademGlobal;
     }
@@ -3721,26 +3757,31 @@ function renderRating() {
     const yakunlagan = passed + failed + no_exam;
     
     const retention = jami > 0 ? ((jami - stopped) / jami) * 100 : 0;
-    const passRate = yakunlagan > 0 ? (passed / yakunlagan) * 100 : 0;
+    // Pass rate = passed / (passed + failed) — imtihonga kirganlardan o'tganlar
+    // Bu asosiy sahifalardagi formula bilan mos
+    const passRate = (passed + failed) > 0 ? (passed / (passed + failed)) * 100 : 0;
     const examEntry = yakunlagan > 0 ? ((passed + failed) / yakunlagan) * 100 : 0;
     
-    // Bayesian Pass (fan kesimida)
+    // Bayesian Pass (fan kesimida) — n = imtihonga kirganlar soni
+    // Chunki passRate ham shu bazadan hisoblanadi
+    const examTakers = passed + failed;
     const fanPR = fanGlobalPR[fan] || akademGlobal;
-    const bayPass = yakunlagan > 0 
-      ? (yakunlagan * passRate + B * fanPR) / (yakunlagan + B) 
+    const bayPass = examTakers > 0 
+      ? (examTakers * passRate + B * fanPR) / (examTakers + B) 
       : fanPR;
     
     // Trend hisoblash (shu o'qituvchi-fan kombinatsiyasi uchun)
+    // Pass rate trendi = passed / (passed + failed) yil bo'yicha
     let curYrPr = null, prevYrPr = null;
     if (curYr) {
       const curRows = enrolled.filter(r => r.Year == curYr);
       const prevRows = enrolled.filter(r => r.Year == prevYr);
-      const curYak = curRows.filter(r => FINAL_STATUSES.includes(r.Final_status)).length;
-      const prevYak = prevRows.filter(r => FINAL_STATUSES.includes(r.Final_status)).length;
+      const curEx = curRows.filter(r => r.Final_status === 'Passed' || r.Final_status === 'Failed').length;
+      const prevEx = prevRows.filter(r => r.Final_status === 'Passed' || r.Final_status === 'Failed').length;
       const curPass = curRows.filter(r => r.Final_status === 'Passed').length;
       const prevPass = prevRows.filter(r => r.Final_status === 'Passed').length;
-      if (curYak > 0) curYrPr = (curPass / curYak) * 100;
-      if (prevYak > 0) prevYrPr = (prevPass / prevYak) * 100;
+      if (curEx > 0) curYrPr = (curPass / curEx) * 100;
+      if (prevEx > 0) prevYrPr = (prevPass / prevEx) * 100;
     } else {
       // "all" tanlanganda eng yangi 2 yil
       const years = [...new Set(enrolled.map(r => r.Year).filter(Boolean))].sort();
@@ -3749,12 +3790,12 @@ function renderRating() {
         const yB = years[years.length - 1];
         const aRows = enrolled.filter(r => r.Year == yA);
         const bRows = enrolled.filter(r => r.Year == yB);
-        const aYak = aRows.filter(r => FINAL_STATUSES.includes(r.Final_status)).length;
-        const bYak = bRows.filter(r => FINAL_STATUSES.includes(r.Final_status)).length;
+        const aEx = aRows.filter(r => r.Final_status === 'Passed' || r.Final_status === 'Failed').length;
+        const bEx = bRows.filter(r => r.Final_status === 'Passed' || r.Final_status === 'Failed').length;
         const aPass = aRows.filter(r => r.Final_status === 'Passed').length;
         const bPass = bRows.filter(r => r.Final_status === 'Passed').length;
-        if (aYak > 0) prevYrPr = (aPass / aYak) * 100;
-        if (bYak > 0) curYrPr = (bPass / bYak) * 100;
+        if (aEx > 0) prevYrPr = (aPass / aEx) * 100;
+        if (bEx > 0) curYrPr = (bPass / bEx) * 100;
       }
     }
     
@@ -3856,7 +3897,7 @@ function renderRating() {
     if (yearFilter !== 'all') parts.push(yearFilter + '-yil');
     if (fanFilter !== 'all') parts.push('Fan: ' + fanFilter);
     const filterTxt = parts.length ? ' (' + parts.join(' · ') + ')' : '';
-    const fanGPRCount = Object.keys(fanGlobalPR).filter(f => fanStats[f] && fanStats[f].finished >= MIN_N_FAN_GPR).length;
+    const fanGPRCount = Object.keys(fanGlobalPR).filter(f => fanStats[f] && fanStats[f].examTakers >= MIN_N_FAN_GPR).length;
     rSubEl.textContent = displayed.length + ' ta yozuv' + filterTxt + ' · Akademiya o\'rtacha pass: ' + Math.round(akademGlobal) + '% · ' + fanGPRCount + ' ta fan globalPR aniqlangan · Har o\'qituvchi-fan kombinatsiyasi alohida ratingda';
   }
   
